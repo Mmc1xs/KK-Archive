@@ -120,7 +120,7 @@ export default async function AdminContentsPage({
                 </td>
                 <td>
                   <div className="inline-actions">
-                    {staff.role === "AUDIT" && content.reviewStatus === ReviewStatus.UNVERIFIED ? (
+                    {(staff.role === "AUDIT" || staff.role === "ADMIN") && content.reviewStatus === ReviewStatus.UNVERIFIED ? (
                       <form action={transitionContentReviewStatusAction}>
                         <input type="hidden" name="contentId" value={content.id} />
                         <input type="hidden" name="nextStatus" value={ReviewStatus.EDITED} />
@@ -130,7 +130,8 @@ export default async function AdminContentsPage({
                         </button>
                       </form>
                     ) : null}
-                    {staff.role === "ADMIN" && content.reviewStatus === ReviewStatus.EDITED ? (
+                    {staff.role === "ADMIN" &&
+                    (content.reviewStatus === ReviewStatus.UNVERIFIED || content.reviewStatus === ReviewStatus.EDITED) ? (
                       <form action={transitionContentReviewStatusAction}>
                         <input type="hidden" name="contentId" value={content.id} />
                         <input type="hidden" name="nextStatus" value={ReviewStatus.PASSED} />

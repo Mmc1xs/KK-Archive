@@ -167,8 +167,8 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
     staff.role === "AUDIT"
       ? currentReviewStatus === ReviewStatus.UNVERIFIED && nextStatus === ReviewStatus.EDITED
       : nextStatus === ReviewStatus.UNVERIFIED ||
-        (currentReviewStatus === ReviewStatus.EDITED && nextStatus === ReviewStatus.PASSED) ||
-        (currentReviewStatus === ReviewStatus.PASSED && nextStatus === ReviewStatus.EDITED);
+        nextStatus === ReviewStatus.EDITED ||
+        nextStatus === ReviewStatus.PASSED;
 
   if (!allowed) {
     redirectWithMessage(redirectTo, "error", "You do not have permission to apply that review status");
