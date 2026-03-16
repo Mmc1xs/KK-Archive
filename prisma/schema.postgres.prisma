@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/postgres-client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("POSTGRES_POOLED_URL")
+  directUrl = env("POSTGRES_SESSION_URL")
+}
+
+enum UserRole {
+  ADMIN
+  AUDIT
+  MEMBER
+}
+
+enum ReviewStatus {
+  UNVERIFIED
+  EDITED
+  PASSED
+}
+
+enum PublishStatus {
+  DRAFT
+  SUMMIT
+  PUBLISHED
+}
+
+enum TagType {
+  AUTHOR
+  STYLE
+  USAGE
+  TYPE
+}
+
+model User {
+  id                  Int       @id @default(autoincrement())
+  email               String    @unique
+  username            String?   @unique @map("username")
+  passwordHash        String?   @map("password_hash")
+  googleId            String?   @unique @map("google_id")
+  googleEmailVerified Boolean   @default(false) @map("google_email_verified")
+  lastLoginAt         DateTime? @map("last_login_at")
+  lastSeenAt          DateTime? @map("last_seen_at")
+  loginCount          Int       @default(0) @map("login_count")
+  isSuspended         Boolean   @default(false) @map("is_suspended")
+  suspendedAt         DateTime? @map("suspended_at")
+  role                UserRole  @default(MEMBER)
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  loginEvents         UserLoginEvent[]
+
+  @@map("users")
+}
+
+model UserLoginEvent {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  provider  String
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_login_events")
+}
+
+model Content {
+  id            Int                   @id @default(autoincrement())
+  title         String
+  slug          String                @unique
+  description   String
+  coverImageUrl String                @map("cover_image_url")
+  isVerified    Boolean               @default(false) @map("is_verified")
+  reviewStatus  ReviewStatus          @default(UNVERIFIED) @map("review_status")
+  viewCount     Int                   @default(0) @map("view_count")
+  lastViewedAt  DateTime?             @map("last_viewed_at")
+  publishStatus PublishStatus         @default(DRAFT) @map("publish_status")
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+  images        ContentImage[]
+  downloadLinks ContentDownloadLink[]
+  contentTags   ContentTag[]
+
+  @@map("contents")
+}
+
+model ContentImage {
+  id        Int      @id @default(autoincrement())
+  contentId Int      @map("content_id")
+  imageUrl  String   @map("image_url")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@map("content_images")
+}
+
+model ContentDownloadLink {
+  id        Int      @id @default(autoincrement())
+  contentId Int      @map("content_id")
+  url       String
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@map("content_download_links")
+}
+
+model Tag {
+  id          Int          @id @default(autoincrement())
+  name        String
+  slug        String       @unique
+  type        TagType
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+  contentTags ContentTag[]
+
+  @@map("tags")
+}
+
+model ContentTag {
+  contentId Int     @map("content_id")
+  tagId     Int     @map("tag_id")
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, tagId])
+  @@map("content_tags")
+}

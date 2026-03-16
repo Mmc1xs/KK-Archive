@@ -1,0 +1,11 @@
+.next
+node_modules
+.env
+dist
+generated
+prisma/dev.db
+tsconfig.tsbuildinfo
+db image/output
+db image/clean
+db image/.env
+*.session

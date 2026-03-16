@@ -1,0 +1,49 @@
+{
+  "name": "kk-diction",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && next build",
+    "build:postgres": "npm run db:use:postgres && prisma generate && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "db:use:sqlite": "tsx scripts/set-prisma-runtime.ts sqlite",
+    "db:use:postgres": "tsx scripts/set-prisma-runtime.ts postgres",
+    "db:generate": "prisma generate",
+    "db:generate:postgres": "prisma generate --schema prisma/schema.postgres.prisma",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:push:postgres": "prisma db push --schema prisma/schema.postgres.prisma",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:migrate:sqlite-to-postgres": "tsx scripts/migrate-sqlite-to-postgres.ts",
+    "db:backfill-usernames": "tsx scripts/backfill-usernames.ts",
+    "clean:manifest": "tsx scripts/build-clean-import-manifest.ts",
+    "clean:pixiv": "tsx scripts/enrich-clean-from-pixiv.ts",
+    "clean:pixiv:new": "tsx scripts/enrich-new-clean-from-pixiv.ts",
+    "clean:post-json": "tsx scripts/write-post-json-from-clean.ts",
+    "clean:import-one": "tsx scripts/import-clean-post.ts",
+    "clean:import-all": "tsx scripts/import-all-clean-posts.ts",
+    "clean:import-new": "tsx scripts/import-new-clean-posts.ts",
+    "clean:sync-new": "tsx scripts/sync-new-clean-content.ts",
+    "r2:upload-clean": "tsx scripts/upload-clean-to-r2.ts",
+    "r2:upload-clean:new": "tsx scripts/upload-new-clean-to-r2.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1009.0",
+    "@aws-sdk/lib-storage": "^3.1009.0",
+    "@prisma/client": "^6.5.0",
+    "next": "^15.2.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "prisma": "^6.5.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

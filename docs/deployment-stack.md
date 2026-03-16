@@ -1,0 +1,143 @@
+# Deployment Stack
+
+Recommended production split for this project:
+
+- Vercel: Next.js app
+- Hosted Postgres: Supabase / Neon / other managed provider
+- Cloudflare R2: image storage
+- Cloudflare DNS/SSL: domain + TLS + caching
+
+## Why
+
+- The app already stores images as URLs, so R2 fits the current schema.
+- The current clean image library is already larger than Supabase Free Storage.
+- Moving image delivery away from the app server reduces future bandwidth pressure.
+
+## Phase 1
+
+- Keep the current app working locally.
+- Add R2 environment variables.
+- Add an upload script for `db image/clean`.
+- Generate a manifest of uploaded files and public URLs.
+- Generate a clean import manifest from `db image/clean/*/_meta.json`.
+
+## Phase 2
+
+- Move Prisma from SQLite to hosted Postgres.
+- Keep the current custom Google OAuth + cookie session unless you intentionally want to replace it later.
+- Run a one-time SQLite -> Postgres data migration before deployment.
+
+## Postgres Migration Workflow
+
+1. Keep local development on SQLite:
+
+```bash
+DATABASE_URL="file:./prisma/dev.db"
+```
+
+2. Fill the target Postgres URL:
+
+```bash
+POSTGRES_POOLED_URL="postgresql://...pooler...:6543/postgres?pgbouncer=true&connection_limit=1"
+POSTGRES_SESSION_URL="postgresql://...pooler...:5432/postgres"
+POSTGRES_DIRECT_URL="postgresql://...db...:5432/postgres" # optional, IPv6 / IPv4 add-on only
+```
+
+3. Generate the Postgres Prisma client:
+
+```bash
+npm run db:generate:postgres
+```
+
+4. Push the Postgres schema:
+
+```bash
+npm run db:push:postgres
+```
+
+5. Copy local data into Postgres:
+
+```bash
+npm run db:migrate:sqlite-to-postgres
+```
+
+6. Switch the runtime Prisma schema used by the app:
+
+```bash
+npm run db:use:postgres
+```
+
+7. Build the production app:
+
+```bash
+npm run build:postgres
+```
+
+If you want to continue local SQLite development later, switch back with:
+
+```bash
+npm run db:use:sqlite
+npm run db:generate
+```
+
+This migration copies:
+
+- users
+- user login events
+- contents
+- content images
+- content download links
+- tags
+- content-tag relations
+
+The migration script also resets Postgres sequences after the copy so future inserts continue from the correct IDs.
+
+## R2 Upload Script
+
+Command:
+
+```bash
+npm run r2:upload-clean
+```
+
+Expected environment variables:
+
+- `R2_ACCOUNT_ID`
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+- `R2_BUCKET_NAME`
+- `R2_PUBLIC_BASE_URL`
+- `CLEAN_IMAGE_ROOT`
+
+The script writes a manifest to `scripts/r2-upload-manifest.json`.
+
+## Clean Import Manifest
+
+Command:
+
+```bash
+npm run clean:manifest
+```
+
+The script reads each `db image/clean/<folder>/_meta.json` and extracts:
+
+- folder id
+- anchor message id
+- Pixiv artwork URL
+- Pixiv artwork ID
+- local image paths
+- first image as cover candidate
+- raw source text
+
+## Post JSON Generation
+
+Command order:
+
+```bash
+npm run clean:manifest
+npm run clean:pixiv
+npm run r2:upload-clean
+npm run clean:post-json
+```
+
+`clean:post-json` now uses R2 public URLs from `scripts/r2-upload-manifest.json` as the final `coverImageUrl` and `imageUrls` written into each `db image/clean/<folder>/post.json`.
