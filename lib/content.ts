@@ -80,33 +80,31 @@ export async function getHomepageContents() {
 }
 
 export async function getHomepageOverviewStats() {
-  const [totalPosts, indexedAuthors, fileTypes, styleTags, usageTags] = await Promise.all([
-    db.content.count({
-      where: {
-        publishStatus: PublishStatus.PUBLISHED
-      }
-    }),
-    db.tag.count({
-      where: {
-        type: TagType.AUTHOR
-      }
-    }),
-    db.tag.count({
-      where: {
-        type: TagType.TYPE
-      }
-    }),
-    db.tag.count({
-      where: {
-        type: TagType.STYLE
-      }
-    }),
-    db.tag.count({
-      where: {
-        type: TagType.USAGE
-      }
-    })
-  ]);
+  const totalPosts = await db.content.count({
+    where: {
+      publishStatus: PublishStatus.PUBLISHED
+    }
+  });
+  const indexedAuthors = await db.tag.count({
+    where: {
+      type: TagType.AUTHOR
+    }
+  });
+  const fileTypes = await db.tag.count({
+    where: {
+      type: TagType.TYPE
+    }
+  });
+  const styleTags = await db.tag.count({
+    where: {
+      type: TagType.STYLE
+    }
+  });
+  const usageTags = await db.tag.count({
+    where: {
+      type: TagType.USAGE
+    }
+  });
 
   return {
     totalPosts,
@@ -130,32 +128,30 @@ export async function recordContentView(contentId: number) {
 }
 
 export async function getContentViewAnalytics() {
-  const [totalViews, viewedContents, topViewedContents] = await Promise.all([
-    db.content.aggregate({
-      _sum: {
-        viewCount: true
+  const totalViews = await db.content.aggregate({
+    _sum: {
+      viewCount: true
+    }
+  });
+  const viewedContents = await db.content.count({
+    where: {
+      viewCount: {
+        gt: 0
       }
-    }),
-    db.content.count({
-      where: {
-        viewCount: {
-          gt: 0
-        }
-      }
-    }),
-    db.content.findMany({
-      orderBy: [{ viewCount: "desc" }, { lastViewedAt: "desc" }],
-      take: 6,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        publishStatus: true,
-        viewCount: true,
-        lastViewedAt: true
-      }
-    })
-  ]);
+    }
+  });
+  const topViewedContents = await db.content.findMany({
+    orderBy: [{ viewCount: "desc" }, { lastViewedAt: "desc" }],
+    take: 6,
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      publishStatus: true,
+      viewCount: true,
+      lastViewedAt: true
+    }
+  });
 
   return {
     totalViews: totalViews._sum.viewCount ?? 0,
@@ -189,20 +185,18 @@ export async function getBrowsableContentsPage(isLoggedIn: boolean, page: number
     }
   };
 
-  const [totalCount, items] = await Promise.all([
-    db.content.count({ where }),
-    db.content.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (safePage - 1) * safePageSize,
-      take: safePageSize,
-      include: {
-        contentTags: {
-          include: { tag: true }
-        }
+  const totalCount = await db.content.count({ where });
+  const items = await db.content.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    skip: (safePage - 1) * safePageSize,
+    take: safePageSize,
+    include: {
+      contentTags: {
+        include: { tag: true }
       }
-    })
-  ]);
+    }
+  });
 
   return {
     items,
@@ -346,23 +340,21 @@ export async function getAdminContents(filter?: { reviewStatus?: "all" | "unveri
 }
 
 export async function getAdminContentReviewCounts() {
-  const [unverified, edited, passed] = await Promise.all([
-    db.content.count({
-      where: {
-        reviewStatus: ReviewStatus.UNVERIFIED
-      }
-    }),
-    db.content.count({
-      where: {
-        reviewStatus: ReviewStatus.EDITED
-      }
-    }),
-    db.content.count({
-      where: {
-        reviewStatus: ReviewStatus.PASSED
-      }
-    })
-  ]);
+  const unverified = await db.content.count({
+    where: {
+      reviewStatus: ReviewStatus.UNVERIFIED
+    }
+  });
+  const edited = await db.content.count({
+    where: {
+      reviewStatus: ReviewStatus.EDITED
+    }
+  });
+  const passed = await db.content.count({
+    where: {
+      reviewStatus: ReviewStatus.PASSED
+    }
+  });
 
   return {
     unverified,
