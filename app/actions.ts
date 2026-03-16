@@ -65,6 +65,7 @@ export async function createContentAction(formData: FormData) {
 
 export async function updateContentAction(contentId: number, formData: FormData) {
   const staff = await requireStaff();
+  const reviewAction = String(formData.get("reviewAction") || "edited");
   const existing = await db.content.findUnique({
     where: { id: contentId },
     select: { reviewStatus: true }
@@ -73,10 +74,8 @@ export async function updateContentAction(contentId: number, formData: FormData)
   if (!existing) {
     redirectWithMessage("/admin/contents", "error", "Content not found");
   }
-  const currentReviewStatus = existing.reviewStatus;
-
   const reviewStatusOverride =
-    staff.role === "AUDIT" ? ReviewStatus.EDITED : currentReviewStatus;
+    staff.role === "ADMIN" && reviewAction === "passed" ? ReviewStatus.PASSED : ReviewStatus.EDITED;
 
   const result = await saveContent(
     {

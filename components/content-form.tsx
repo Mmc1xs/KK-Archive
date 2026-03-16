@@ -107,7 +107,7 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
             {role === "AUDIT" ? (
               <small>Saving audit edits will move this content into the Edited state automatically.</small>
             ) : (
-              <small>Admin can make the final decision after audit review is complete.</small>
+              <small>Update Content moves this post to Edited. Use the admin pass button to approve it directly.</small>
             )}
           </div>
         ) : null}
@@ -184,7 +184,20 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
           placeholder="Paste a download link and press Enter"
           initialUrls={downloadLinks}
         />
-        <button type="submit">{mode === "create" ? "Create Content" : "Update Content"}</button>
+        {mode === "create" ? (
+          <button type="submit">Create Content</button>
+        ) : (
+          <div className="inline-actions">
+            <button type="submit" name="reviewAction" value="edited">
+              Update Content
+            </button>
+            {role === "ADMIN" ? (
+              <button type="submit" name="reviewAction" value="passed" className="button secondary">
+                Update and Pass
+              </button>
+            ) : null}
+          </div>
+        )}
       </form>
     </section>
   );
