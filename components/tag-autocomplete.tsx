@@ -48,8 +48,8 @@ export function TagAutocomplete({
       .filter(Boolean)
       .map((tag) => ({ id: tag!.id, name: tag!.name, slug: tag!.slug }));
 
-    setSelectedTags(initialTags);
-  }, [initialSelectedIds, options]);
+    setSelectedTags(multiple ? initialTags : initialTags.slice(0, 1));
+  }, [initialSelectedIds, multiple, options]);
 
   const selectedIds = useMemo(
     () => selectedTags.map((tag) => tag.id).filter((id): id is number => typeof id === "number"),

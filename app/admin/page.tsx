@@ -80,9 +80,7 @@ export default async function AdminPage() {
                         <div className="split">
                           <div>
                             <strong>{account.username ?? account.email}</strong>
-                            <div className="muted">
-                              {account.email} ﾂｷ {account.role}
-                            </div>
+                            <div className="muted">{`${account.email} - ${account.role}`}</div>
                           </div>
                           <div className={account.logins24h >= 15 ? "status status-unverified" : "status"}>
                             {account.logins24h} sign-ins / 24h
@@ -112,9 +110,7 @@ export default async function AdminPage() {
                           <span className="status">{event.provider}</span>
                         </div>
                         <div className="admin-activity-meta">
-                          <span>
-                            {event.email} ﾂｷ {event.role}
-                          </span>
+                          <span>{`${event.email} - ${event.role}`}</span>
                           <span>{formatDateTime(event.createdAt)}</span>
                         </div>
                       </article>
@@ -160,9 +156,7 @@ export default async function AdminPage() {
                       <div className="split">
                         <div>
                           <strong>{content.title}</strong>
-                          <div className="muted">
-                            {content.slug} ﾂｷ {content.publishStatus}
-                          </div>
+                          <div className="muted">{`${content.slug} - ${content.publishStatus}`}</div>
                         </div>
                         <div className="status">{content.viewCount} views</div>
                       </div>

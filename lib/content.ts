@@ -531,8 +531,8 @@ export async function saveContent(input: unknown, contentId?: number, options?: 
 
   const data = parsed.data;
   const authorSelections = data.authorTagIds.length + data.authorTagNames.length;
-  if (authorSelections < 1) {
-    return { ok: false as const, error: "At least one author is required" };
+  if (authorSelections !== 1) {
+    return { ok: false as const, error: "Exactly one author is required" };
   }
 
   const authorTagIds = await resolveTagIds(TagType.AUTHOR, data.authorTagIds, data.authorTagNames);
@@ -658,8 +658,8 @@ export async function saveContent(input: unknown, contentId?: number, options?: 
       }
     });
 
-    if (authorCount < 1) {
-      throw new Error("Each content item must have at least one author tag.");
+    if (authorCount !== 1) {
+      throw new Error("Each content item must have exactly one author tag.");
     }
 
     return { ok: true as const, contentId: content.id };

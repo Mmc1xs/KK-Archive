@@ -125,7 +125,6 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
           newName="authorTagNames"
           options={tagOptions.authors}
           initialSelectedIds={[...authorIds]}
-          multiple
           required
           placeholder="Search or create authors"
         />

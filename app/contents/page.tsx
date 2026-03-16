@@ -56,9 +56,7 @@ export default async function ContentsPage({
           <div className="eyebrow">Browsable Library</div>
           <h1 className="title-lg">Available Content</h1>
         </div>
-        <div className="status">
-          Page {currentPage} / {totalPages} · {totalCount} posts
-        </div>
+        <div className="status">{`Page ${currentPage} / ${totalPages} - ${totalCount} posts`}</div>
       </div>
       <div className="grid content-grid">
         {items.map((content) => (

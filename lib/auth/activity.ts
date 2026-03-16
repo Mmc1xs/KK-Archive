@@ -1,6 +1,7 @@
 import { db } from "@/lib/db";
 
 const LAST_SEEN_TOUCH_WINDOW_MS = 1000 * 60 * 10;
+const recentActivityTouches = new Map<number, number>();
 
 export async function recordUserLogin(userId: number, provider: string) {
   const now = new Date();
@@ -26,6 +27,13 @@ export async function recordUserLogin(userId: number, provider: string) {
 }
 
 export async function touchUserActivity(userId: number) {
+  const now = Date.now();
+  const lastTouchedAt = recentActivityTouches.get(userId);
+
+  if (lastTouchedAt && now - lastTouchedAt < LAST_SEEN_TOUCH_WINDOW_MS) {
+    return;
+  }
+
   const threshold = new Date(Date.now() - LAST_SEEN_TOUCH_WINDOW_MS);
 
   await db.user.updateMany({
@@ -37,4 +45,6 @@ export async function touchUserActivity(userId: number) {
       lastSeenAt: new Date()
     }
   });
+
+  recentActivityTouches.set(userId, now);
 }

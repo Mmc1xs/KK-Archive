@@ -30,7 +30,7 @@ export const contentSchema = z.object({
   reviewStatus: z.nativeEnum(ReviewStatus).default(ReviewStatus.UNVERIFIED),
   publishStatus: z.enum(["DRAFT", "SUMMIT", "PUBLISHED"]),
   authorTagIds: z.array(z.coerce.number().int().positive()).default([]),
-  authorTagNames: z.array(z.string().trim().min(1)).default([]),
+  authorTagNames: z.array(z.string().trim().min(1)).max(1, "Exactly one author is required").default([]),
   styleTagIds: z.array(z.coerce.number().int().positive()).default([]),
   styleTagNames: z.array(z.string().trim().min(1)).default([]),
   usageTagIds: z.array(z.coerce.number().int().positive()).default([]),
