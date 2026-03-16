@@ -1,0 +1,204 @@
+KK Archive - Website Operations Manual
+
+1. Overview
+
+This project is managed through four main services:
+
+- GitHub: source code and version history
+- Vercel: website deployment
+- Supabase: production database
+- Cloudflare R2: image storage
+
+Daily content management and feature development are separate workflows.
+
+
+2. Daily Content Workflow
+
+When new content is ready:
+
+1. Put reviewed folders into:
+   db image/clean
+
+2. Run:
+   npm run clean:sync-new
+
+This will:
+
+- enrich missing Pixiv metadata
+- upload new images to R2
+- rebuild post.json
+- import new content into the database
+
+3. Open the website admin:
+
+- /admin
+- /admin/contents
+
+4. Review flow:
+
+- AUDIT role:
+  Unverified -> Edited
+
+- ADMIN role:
+  Edited -> Passed
+
+
+3. Content Review Rules
+
+Review states:
+
+- Unverified:
+  raw imported content, not yet reviewed
+
+- Edited:
+  reviewed and adjusted by audit staff
+
+- Passed:
+  approved by admin
+
+Public users should not rely on internal review labels except where the UI explicitly shows Unverified warnings.
+
+
+4. Account and Risk Management
+
+Use:
+
+- /admin
+- /admin/activity
+
+Available controls:
+
+- suspend suspicious accounts
+- inspect login activity
+- review member activity signals
+- manage role changes
+
+Current role structure:
+
+- MEMBER
+- AUDIT
+- ADMIN
+
+
+5. Local Development Workflow
+
+If you want to change the website UI, features, or logic:
+
+1. Work locally on your own machine
+2. Test locally
+3. Commit changes to git
+4. Push to GitHub
+5. Let Vercel deploy the new version
+
+Recommended local process:
+
+1. Start local development:
+   npm run dev
+
+2. If you changed production-related database behavior, verify build:
+   npm run build:postgres
+
+3. Commit:
+   git add .
+   git commit -m "Describe the change"
+
+4. Push:
+   git push
+
+Vercel will then deploy from GitHub.
+
+
+6. Production Deployment Workflow
+
+Main deployment path:
+
+- code -> GitHub
+- build -> Vercel
+- database -> Supabase
+- images -> R2
+
+Important production environment variables:
+
+- POSTGRES_POOLED_URL
+- POSTGRES_SESSION_URL
+- SESSION_SECRET
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- GOOGLE_REDIRECT_URI
+- R2_ACCOUNT_ID
+- R2_ACCESS_KEY_ID
+- R2_SECRET_ACCESS_KEY
+- R2_BUCKET_NAME
+- R2_PUBLIC_BASE_URL
+
+
+7. Database Migration Notes
+
+Local development may still use SQLite for convenience.
+
+Production uses Supabase Postgres.
+
+Useful commands:
+
+- npm run db:generate:postgres
+- npm run db:push:postgres
+- npm run db:migrate:sqlite-to-postgres
+- npm run db:use:postgres
+- npm run build:postgres
+
+
+8. Backup Recommendations
+
+At minimum, keep backups of:
+
+- Supabase database exports
+- R2 bucket contents or original local content source
+- db image/output if it remains your raw source archive
+- db image/clean if it remains your reviewed import source
+
+Do not rely only on the deployed website as your backup.
+
+
+9. Security Checklist
+
+Before or after production updates, rotate sensitive secrets when needed:
+
+- Supabase database password
+- Google OAuth client secret
+- Cloudflare R2 keys
+
+Never commit these files:
+
+- .env
+- local session files
+- local database files
+- large raw image archives unless intentionally needed
+
+
+10. Quick Command List
+
+Content import:
+
+- npm run clean:sync-new
+
+Local dev:
+
+- npm run dev
+
+Production build check:
+
+- npm run build:postgres
+
+Switch Prisma runtime:
+
+- npm run db:use:sqlite
+- npm run db:use:postgres
+
+
+11. Simple Rule of Thumb
+
+- Change content in admin or through clean import workflow
+- Change code locally
+- Push code to GitHub
+- Let Vercel update production
+

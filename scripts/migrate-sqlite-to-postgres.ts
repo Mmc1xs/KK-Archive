@@ -1,6 +1,6 @@
 import "./load-env";
 
-import { PrismaClient as SqlitePrismaClient } from "@prisma/client";
+import { PrismaClient as SqlitePrismaClient } from "../generated/sqlite-client";
 import { PrismaClient as PostgresPrismaClient } from "../generated/postgres-client";
 
 const sqlite = new SqlitePrismaClient();

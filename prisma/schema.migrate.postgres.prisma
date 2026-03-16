@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/postgres-client"
 }
 
 datasource db {
@@ -126,3 +127,4 @@ model ContentTag {
   @@id([contentId, tagId])
   @@map("content_tags")
 }
+

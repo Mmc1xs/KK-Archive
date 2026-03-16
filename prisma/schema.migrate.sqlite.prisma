@@ -1,11 +1,11 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/sqlite-client"
 }
 
 datasource db {
-  provider  = "postgresql"
-  url       = env("POSTGRES_POOLED_URL")
-  directUrl = env("POSTGRES_SESSION_URL")
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {

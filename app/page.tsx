@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { getHomepageContents, getHomepageOverviewStats } from "@/lib/content";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [contents, overviewStats] = await Promise.all([getHomepageContents(), getHomepageOverviewStats()]);
   const featuredContent = contents[0];
