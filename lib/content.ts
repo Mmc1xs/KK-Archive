@@ -1,4 +1,5 @@
 import { PublishStatus, ReviewStatus, TagType } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { contentSchema } from "@/lib/validation";
 
@@ -64,55 +65,70 @@ function getVisibleStatuses(isLoggedIn: boolean) {
   return isLoggedIn ? [PublishStatus.PUBLISHED, PublishStatus.SUMMIT] : [PublishStatus.PUBLISHED];
 }
 
-export async function getHomepageContents() {
-  return db.content.findMany({
-    where: { publishStatus: PublishStatus.PUBLISHED },
-    orderBy: { createdAt: "desc" },
-    take: 6,
-    include: {
-      contentTags: {
-        include: {
-          tag: true
+const getCachedHomepageContents = unstable_cache(
+  async () =>
+    db.content.findMany({
+      where: { publishStatus: PublishStatus.PUBLISHED },
+      orderBy: { createdAt: "desc" },
+      take: 6,
+      include: {
+        contentTags: {
+          include: {
+            tag: true
+          }
         }
       }
-    }
-  });
+    }),
+  ["homepage-contents"],
+  { revalidate: 300 }
+);
+
+export async function getHomepageContents() {
+  return getCachedHomepageContents();
 }
 
-export async function getHomepageOverviewStats() {
-  const totalPosts = await db.content.count({
-    where: {
-      publishStatus: PublishStatus.PUBLISHED
-    }
-  });
-  const indexedAuthors = await db.tag.count({
-    where: {
-      type: TagType.AUTHOR
-    }
-  });
-  const fileTypes = await db.tag.count({
-    where: {
-      type: TagType.TYPE
-    }
-  });
-  const styleTags = await db.tag.count({
-    where: {
-      type: TagType.STYLE
-    }
-  });
-  const usageTags = await db.tag.count({
-    where: {
-      type: TagType.USAGE
-    }
-  });
+const getCachedHomepageOverviewStats = unstable_cache(
+  async () => {
+    const totalPosts = await db.content.count({
+      where: {
+        publishStatus: PublishStatus.PUBLISHED
+      }
+    });
+    const indexedAuthors = await db.tag.count({
+      where: {
+        type: TagType.AUTHOR
+      }
+    });
+    const fileTypes = await db.tag.count({
+      where: {
+        type: TagType.TYPE
+      }
+    });
+    const styleTags = await db.tag.count({
+      where: {
+        type: TagType.STYLE
+      }
+    });
+    const usageTags = await db.tag.count({
+      where: {
+        type: TagType.USAGE
+      }
+    });
 
-  return {
-    totalPosts,
-    indexedAuthors,
-    fileTypes,
-    styleTags,
-    usageTags
-  };
+    return {
+      totalPosts,
+      indexedAuthors,
+      fileTypes,
+      styleTags,
+      usageTags
+    };
+  },
+  ["homepage-overview-stats"],
+  { revalidate: 300 }
+);
+
+export async function getHomepageOverviewStats() {
+  return getCachedHomepageOverviewStats();
 }
 
 export async function recordContentView(contentId: number) {
@@ -179,6 +195,11 @@ export async function getBrowsableContents(isLoggedIn: boolean) {
 export async function getBrowsableContentsPage(isLoggedIn: boolean, page: number, pageSize: number) {
   const safePage = Number.isInteger(page) && page > 0 ? page : 1;
   const safePageSize = Number.isInteger(pageSize) && pageSize > 0 ? pageSize : 12;
+
+  if (!isLoggedIn) {
+    return getCachedPublicBrowsableContentsPage(safePage, safePageSize);
+  }
+
   const where = {
     publishStatus: {
       in: getVisibleStatuses(isLoggedIn)
@@ -207,6 +228,39 @@ export async function getBrowsableContentsPage(isLoggedIn: boolean, page: number
   };
 }
 
+const getCachedPublicBrowsableContentsPage = unstable_cache(
+  async (safePage: number, safePageSize: number) => {
+    const where = {
+      publishStatus: {
+        in: [PublishStatus.PUBLISHED]
+      }
+    };
+
+    const totalCount = await db.content.count({ where });
+    const items = await db.content.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+      include: {
+        contentTags: {
+          include: { tag: true }
+        }
+      }
+    });
+
+    return {
+      items,
+      totalCount,
+      page: safePage,
+      pageSize: safePageSize,
+      totalPages: Math.max(1, Math.ceil(totalCount / safePageSize))
+    };
+  },
+  ["public-browsable-contents-page"],
+  { revalidate: 120 }
+);
+
 export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolean) {
   return db.content.findFirst({
     where: {
@@ -232,9 +286,7 @@ export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolea
 }
 
 export async function getSearchFilters() {
-  const tags = await db.tag.findMany({
-    orderBy: [{ type: "asc" }, { name: "asc" }]
-  });
+  const tags = await getCachedSearchFilters();
 
   return {
     authors: tags.filter((tag) => tag.type === TagType.AUTHOR),
@@ -244,6 +296,88 @@ export async function getSearchFilters() {
   };
 }
 
+const getCachedSearchFilters = unstable_cache(
+  async () =>
+    db.tag.findMany({
+      orderBy: [{ type: "asc" }, { name: "asc" }]
+    }),
+  ["search-filters"],
+  { revalidate: 300 }
+);
+
+const getCachedPublicSearchResults = unstable_cache(
+  async (author?: string, styles?: string[], usages?: string[], types?: string[]) => {
+    const styleSlugs = styles?.filter(Boolean) ?? [];
+    const usageSlugs = usages?.filter(Boolean) ?? [];
+    const typeSlugs = types?.filter(Boolean) ?? [];
+    const andConditions = [
+      ...styleSlugs.map((slug) => ({
+        contentTags: {
+          some: {
+            tag: {
+              slug,
+              type: TagType.STYLE
+            }
+          }
+        }
+      })),
+      ...usageSlugs.map((slug) => ({
+        contentTags: {
+          some: {
+            tag: {
+              slug,
+              type: TagType.USAGE
+            }
+          }
+        }
+      })),
+      ...typeSlugs.map((slug) => ({
+        contentTags: {
+          some: {
+            tag: {
+              slug,
+              type: TagType.TYPE
+            }
+          }
+        }
+      }))
+    ];
+
+    return db.content.findMany({
+      where: {
+        publishStatus: {
+          in: [PublishStatus.PUBLISHED]
+        },
+        ...(author
+          ? {
+              contentTags: {
+                some: {
+                  tag: {
+                    slug: author,
+                    type: TagType.AUTHOR
+                  }
+                }
+              }
+            }
+          : {}),
+        ...(andConditions.length
+          ? {
+              AND: andConditions
+            }
+          : {})
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        contentTags: {
+          include: { tag: true }
+        }
+      }
+    });
+  },
+  ["public-search-results"],
+  { revalidate: 120 }
+);
+
 export async function searchPublishedContents(filters: {
   isLoggedIn: boolean;
   author?: string;
@@ -251,6 +385,10 @@ export async function searchPublishedContents(filters: {
   usages?: string[];
   types?: string[];
 }) {
+  if (!filters.isLoggedIn) {
+    return getCachedPublicSearchResults(filters.author, filters.styles, filters.usages, filters.types);
+  }
+
   const styleSlugs = filters.styles?.filter(Boolean) ?? [];
   const usageSlugs = filters.usages?.filter(Boolean) ?? [];
   const typeSlugs = filters.types?.filter(Boolean) ?? [];

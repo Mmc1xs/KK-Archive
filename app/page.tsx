@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { getHomepageContents, getHomepageOverviewStats } from "@/lib/content";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export default async function HomePage() {
   const [contents, overviewStats] = await Promise.all([getHomepageContents(), getHomepageOverviewStats()]);
