@@ -70,7 +70,7 @@ const getCachedHomepageContents = unstable_cache(
     db.content.findMany({
       where: { publishStatus: PublishStatus.PUBLISHED },
       orderBy: { createdAt: "desc" },
-      take: 6,
+      take: 8,
       include: {
         contentTags: {
           include: {
