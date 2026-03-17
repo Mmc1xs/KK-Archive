@@ -2,7 +2,8 @@ import "./load-env";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import path from "path";
-import { PublishStatus, TagType } from "@prisma/client";
+import { pathToFileURL } from "url";
+import { PublishStatus, Tag, TagType } from "@prisma/client";
 import { db } from "../lib/db";
 
 type PostJson = {
@@ -30,6 +31,12 @@ type PostJson = {
     reason: string | null;
     pixivFetchError: string | null;
   };
+};
+
+type ImportCleanPostOptions = {
+  logResult?: boolean;
+  authorTagCache?: Map<string, Tag>;
+  typeTagCache?: Map<string, Pick<Tag, "id" | "name">>;
 };
 
 function slugify(input: string) {
@@ -102,12 +109,7 @@ function getFallbackAuthorName(name: string | null) {
   return normalized ? normalized : "Unknown";
 }
 
-async function main() {
-  const folder = process.argv[2];
-  if (!folder) {
-    throw new Error("Usage: npm exec tsx scripts/import-clean-post.ts <folder>");
-  }
-
+export async function importCleanPost(folder: string, options?: ImportCleanPostOptions) {
   const postPath = path.resolve(process.cwd(), "db image", "clean", folder, "post.json");
   if (!existsSync(postPath)) {
     throw new Error(`post.json not found: ${postPath}`);
@@ -131,16 +133,32 @@ async function main() {
     }
   });
 
-  const authorTag = await ensureAuthorTag(getFallbackAuthorName(post.post.authorName));
-  const typeTag = await db.tag.findFirst({
-    where: {
-      type: TagType.TYPE,
-      name: post.post.typeName
-    }
-  });
+  const authorName = getFallbackAuthorName(post.post.authorName);
+  const cachedAuthorTag = options?.authorTagCache?.get(authorName);
+  const authorTag = cachedAuthorTag ?? (await ensureAuthorTag(authorName));
+  if (!cachedAuthorTag) {
+    options?.authorTagCache?.set(authorName, authorTag);
+  }
+
+  const cachedTypeTag = options?.typeTagCache?.get(post.post.typeName);
+  const typeTag =
+    cachedTypeTag ??
+    (await db.tag.findFirst({
+      where: {
+        type: TagType.TYPE,
+        name: post.post.typeName
+      },
+      select: {
+        id: true,
+        name: true
+      }
+    }));
 
   if (!typeTag) {
     throw new Error(`Type tag not found: ${post.post.typeName}`);
+  }
+  if (!cachedTypeTag) {
+    options?.typeTagCache?.set(post.post.typeName, typeTag);
   }
 
   const title = post.post.title || `Post ${folder}`;
@@ -157,10 +175,7 @@ async function main() {
           publishStatus: post.post.publishStatus,
           contentTags: {
             deleteMany: {},
-            create: [
-              { tagId: authorTag.id },
-              { tagId: typeTag.id }
-            ]
+            create: [{ tagId: authorTag.id }, { tagId: typeTag.id }]
           },
           images: {
             deleteMany: {},
@@ -177,10 +192,11 @@ async function main() {
             }))
           }
         },
-        include: {
-          contentTags: { include: { tag: true } },
-          images: true,
-          downloadLinks: true
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          publishStatus: true
         }
       })
     : await db.content.create({
@@ -192,10 +208,7 @@ async function main() {
           sourceLink: post.post.sourceLink ?? post.source.pixivArtworkUrl,
           publishStatus: post.post.publishStatus,
           contentTags: {
-            create: [
-              { tagId: authorTag.id },
-              { tagId: typeTag.id }
-            ]
+            create: [{ tagId: authorTag.id }, { tagId: typeTag.id }]
           },
           images: {
             create: post.post.imageUrls.map((imageUrl, index) => ({
@@ -210,39 +223,53 @@ async function main() {
             }))
           }
         },
-        include: {
-          contentTags: { include: { tag: true } },
-          images: true,
-          downloadLinks: true
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          publishStatus: true
         }
       });
 
-  console.log(
-    JSON.stringify(
-      {
-        imported: !existingImported,
-        updated: Boolean(existingImported),
-        folder,
-        contentId: content.id,
-        slug: content.slug,
-        title: content.title,
-        authorTags: content.contentTags.filter((item) => item.tag.type === TagType.AUTHOR).map((item) => item.tag.name),
-        typeTags: content.contentTags.filter((item) => item.tag.type === TagType.TYPE).map((item) => item.tag.name),
-        imageCount: content.images.length,
-        downloadLinks: content.downloadLinks.map((item) => item.url),
-        publishStatus: content.publishStatus
-      },
-      null,
-      2
-    )
-  );
+  const result = {
+    imported: !existingImported,
+    updated: Boolean(existingImported),
+    folder,
+    contentId: content.id,
+    slug: content.slug,
+    title: content.title,
+    authorName: authorTag.name,
+    typeName: typeTag.name,
+    imageCount: post.post.imageUrls.length,
+    downloadLinks: post.post.downloadLinks,
+    publishStatus: content.publishStatus
+  };
+
+  if (options?.logResult ?? true) {
+    console.log(JSON.stringify(result, null, 2));
+  }
+
+  return result;
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await db.$disconnect();
-  });
+async function main() {
+  const folder = process.argv[2];
+  if (!folder) {
+    throw new Error("Usage: npm exec tsx scripts/import-clean-post.ts <folder>");
+  }
+
+  await importCleanPost(folder, { logResult: true });
+}
+
+const isDirectRun = process.argv[1] ? import.meta.url === pathToFileURL(process.argv[1]).href : false;
+
+if (isDirectRun) {
+  main()
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await db.$disconnect();
+    });
+}

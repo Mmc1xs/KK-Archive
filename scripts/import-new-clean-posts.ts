@@ -1,9 +1,10 @@
 import "./load-env";
 import { existsSync } from "fs";
-import { readdir, readFile } from "fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "fs/promises";
 import path from "path";
-import { spawnSync } from "child_process";
+import { Tag } from "@prisma/client";
 import { db } from "../lib/db";
+import { importCleanPost } from "./import-clean-post";
 
 type PostJson = {
   source: {
@@ -12,6 +13,21 @@ type PostJson = {
 };
 
 const cleanRoot = path.resolve(process.cwd(), "db image", "clean");
+const reportsRoot = path.resolve(process.cwd(), "scripts", "reports");
+
+async function writeReport(prefix: string, payload: unknown) {
+  await mkdir(reportsRoot, { recursive: true });
+  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+  const latestPath = path.join(reportsRoot, `${prefix}.latest.json`);
+  const timestampedPath = path.join(reportsRoot, `${prefix}.${stamp}.json`);
+  const body = JSON.stringify(payload, null, 2);
+
+  await writeFile(latestPath, body, "utf8");
+  await writeFile(timestampedPath, body, "utf8");
+
+  return { latestPath, timestampedPath };
+}
+
 async function main() {
   if (!existsSync(cleanRoot)) {
     throw new Error(`Clean root not found: ${cleanRoot}`);
@@ -47,43 +63,56 @@ async function main() {
     pendingFolders.push(folder);
   }
 
-  const imported: string[] = [];
+  const imported: Array<{ folder: string; contentId: number; slug: string; title: string; mode: "imported" | "updated" }> = [];
   const failed: Array<{ folder: string; reason: string }> = [];
+  const authorTagCache = new Map<string, Tag>();
+  const typeTagCache = new Map<string, Pick<Tag, "id" | "name">>();
 
-  for (const folder of pendingFolders) {
-    const result = spawnSync("npx", ["tsx", "scripts/import-clean-post.ts", folder], {
-      cwd: process.cwd(),
-      encoding: "utf8",
-      shell: process.platform === "win32"
-    });
+  console.log(`[SYNC:NEW][IMPORT] pending ${pendingFolders.length} folder(s)`);
 
-    if (result.status === 0) {
-      imported.push(folder);
-      console.log(result.stdout.trim());
-      continue;
+  for (const [index, folder] of pendingFolders.entries()) {
+    const label = `[SYNC:NEW][IMPORT ${index + 1}/${pendingFolders.length}] folder ${folder}`;
+    const startedAt = Date.now();
+    console.log(`${label} start`);
+
+    try {
+      const result = await importCleanPost(folder, {
+        logResult: false,
+        authorTagCache,
+        typeTagCache
+      });
+      imported.push({
+        folder,
+        contentId: result.contentId,
+        slug: result.slug,
+        title: result.title,
+        mode: result.updated ? "updated" : "imported"
+      });
+      console.log(`${label} done in ${Date.now() - startedAt}ms -> ${result.updated ? "updated" : "imported"} "${result.title}"`);
+    } catch (error) {
+      const reason = error instanceof Error ? error.stack ?? error.message : String(error);
+      failed.push({ folder, reason });
+      console.error(`${label} failed in ${Date.now() - startedAt}ms`);
     }
-
-    failed.push({
-      folder,
-      reason: (result.stderr || result.stdout || "Unknown import error").trim()
-    });
   }
 
-  console.log(
-    JSON.stringify(
-      {
-        totalFolders: folders.length,
-        pendingFolders: pendingFolders.length,
-        importedFolders: imported.length,
-        skippedCount: skipped.length,
-        failedCount: failed.length,
-        skipped,
-        failed
-      },
-      null,
-      2
-    )
-  );
+  const summary = {
+    totalFolders: folders.length,
+    pendingFolders: pendingFolders.length,
+    importedFolders: imported.length,
+    skippedCount: skipped.length,
+    failedCount: failed.length
+  };
+
+  const reportPaths = await writeReport("clean-import-new-report", {
+    ...summary,
+    skipped,
+    imported,
+    failed
+  });
+
+  console.log(`[SYNC:NEW][IMPORT] completed imported=${summary.importedFolders} failed=${summary.failedCount} skipped=${summary.skippedCount}`);
+  console.log(`[SYNC:NEW][IMPORT] report saved: ${reportPaths.latestPath}`);
 }
 
 main()

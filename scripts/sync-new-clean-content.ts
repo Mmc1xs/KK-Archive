@@ -1,29 +1,36 @@
 import "./load-env";
-import { spawnSync } from "child_process";
+import { spawn } from "child_process";
 
 function runStep(label: string, args: string[]) {
   console.log(`[SYNC:NEW] ${label}`);
 
-  const result = spawnSync("npx", ["tsx", ...args], {
-    cwd: process.cwd(),
-    encoding: "utf8",
-    shell: process.platform === "win32"
+  return new Promise<void>((resolve, reject) => {
+    const child = spawn("npx", ["tsx", ...args], {
+      cwd: process.cwd(),
+      shell: process.platform === "win32",
+      stdio: "inherit"
+    });
+
+    child.on("error", reject);
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve();
+        return;
+      }
+
+      reject(new Error(`${label} failed with exit code ${code ?? "unknown"}`));
+    });
   });
-
-  if (result.stdout.trim()) {
-    console.log(result.stdout.trim());
-  }
-
-  if (result.status !== 0) {
-    throw new Error((result.stderr || result.stdout || `${label} failed`).trim());
-  }
 }
 
-function main() {
-  runStep("pixiv", ["scripts/enrich-new-clean-from-pixiv.ts"]);
-  runStep("r2", ["scripts/upload-new-clean-to-r2.ts"]);
-  runStep("post-json", ["scripts/write-new-post-json-from-clean.ts"]);
-  runStep("import", ["scripts/import-new-clean-posts.ts"]);
+async function main() {
+  await runStep("pixiv", ["scripts/enrich-new-clean-from-pixiv.ts"]);
+  await runStep("r2", ["scripts/upload-new-clean-to-r2.ts"]);
+  await runStep("post-json", ["scripts/write-new-post-json-from-clean.ts"]);
+  await runStep("import", ["scripts/import-new-clean-posts.ts"]);
 }
 
-main();
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});
