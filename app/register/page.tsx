@@ -1,11 +1,19 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { GoogleAuthCard } from "@/components/google-auth-card";
+import { getCurrentSession } from "@/lib/auth/session";
 
 export default async function RegisterPage({
   searchParams
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const user = await getCurrentSession({ touchActivity: false });
+
+  if (user) {
+    redirect(user.role === "ADMIN" || user.role === "AUDIT" ? "/admin" : "/");
+  }
+
   const params = await searchParams;
   const error = typeof params.error === "string" ? params.error : undefined;
 
