@@ -7,8 +7,9 @@ import { formatDateTime } from "@/lib/utils";
 export default async function AdminPage() {
   const user = await requireStaff();
   const isAdmin = user.role === "ADMIN";
-  const analytics = isAdmin ? await getAccountActivityAnalytics() : null;
-  const contentViews = isAdmin ? await getContentViewAnalytics() : null;
+  const [analytics, contentViews] = isAdmin
+    ? await Promise.all([getAccountActivityAnalytics(), getContentViewAnalytics()])
+    : [null, null];
 
   return (
     <div className="page-section grid admin-dashboard-grid">

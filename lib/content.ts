@@ -478,27 +478,66 @@ export async function getAdminContents(filter?: { reviewStatus?: "all" | "unveri
   });
 }
 
+export async function getAdminContentsPage(options?: {
+  reviewStatus?: "all" | "unverified" | "edited" | "passed";
+  page?: number;
+  pageSize?: number;
+}) {
+  const reviewStatus = options?.reviewStatus ?? "all";
+  const page = Number.isInteger(options?.page) && (options?.page ?? 0) > 0 ? (options?.page as number) : 1;
+  const pageSize =
+    Number.isInteger(options?.pageSize) && (options?.pageSize ?? 0) > 0 ? (options?.pageSize as number) : 20;
+
+  const where = {
+    ...(reviewStatus === "unverified"
+      ? { reviewStatus: ReviewStatus.UNVERIFIED }
+      : reviewStatus === "edited"
+        ? { reviewStatus: ReviewStatus.EDITED }
+        : reviewStatus === "passed"
+          ? { reviewStatus: ReviewStatus.PASSED }
+          : {})
+  };
+
+  const [totalCount, items] = await Promise.all([
+    db.content.count({ where }),
+    db.content.findMany({
+      where,
+      orderBy: { updatedAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        publishStatus: true,
+        reviewStatus: true
+      }
+    })
+  ]);
+
+  return {
+    items,
+    totalCount,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(totalCount / pageSize))
+  };
+}
+
 export async function getAdminContentReviewCounts() {
-  const unverified = await db.content.count({
-    where: {
-      reviewStatus: ReviewStatus.UNVERIFIED
-    }
-  });
-  const edited = await db.content.count({
-    where: {
-      reviewStatus: ReviewStatus.EDITED
-    }
-  });
-  const passed = await db.content.count({
-    where: {
-      reviewStatus: ReviewStatus.PASSED
+  const grouped = await db.content.groupBy({
+    by: ["reviewStatus"],
+    _count: {
+      _all: true
     }
   });
 
+  const counts = new Map(grouped.map((item) => [item.reviewStatus, item._count._all]));
+
   return {
-    unverified,
-    edited,
-    passed
+    unverified: counts.get(ReviewStatus.UNVERIFIED) ?? 0,
+    edited: counts.get(ReviewStatus.EDITED) ?? 0,
+    passed: counts.get(ReviewStatus.PASSED) ?? 0
   };
 }
 

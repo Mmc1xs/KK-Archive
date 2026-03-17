@@ -122,85 +122,81 @@ export async function getAccountActivityAnalytics(): Promise<AccountActivityAnal
   const since24h = new Date(now - 1000 * 60 * 60 * 24);
   const since7d = new Date(now - 1000 * 60 * 60 * 24 * 7);
 
-  const totalMembers = await db.user.count({
-    where: {
-      role: UserRole.MEMBER
-    }
-  });
-
-  const activeUsers24h = await db.user.count({
-    where: {
-      lastSeenAt: {
-        gte: since24h
-      }
-    }
-  });
-
-  const signIns24h = await db.userLoginEvent.count({
-    where: {
-      createdAt: {
-        gte: since24h
-      }
-    }
-  });
-
-  const signIns7d = await db.userLoginEvent.count({
-    where: {
-      createdAt: {
-        gte: since7d
-      }
-    }
-  });
-
-  const suspendedUsers = await db.user.count({
-    where: {
-      isSuspended: true
-    }
-  });
-
-  const grouped24h = await db.userLoginEvent.groupBy({
-    by: ["userId"],
-    where: {
-      createdAt: {
-        gte: since24h
-      }
-    },
-    _count: {
-      _all: true
-    }
-  });
-
-  const users = await db.user.findMany({
-    select: {
-      id: true,
-      username: true,
-      email: true,
-      role: true,
-      loginCount: true,
-      lastLoginAt: true,
-      lastSeenAt: true,
-      isSuspended: true,
-      suspendedAt: true
-    },
-    orderBy: [{ lastSeenAt: "desc" }, { loginCount: "desc" }],
-    take: 12
-  });
-
-  const recentSignIns = await db.userLoginEvent.findMany({
-    take: 12,
-    orderBy: {
-      createdAt: "desc"
-    },
-    include: {
-      user: {
+  const [totalMembers, activeUsers24h, signIns24h, signIns7d, suspendedUsers, grouped24h, users, recentSignIns] =
+    await Promise.all([
+      db.user.count({
+        where: {
+          role: UserRole.MEMBER
+        }
+      }),
+      db.user.count({
+        where: {
+          lastSeenAt: {
+            gte: since24h
+          }
+        }
+      }),
+      db.userLoginEvent.count({
+        where: {
+          createdAt: {
+            gte: since24h
+          }
+        }
+      }),
+      db.userLoginEvent.count({
+        where: {
+          createdAt: {
+            gte: since7d
+          }
+        }
+      }),
+      db.user.count({
+        where: {
+          isSuspended: true
+        }
+      }),
+      db.userLoginEvent.groupBy({
+        by: ["userId"],
+        where: {
+          createdAt: {
+            gte: since24h
+          }
+        },
+        _count: {
+          _all: true
+        }
+      }),
+      db.user.findMany({
         select: {
+          id: true,
           username: true,
           email: true,
-          role: true
+          role: true,
+          loginCount: true,
+          lastLoginAt: true,
+          lastSeenAt: true,
+          isSuspended: true,
+          suspendedAt: true
+        },
+        orderBy: [{ lastSeenAt: "desc" }, { loginCount: "desc" }],
+        take: 12
+      }),
+      db.userLoginEvent.findMany({
+        take: 12,
+        orderBy: {
+          createdAt: "desc"
+        },
+        include: {
+          user: {
+            select: {
+              username: true,
+              email: true,
+              role: true
+            }
+          }
         }
-      }
-    }
-  });
+      })
+    ]);
 
   const logins24hByUser = new Map(grouped24h.map((item) => [item.userId, item._count._all]));
 
