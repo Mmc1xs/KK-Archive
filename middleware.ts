@@ -2,6 +2,19 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { SESSION_COOKIE_NAME } from "@/lib/constants";
 
+function getCanonicalOrigin() {
+  const redirectUri = process.env.GOOGLE_REDIRECT_URI;
+  if (!redirectUri) {
+    return null;
+  }
+
+  try {
+    return new URL(redirectUri).origin;
+  } catch {
+    return null;
+  }
+}
+
 async function sign(value: string) {
   const secret = process.env.SESSION_SECRET || "dev-secret-change-me";
   const key = await crypto.subtle.importKey(
@@ -24,6 +37,11 @@ function decodeBase64Url(value: string) {
 }
 
 export async function middleware(request: NextRequest) {
+  const canonicalOrigin = getCanonicalOrigin();
+  if (canonicalOrigin && request.nextUrl.origin !== canonicalOrigin) {
+    return NextResponse.redirect(new URL(`${request.nextUrl.pathname}${request.nextUrl.search}`, canonicalOrigin));
+  }
+
   if (!request.nextUrl.pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
@@ -59,5 +77,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"]
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"]
 };
