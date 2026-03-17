@@ -1,4 +1,5 @@
 import { TagType } from "@prisma/client";
+import { revalidateTag, unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { tagSchema } from "@/lib/validation";
 
@@ -11,40 +12,54 @@ const FIXED_TYPE_TAGS = [
 ] as const;
 
 export async function ensureFixedTypeTags() {
-  await Promise.all(
-    FIXED_TYPE_TAGS.map((tag) =>
-      db.tag.upsert({
-        where: { slug: tag.slug },
-        update: {
-          name: tag.name,
-          type: TagType.TYPE
-        },
-        create: {
-          name: tag.name,
-          slug: tag.slug,
-          type: TagType.TYPE
-        }
-      })
-    )
-  );
-}
-
-export async function getAllTags() {
-  await ensureFixedTypeTags();
-  return db.tag.findMany({
-    orderBy: [{ type: "asc" }, { name: "asc" }]
+  await db.tag.createMany({
+    data: FIXED_TYPE_TAGS.map((tag) => ({
+      name: tag.name,
+      slug: tag.slug,
+      type: TagType.TYPE
+    })),
+    skipDuplicates: true
   });
 }
 
-export async function getTagOptions() {
-  const tags = await getAllTags();
-  return {
-    authors: tags.filter((tag) => tag.type === TagType.AUTHOR),
-    styles: tags.filter((tag) => tag.type === TagType.STYLE),
-    usages: tags.filter((tag) => tag.type === TagType.USAGE),
-    types: tags.filter((tag) => tag.type === TagType.TYPE)
-  };
+export async function getAllTags() {
+  return getCachedAllTags();
 }
+
+export async function getTagOptions() {
+  return getCachedTagOptions();
+}
+
+const getCachedAllTags = unstable_cache(
+  async () => {
+    await ensureFixedTypeTags();
+    return db.tag.findMany({
+      orderBy: [{ type: "asc" }, { name: "asc" }]
+    });
+  },
+  ["admin-all-tags"],
+  {
+    revalidate: 300,
+    tags: ["tags"]
+  }
+);
+
+const getCachedTagOptions = unstable_cache(
+  async () => {
+    const tags = await getCachedAllTags();
+    return {
+      authors: tags.filter((tag) => tag.type === TagType.AUTHOR),
+      styles: tags.filter((tag) => tag.type === TagType.STYLE),
+      usages: tags.filter((tag) => tag.type === TagType.USAGE),
+      types: tags.filter((tag) => tag.type === TagType.TYPE)
+    };
+  },
+  ["admin-tag-options"],
+  {
+    revalidate: 300,
+    tags: ["tags"]
+  }
+);
 
 export async function saveTag(input: unknown) {
   const parsed = tagSchema.safeParse(input);
@@ -73,6 +88,7 @@ export async function saveTag(input: unknown) {
     await db.tag.create({
       data: parsed.data
     });
+    revalidateTag("tags");
     return { ok: true as const };
   } catch {
     return { ok: false as const, error: "Failed to create tag. Slug or name may already exist." };

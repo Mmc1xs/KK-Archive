@@ -2,6 +2,7 @@ import { PublishStatus, ReviewStatus, TagType } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { contentSchema } from "@/lib/validation";
+import { revalidateTag } from "next/cache";
 
 function slugifyTagName(name: string) {
   const base = name
@@ -663,6 +664,8 @@ export async function saveContent(input: unknown, contentId?: number, options?: 
     if (authorCount !== 1) {
       throw new Error("Each content item must have exactly one author tag.");
     }
+
+    revalidateTag("tags");
 
     return { ok: true as const, contentId: content.id };
   } catch (error) {
