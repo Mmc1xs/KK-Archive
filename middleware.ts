@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE_NAME } from "@/lib/constants";
 
 function getCanonicalOrigin() {
   const redirectUri = process.env.GOOGLE_REDIRECT_URI;
@@ -19,15 +18,6 @@ export async function middleware(request: NextRequest) {
   const canonicalOrigin = getCanonicalOrigin();
   if (canonicalOrigin && request.nextUrl.origin !== canonicalOrigin) {
     return NextResponse.redirect(new URL(`${request.nextUrl.pathname}${request.nextUrl.search}`, canonicalOrigin));
-  }
-
-  if (!request.nextUrl.pathname.startsWith("/admin")) {
-    return NextResponse.next();
-  }
-
-  const session = request.cookies.get(SESSION_COOKIE_NAME)?.value;
-  if (!session) {
-    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
