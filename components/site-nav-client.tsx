@@ -59,9 +59,9 @@ export function SiteNavClient() {
         {user ? (
           <>
             <span className="muted">{user.username ?? user.email}</span>
-            <Link href="/auth/logout" className="link-pill">
+            <a href="/auth/logout" className="link-pill">
               Logout
-            </Link>
+            </a>
           </>
         ) : loaded ? (
           <>
