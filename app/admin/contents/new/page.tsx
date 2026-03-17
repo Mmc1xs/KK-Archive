@@ -7,7 +7,7 @@ export default async function NewContentPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireAdmin();
+  await requireAdmin({ touchActivity: false });
   const [params, tagOptions] = await Promise.all([searchParams, getTagOptions()]);
   const error = typeof params.error === "string" ? params.error : undefined;
 

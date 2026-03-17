@@ -35,7 +35,7 @@ function getStringList(formData: FormData, key: string) {
 }
 
 export async function createContentAction(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin({ touchActivity: false });
 
   const result = await saveContent({
     title: formData.get("title"),
@@ -65,7 +65,7 @@ export async function createContentAction(formData: FormData) {
 }
 
 export async function updateContentAction(contentId: number, formData: FormData) {
-  const staff = await requireStaff();
+  const staff = await requireStaff({ touchActivity: false });
   const reviewAction = String(formData.get("reviewAction") || "edited");
   const existing = await db.content.findUnique({
     where: { id: contentId },
@@ -110,7 +110,7 @@ export async function updateContentAction(contentId: number, formData: FormData)
 }
 
 export async function createTagAction(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin({ touchActivity: false });
 
   const result = await saveTag({
     name: formData.get("name"),
@@ -126,7 +126,7 @@ export async function createTagAction(formData: FormData) {
 }
 
 export async function deleteContentAction(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin({ touchActivity: false });
 
   const contentId = Number(formData.get("contentId"));
   if (!Number.isInteger(contentId) || contentId <= 0) {
@@ -141,7 +141,7 @@ export async function deleteContentAction(formData: FormData) {
 }
 
 export async function transitionContentReviewStatusAction(formData: FormData) {
-  const staff = await requireStaff();
+  const staff = await requireStaff({ touchActivity: false });
   const contentId = Number(formData.get("contentId"));
   const nextStatus = String(formData.get("nextStatus") || "");
   const redirectTo = String(formData.get("redirectTo") || "/admin/contents");
@@ -194,7 +194,7 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
 }
 
 export async function toggleUserSuspendedAction(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin({ touchActivity: false });
   const userId = Number(formData.get("userId"));
   const nextValue = formData.get("nextValue") === "true";
   const redirectTo = String(formData.get("redirectTo") || "/admin/activity");
@@ -219,7 +219,7 @@ export async function toggleUserSuspendedAction(formData: FormData) {
 }
 
 export async function updateUserRoleAction(formData: FormData) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin({ touchActivity: false });
   const userId = Number(formData.get("userId"));
   const nextRole = String(formData.get("nextRole") || "");
   const redirectTo = String(formData.get("redirectTo") || "/admin/activity");

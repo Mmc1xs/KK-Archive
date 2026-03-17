@@ -35,7 +35,7 @@ export default async function AdminActivityPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const admin = await requireAdmin();
+  const admin = await requireAdmin({ touchActivity: false });
   const [params, data] = await Promise.all([searchParams, getAccountActivityPageData()]);
   const success = typeof params.success === "string" ? params.success : undefined;
   const error = typeof params.error === "string" ? params.error : undefined;

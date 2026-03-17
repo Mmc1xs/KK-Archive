@@ -11,7 +11,7 @@ export default async function EditContentPage({
   params: Promise<{ id: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const staff = await requireStaff();
+  const staff = await requireStaff({ touchActivity: false });
   const routeParams = await params;
   const contentId = Number(routeParams.id);
   const [query, tagOptions, content] = await Promise.all([

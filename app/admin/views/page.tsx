@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/utils";
 
 export default async function AdminViewsPage() {
-  await requireAdmin();
+  await requireAdmin({ touchActivity: false });
   const contentViews = await getContentViewAnalytics();
 
   return (

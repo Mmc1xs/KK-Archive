@@ -73,7 +73,7 @@ export default async function AdminContentsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const staff = await requireStaff();
+  const staff = await requireStaff({ touchActivity: false });
   const params = await searchParams;
   const success = typeof params.success === "string" ? params.success : undefined;
   const error = typeof params.error === "string" ? params.error : undefined;

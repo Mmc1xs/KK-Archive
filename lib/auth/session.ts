@@ -105,7 +105,11 @@ export async function clearSession() {
   store.delete(SESSION_COOKIE_NAME);
 }
 
-export async function getCurrentSession(options?: { touchActivity?: boolean }) {
+type SessionAccessOptions = {
+  touchActivity?: boolean;
+};
+
+export async function getCurrentSession(options?: SessionAccessOptions) {
   const store = await cookies();
   const value = store.get(SESSION_COOKIE_NAME)?.value;
   if (!value) {
@@ -167,16 +171,24 @@ export async function requireUser() {
   return user;
 }
 
-export async function requireAdmin() {
-  const user = await requireUser();
+export async function requireUserWithoutTouch() {
+  const user = await getCurrentSession({ touchActivity: false });
+  if (!user) {
+    redirect("/login");
+  }
+  return user;
+}
+
+export async function requireAdmin(options?: SessionAccessOptions) {
+  const user = options?.touchActivity === false ? await requireUserWithoutTouch() : await requireUser();
   if (user.role !== UserRole.ADMIN) {
     redirect("/");
   }
   return user;
 }
 
-export async function requireStaff() {
-  const user = await requireUser();
+export async function requireStaff(options?: SessionAccessOptions) {
+  const user = options?.touchActivity === false ? await requireUserWithoutTouch() : await requireUser();
   if (user.role !== UserRole.ADMIN && user.role !== UserRole.AUDIT) {
     redirect("/");
   }

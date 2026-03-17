@@ -7,7 +7,7 @@ export default async function AdminTagsPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireAdmin();
+  await requireAdmin({ touchActivity: false });
   const [params, tags] = await Promise.all([searchParams, getAllTags()]);
   const error = typeof params.error === "string" ? params.error : undefined;
   const success = typeof params.success === "string" ? params.success : undefined;

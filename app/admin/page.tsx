@@ -2,7 +2,7 @@ import Link from "next/link";
 import { requireStaff } from "@/lib/auth/session";
 
 export default async function AdminPage() {
-  const user = await requireStaff();
+  const user = await requireStaff({ touchActivity: false });
   const isAdmin = user.role === "ADMIN";
 
   return (
