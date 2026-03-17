@@ -20,6 +20,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:migrate:sqlite-to-postgres": "npm run db:generate:migrate:sqlite && npm run db:generate:migrate:postgres && tsx scripts/migrate-sqlite-to-postgres.ts",
     "db:backfill-usernames": "tsx scripts/backfill-usernames.ts",
+    "db:backfill-source-links": "tsx scripts/backfill-content-source-links.ts",
     "clean:manifest": "tsx scripts/build-clean-import-manifest.ts",
     "clean:pixiv": "tsx scripts/enrich-clean-from-pixiv.ts",
     "clean:pixiv:new": "tsx scripts/enrich-new-clean-from-pixiv.ts",

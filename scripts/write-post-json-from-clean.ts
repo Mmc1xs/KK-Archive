@@ -45,6 +45,7 @@ type PostJson = {
     title: string | null;
     authorName: string | null;
     typeName: string | null;
+    sourceLink: string | null;
     publishStatus: PublishStatus;
     coverImageUrl: string | null;
     imageUrls: string[];
@@ -160,6 +161,7 @@ function buildPostJson(candidate: EnrichedCleanImportCandidate, r2Entry?: R2Uplo
       title: candidate.pixivTitle,
       authorName: candidate.pixivAuthorName,
       typeName: extractTypeName(candidate.rawText),
+      sourceLink: candidate.pixivArtworkUrl,
       publishStatus: hasPaidTag(candidate.rawText) ? PublishStatus.SUMMIT : PublishStatus.PUBLISHED,
       coverImageUrl: imageUrls[0] ?? null,
       imageUrls,
