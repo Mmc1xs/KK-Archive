@@ -12,6 +12,8 @@ type SessionPayload = {
   expiresAt: number;
 };
 
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+
 function getSessionSecret() {
   const value = process.env.SESSION_SECRET;
   if (value) {
@@ -39,7 +41,7 @@ function buildSessionPayload(userId: number, role: UserRole): SessionPayload {
   return {
     userId,
     role,
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
+    expiresAt: Date.now() + 1000 * SESSION_MAX_AGE_SECONDS
   };
 }
 
@@ -47,12 +49,23 @@ export function getSessionCookieValue(userId: number, role: UserRole) {
   return encodeSession(buildSessionPayload(userId, role));
 }
 
-export function getSessionCookieOptions(expiresAt?: number) {
+function normalizeCookieDomain(domain?: string) {
+  if (!domain || domain === "localhost" || domain.endsWith(".localhost")) {
+    return undefined;
+  }
+
+  return domain;
+}
+
+export function getSessionCookieOptions(expiresAt?: number, domain?: string) {
   return {
     httpOnly: true,
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
+    maxAge: SESSION_MAX_AGE_SECONDS,
+    priority: "high" as const,
+    ...(normalizeCookieDomain(domain) ? { domain: normalizeCookieDomain(domain) } : {}),
     ...(expiresAt ? { expires: new Date(expiresAt) } : {})
   };
 }

@@ -106,12 +106,17 @@ export async function GET(request: NextRequest) {
 
     await recordUserLogin(user.id, "google");
     const response = NextResponse.redirect(new URL(user.role === UserRole.ADMIN ? "/admin" : "/", request.url));
+    const cookieDomain = request.nextUrl.hostname;
     response.cookies.set(
       SESSION_COOKIE_NAME,
       getSessionCookieValue(user.id, user.role),
-      getSessionCookieOptions(Date.now() + 1000 * 60 * 60 * 24 * 7)
+      getSessionCookieOptions(Date.now() + 1000 * 60 * 60 * 24 * 7, cookieDomain)
     );
-    response.cookies.delete(GOOGLE_STATE_COOKIE_NAME);
+    response.cookies.delete({
+      name: GOOGLE_STATE_COOKIE_NAME,
+      path: "/",
+      ...(cookieDomain === "localhost" || cookieDomain.endsWith(".localhost") ? {} : { domain: cookieDomain })
+    });
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : "Google sign-in failed";
