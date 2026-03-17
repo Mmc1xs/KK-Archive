@@ -64,24 +64,33 @@ export default async function AdminContentsPage({
             </Link>
           </div>
         </div>
-        <div className="admin-contents-toolbar">
-          <div className="admin-contents-review-stats">
-            <article className="admin-stat-card admin-review-stat">
-              <span className="eyebrow">Unverified</span>
-              <strong>{reviewCounts.unverified}</strong>
-              <small>Waiting for audit handling</small>
-            </article>
-            <article className="admin-stat-card admin-review-stat">
-              <span className="eyebrow">Edited</span>
-              <strong>{reviewCounts.edited}</strong>
-              <small>Reviewed by audit staff</small>
-            </article>
-            <article className="admin-stat-card admin-review-stat">
-              <span className="eyebrow">Passed</span>
-              <strong>{reviewCounts.passed}</strong>
-              <small>Approved by admin</small>
-            </article>
-          </div>
+          <div className="admin-contents-toolbar">
+            <div className="admin-contents-review-stats">
+              <Link
+                href="/admin/contents?review=unverified"
+                className={review === "unverified" ? "admin-stat-card admin-review-stat admin-review-stat-active" : "admin-stat-card admin-review-stat"}
+              >
+                <span className="eyebrow">Unverified</span>
+                <strong>{reviewCounts.unverified}</strong>
+                <small>Waiting for audit handling</small>
+              </Link>
+              <Link
+                href="/admin/contents?review=edited"
+                className={review === "edited" ? "admin-stat-card admin-review-stat admin-review-stat-active" : "admin-stat-card admin-review-stat"}
+              >
+                <span className="eyebrow">Edited</span>
+                <strong>{reviewCounts.edited}</strong>
+                <small>Reviewed by audit staff</small>
+              </Link>
+              <Link
+                href="/admin/contents?review=passed"
+                className={review === "passed" ? "admin-stat-card admin-review-stat admin-review-stat-active" : "admin-stat-card admin-review-stat"}
+              >
+                <span className="eyebrow">Passed</span>
+                <strong>{reviewCounts.passed}</strong>
+                <small>Approved by admin</small>
+              </Link>
+            </div>
         {staff.role === "ADMIN" ? (
           <Link href="/admin/contents/new" className="button">
             New Content
