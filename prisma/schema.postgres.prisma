@@ -49,6 +49,7 @@ model User {
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
   loginEvents         UserLoginEvent[]
+  editedContents      Content[] @relation("ContentEditedBy")
 
   @@map("users")
 }
@@ -72,11 +73,14 @@ model Content {
   sourceLink    String?               @map("source_link")
   isVerified    Boolean               @default(false) @map("is_verified")
   reviewStatus  ReviewStatus          @default(UNVERIFIED) @map("review_status")
+  editedByUserId Int?                 @map("edited_by_user_id")
+  editedAt      DateTime?             @map("edited_at")
   viewCount     Int                   @default(0) @map("view_count")
   lastViewedAt  DateTime?             @map("last_viewed_at")
   publishStatus PublishStatus         @default(DRAFT) @map("publish_status")
   createdAt     DateTime              @default(now()) @map("created_at")
   updatedAt     DateTime              @updatedAt @map("updated_at")
+  editedBy      User?                 @relation("ContentEditedBy", fields: [editedByUserId], references: [id], onDelete: SetNull)
   images        ContentImage[]
   downloadLinks ContentDownloadLink[]
   contentTags   ContentTag[]

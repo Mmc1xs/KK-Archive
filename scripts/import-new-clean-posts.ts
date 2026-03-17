@@ -3,7 +3,7 @@ import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import path from "path";
 import { spawnSync } from "child_process";
-import { PrismaClient } from "@prisma/client";
+import { db } from "../lib/db";
 
 type PostJson = {
   source: {
@@ -12,8 +12,6 @@ type PostJson = {
 };
 
 const cleanRoot = path.resolve(process.cwd(), "db image", "clean");
-const db = new PrismaClient();
-
 async function main() {
   if (!existsSync(cleanRoot)) {
     throw new Error(`Clean root not found: ${cleanRoot}`);

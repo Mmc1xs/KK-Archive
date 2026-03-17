@@ -1,0 +1,207 @@
+KK Archive - 網站營運手冊
+
+1. 總覽
+
+這個專案目前主要透過四個服務共同運作：
+
+- GitHub：原始碼與版本紀錄
+- Vercel：網站部署
+- Supabase：正式環境資料庫
+- Cloudflare R2：圖片儲存
+
+日常內容管理與功能開發是兩條不同的工作流程。
+
+
+2. 日常內容流程
+
+當有新的內容整理完成後：
+
+1. 將已確認過的資料夾放進：
+   db image/clean
+
+2. 執行：
+   npm run sync:new
+
+這個指令會自動完成：
+
+- 補齊缺少的 Pixiv metadata
+- 上傳新的圖片到 R2
+- 重建 post.json
+- 將新內容匯入資料庫
+
+如需整批重建全部 clean 資料，請改用：
+
+   npm run sync:all
+
+3. 打開網站後台：
+
+- /admin
+- /admin/contents
+
+4. 審核流程：
+
+- AUDIT 角色：
+  Unverified -> Edited
+
+- ADMIN 角色：
+  Edited -> Passed
+
+
+3. 內容審核規則
+
+審核狀態如下：
+
+- Unverified：
+  剛匯入、尚未整理的內容
+
+- Edited：
+  已由審核者檢查並調整過
+
+- Passed：
+  已由管理者完成最終核准
+
+除非畫面上明確顯示 Unverified 警示，否則公開使用者不應依賴內部審核標記。
+
+
+4. 帳號與風險管理
+
+請使用：
+
+- /admin
+- /admin/activity
+
+目前可用的管理功能：
+
+- 停權可疑帳號
+- 檢查登入活動
+- 查看會員活躍訊號
+- 調整使用者角色
+
+目前角色結構：
+
+- MEMBER
+- AUDIT
+- ADMIN
+
+
+5. 本地開發流程
+
+如果你要修改網站 UI、功能或邏輯：
+
+1. 在本機開發
+2. 在本機測試
+3. 將變更 commit 到 git
+4. push 到 GitHub
+5. 讓 Vercel 自動部署新版本
+
+建議的本地流程：
+
+1. 啟動本地開發：
+   npm run dev
+
+2. 如果你改動了正式環境相關的資料庫行為，先檢查 build：
+   npm run build:postgres
+
+3. Commit：
+   git add .
+   git commit -m "描述這次修改"
+
+4. Push：
+   git push
+
+之後 Vercel 會從 GitHub 自動部署。
+
+
+6. 正式部署流程
+
+主要部署路徑：
+
+- 程式碼 -> GitHub
+- 建置 -> Vercel
+- 資料庫 -> Supabase
+- 圖片 -> R2
+
+正式環境重要的環境變數：
+
+- POSTGRES_POOLED_URL
+- POSTGRES_SESSION_URL
+- SESSION_SECRET
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- GOOGLE_REDIRECT_URI
+- R2_ACCOUNT_ID
+- R2_ACCESS_KEY_ID
+- R2_SECRET_ACCESS_KEY
+- R2_BUCKET_NAME
+- R2_PUBLIC_BASE_URL
+
+
+7. 資料庫遷移說明
+
+本地開發仍可為了方便使用 SQLite。
+
+正式環境使用 Supabase Postgres。
+
+常用指令：
+
+- npm run db:generate:postgres
+- npm run db:push:postgres
+- npm run db:migrate:sqlite-to-postgres
+- npm run db:use:postgres
+- npm run build:postgres
+
+
+8. 備份建議
+
+至少請保留以下備份：
+
+- Supabase 資料庫匯出
+- R2 bucket 內容，或原始本地內容來源
+- 如果 `db image/output` 仍是你的原始素材庫，也要保留
+- 如果 `db image/clean` 仍是你的審核後匯入來源，也要保留
+
+不要只把已部署網站當成唯一備份。
+
+
+9. 安全檢查清單
+
+正式更新前後，如有需要請輪換敏感憑證：
+
+- Supabase 資料庫密碼
+- Google OAuth client secret
+- Cloudflare R2 keys
+
+以下檔案絕對不要 commit：
+
+- .env
+- 本地 session 檔
+- 本地資料庫檔
+- 大型原始圖片檔案，除非你真的刻意要版控
+
+
+10. 常用指令速查
+
+內容匯入：
+
+- npm run clean:sync-new
+
+本地開發：
+
+- npm run dev
+
+正式 build 檢查：
+
+- npm run build:postgres
+
+切換 Prisma runtime：
+
+- npm run db:use:sqlite
+- npm run db:use:postgres
+
+
+11. 簡單原則
+
+- 改內容：在後台或 clean 匯入流程處理
+- 改程式：在本地處理
+- 程式更新後：push 到 GitHub
+- 正式站更新：交給 Vercel 自動部署

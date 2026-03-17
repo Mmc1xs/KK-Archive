@@ -1,5 +1,5 @@
 import { UserRole } from "@prisma/client";
-import { createContentAction, updateContentAction } from "@/app/actions";
+import { createContentAction, transitionContentReviewStatusAction, updateContentAction } from "@/app/actions";
 import { MultiUrlInput } from "@/components/multi-url-input";
 import { TagAutocomplete } from "@/components/tag-autocomplete";
 
@@ -198,14 +198,26 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
         {mode === "create" ? (
           <button type="submit">Create Content</button>
         ) : (
-          <div className="inline-actions">
-            <button type="submit" name="reviewAction" value="edited">
-              Update Content
-            </button>
-            {role === "ADMIN" ? (
-              <button type="submit" name="reviewAction" value="passed" className="button secondary">
-                Update and Pass
+          <div className="content-form-actions">
+            <div className="inline-actions">
+              <button type="submit" name="reviewAction" value="edited">
+                Update Content
               </button>
+              {role === "ADMIN" ? (
+                <button type="submit" name="reviewAction" value="passed" className="button secondary">
+                  Update and Pass
+                </button>
+              ) : null}
+            </div>
+            {role === "ADMIN" && content && content.reviewStatus !== "UNVERIFIED" ? (
+              <form action={transitionContentReviewStatusAction}>
+                <input type="hidden" name="contentId" value={content.id} />
+                <input type="hidden" name="nextStatus" value="UNVERIFIED" />
+                <input type="hidden" name="redirectTo" value={`/admin/contents/${content.id}/edit`} />
+                <button type="submit" className="link-pill">
+                  Reset to Unverified
+                </button>
+              </form>
             ) : null}
           </div>
         )}

@@ -3,6 +3,7 @@ import { existsSync } from "fs";
 import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import { spawnSync } from "child_process";
+import { db } from "../lib/db";
 
 type CleanImportCandidate = {
   folder: string;
@@ -178,6 +179,16 @@ async function main() {
     ? (JSON.parse(await readFile(outPath, "utf8")) as EnrichedCleanImportCandidate[])
     : [];
 
+  const existingLinks = await db.contentDownloadLink.findMany({
+    select: { url: true }
+  });
+  const existingLinkSet = new Set(existingLinks.map((item) => item.url));
+  const pendingFolderSet = new Set(
+    candidates
+      .filter((candidate) => !existingLinkSet.has(`https://t.me/Koikatunews/${candidate.folder}`))
+      .map((candidate) => candidate.folder)
+  );
+
   const existingMap = new Map(existing.map((entry) => [entry.folder, entry]));
   const merged = new Map<string, EnrichedCleanImportCandidate>();
 
@@ -185,7 +196,9 @@ async function main() {
     merged.set(entry.folder, entry);
   }
 
-  const targets = candidates.filter((candidate) => needsEnrichment(candidate, existingMap.get(candidate.folder)));
+  const targets = candidates.filter(
+    (candidate) => pendingFolderSet.has(candidate.folder) && needsEnrichment(candidate, existingMap.get(candidate.folder))
+  );
 
   for (const candidate of targets) {
     const next = await enrichCandidate(candidate);
@@ -213,7 +226,11 @@ async function main() {
   console.log(`Updated ${targets.length} folder(s) -> ${outPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await db.$disconnect();
+  });

@@ -2,7 +2,7 @@ import "./load-env";
 import { spawnSync } from "child_process";
 
 function runStep(label: string, args: string[]) {
-  console.log(`[SYNC:NEW] ${label}`);
+  console.log(`[SYNC:ALL] ${label}`);
 
   const result = spawnSync("npx", ["tsx", ...args], {
     cwd: process.cwd(),
@@ -20,10 +20,11 @@ function runStep(label: string, args: string[]) {
 }
 
 function main() {
-  runStep("pixiv", ["scripts/enrich-new-clean-from-pixiv.ts"]);
-  runStep("r2", ["scripts/upload-new-clean-to-r2.ts"]);
-  runStep("post-json", ["scripts/write-new-post-json-from-clean.ts"]);
-  runStep("import", ["scripts/import-new-clean-posts.ts"]);
+  runStep("manifest", ["scripts/build-clean-import-manifest.ts"]);
+  runStep("pixiv", ["scripts/enrich-clean-from-pixiv.ts"]);
+  runStep("r2", ["scripts/upload-clean-to-r2.ts"]);
+  runStep("post-json", ["scripts/write-post-json-from-clean.ts"]);
+  runStep("import", ["scripts/import-all-clean-posts.ts"]);
 }
 
 main();

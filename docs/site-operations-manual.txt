@@ -19,22 +19,43 @@ When new content is ready:
 1. Put reviewed folders into:
    db image/clean
 
-2. Run:
-   npm run clean:sync-new
+2. For normal day-to-day updates, run:
+   npm run sync:new
 
 This will:
 
 - enrich missing Pixiv metadata
 - upload new images to R2
-- rebuild post.json
+- rebuild post.json only for new folders
 - import new content into the database
 
-3. Open the website admin:
+3. If you need to rebuild all clean content from scratch, run:
+
+   npm run sync:all
+
+This full rebuild runs the same steps in this order:
+
+   npm run clean:manifest
+   npm run clean:pixiv
+   npm run r2:upload-clean
+   npm run clean:post-json
+   npm run clean:import-all
+
+Notes:
+
+- clean:manifest does not need to run twice
+- clean:post-json only writes post.json files
+- clean:post-json:new only writes post.json for folders not yet imported
+- sync:new is a short alias for clean:sync-new
+- sync:all is a short alias for clean:sync-all
+- database import happens in clean:import-new or clean:import-all
+
+4. Open the website admin:
 
 - /admin
 - /admin/contents
 
-4. Review flow:
+5. Review flow:
 
 - AUDIT role:
   Unverified -> Edited
@@ -180,6 +201,16 @@ Never commit these files:
 Content import:
 
 - npm run clean:sync-new
+- npm run clean:sync-all
+- npm run sync:new
+- npm run sync:all
+- npm run clean:import-new
+- npm run clean:import-all
+- npm run clean:manifest
+- npm run clean:pixiv
+- npm run r2:upload-clean
+- npm run clean:post-json
+- npm run clean:post-json:new
 
 Local dev:
 
@@ -201,4 +232,3 @@ Switch Prisma runtime:
 - Change code locally
 - Push code to GitHub
 - Let Vercel update production
-

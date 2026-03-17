@@ -4,6 +4,7 @@ import { readFile, writeFile } from "fs/promises";
 import path from "path";
 import { Upload } from "@aws-sdk/lib-storage";
 import { buildR2PublicUrl, createR2Client, getR2Config } from "../lib/storage/r2";
+import { db } from "../lib/db";
 
 type CleanMeta = {
   anchor_message_id: number;
@@ -77,11 +78,19 @@ async function main() {
     ? (JSON.parse(await readFile(manifestPath, "utf8")) as UploadManifestEntry[])
     : [];
   const manifestMap = new Map(existing.map((entry) => [entry.contentFolder, entry]));
+  const existingLinks = await db.contentDownloadLink.findMany({
+    select: { url: true }
+  });
+  const existingLinkSet = new Set(existingLinks.map((item) => item.url));
 
   let touchedFolders = 0;
   let uploadedFiles = 0;
 
   for (const folder of folders) {
+    if (existingLinkSet.has(`https://t.me/Koikatunews/${folder}`)) {
+      continue;
+    }
+
     const { meta, metaPath } = await readMeta(folder);
     const existingEntry = manifestMap.get(folder);
     const uploadedBySource = new Map((existingEntry?.uploaded ?? []).map((item) => [item.sourcePath, item]));
@@ -132,7 +141,11 @@ async function main() {
   console.log(`Updated ${touchedFolders} folder(s), uploaded ${uploadedFiles} new file(s) -> ${manifestPath}`);
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await db.$disconnect();
+  });

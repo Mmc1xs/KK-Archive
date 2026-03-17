@@ -510,7 +510,16 @@ export async function getAdminContentsPage(options?: {
         title: true,
         slug: true,
         publishStatus: true,
-        reviewStatus: true
+        reviewStatus: true,
+        editedAt: true,
+        editedBy: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            role: true
+          }
+        }
       }
     })
   ]);
@@ -560,7 +569,11 @@ export async function getAdminContentById(id: number) {
   });
 }
 
-export async function saveContent(input: unknown, contentId?: number, options?: { reviewStatusOverride?: ReviewStatus }) {
+export async function saveContent(
+  input: unknown,
+  contentId?: number,
+  options?: { reviewStatusOverride?: ReviewStatus; reviewHandledByUserId?: number }
+) {
   const parsed = contentSchema.safeParse(input);
   if (!parsed.success) {
     return {
@@ -629,6 +642,31 @@ export async function saveContent(input: unknown, contentId?: number, options?: 
 
   const tagIds = [...authorTagIds, ...styleTagIds, ...usageTagIds, ...data.typeTagIds];
 
+  const nextReviewStatus = options?.reviewStatusOverride ?? data.reviewStatus;
+  const editedTrackingUpdate =
+    nextReviewStatus === ReviewStatus.UNVERIFIED
+      ? {
+          editedByUserId: null,
+          editedAt: null
+        }
+      : nextReviewStatus === ReviewStatus.EDITED
+        ? {
+            editedByUserId: options?.reviewHandledByUserId ?? null,
+            editedAt: new Date()
+          }
+        : {};
+
+  const editedTrackingCreate =
+    nextReviewStatus === ReviewStatus.EDITED
+      ? {
+          editedByUserId: options?.reviewHandledByUserId ?? null,
+          editedAt: new Date()
+        }
+      : {
+          editedByUserId: null,
+          editedAt: null
+        };
+
   try {
     const content = await db.content.upsert({
       where: { id: contentId ?? -1 },
@@ -638,8 +676,9 @@ export async function saveContent(input: unknown, contentId?: number, options?: 
         description: data.description,
         coverImageUrl: data.coverImageUrl,
         sourceLink: data.sourceLink ?? null,
-        isVerified: (options?.reviewStatusOverride ?? data.reviewStatus) === ReviewStatus.PASSED,
-        reviewStatus: options?.reviewStatusOverride ?? data.reviewStatus,
+        isVerified: nextReviewStatus === ReviewStatus.PASSED,
+        reviewStatus: nextReviewStatus,
+        ...editedTrackingUpdate,
         publishStatus: data.publishStatus,
         contentTags: {
           deleteMany: {},
@@ -668,8 +707,9 @@ export async function saveContent(input: unknown, contentId?: number, options?: 
         description: data.description,
         coverImageUrl: data.coverImageUrl,
         sourceLink: data.sourceLink ?? null,
-        isVerified: (options?.reviewStatusOverride ?? data.reviewStatus) === ReviewStatus.PASSED,
-        reviewStatus: options?.reviewStatusOverride ?? data.reviewStatus,
+        isVerified: nextReviewStatus === ReviewStatus.PASSED,
+        reviewStatus: nextReviewStatus,
+        ...editedTrackingCreate,
         publishStatus: data.publishStatus,
         contentTags: {
           create: tagIds.map((tagId) => ({

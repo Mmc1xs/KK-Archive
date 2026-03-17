@@ -131,13 +131,44 @@ The script reads each `db image/clean/<folder>/_meta.json` and extracts:
 
 ## Post JSON Generation
 
-Command order:
+Command order for a full rebuild:
 
 ```bash
 npm run clean:manifest
 npm run clean:pixiv
 npm run r2:upload-clean
 npm run clean:post-json
+npm run clean:import-all
 ```
 
 `clean:post-json` now uses R2 public URLs from `scripts/r2-upload-manifest.json` as the final `coverImageUrl` and `imageUrls` written into each `db image/clean/<folder>/post.json`.
+
+For normal day-to-day updates, prefer:
+
+```bash
+npm run sync:new
+```
+
+This now only processes folders that have not yet been imported into the site:
+
+```bash
+npm run clean:pixiv:new
+npm run r2:upload-clean:new
+npm run clean:post-json:new
+npm run clean:import-new
+```
+
+For a full rebuild and re-import of the entire clean library, use:
+
+```bash
+npm run sync:all
+```
+
+Notes:
+
+- `clean:manifest` does not need to run twice.
+- `clean:post-json` only writes `post.json`; it does not import into the database.
+- `clean:post-json:new` only rewrites `post.json` for folders that are not yet imported.
+- `sync:new` is a short alias for `clean:sync-new`.
+- `sync:all` is a short alias for `clean:sync-all`.
+- Database import happens in `clean:import-new` or `clean:import-all`.

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ReviewStatus } from "@prisma/client";
-import { deleteContentAction, transitionContentReviewStatusAction } from "@/app/actions";
+import { deleteContentAction } from "@/app/actions";
 import { requireStaff } from "@/lib/auth/session";
 import { getAdminContentReviewCounts, getAdminContentsPage } from "@/lib/content";
 
@@ -170,6 +170,7 @@ export default async function AdminContentsPage({
             <th>Status</th>
             <th>Review</th>
             <th>Actions</th>
+            <th>Edited By</th>
           </tr>
         </thead>
         <tbody>
@@ -190,16 +191,6 @@ export default async function AdminContentsPage({
                 </td>
                 <td>
                   <div className="inline-actions">
-                    {staff.role === "ADMIN" && content.reviewStatus !== ReviewStatus.UNVERIFIED ? (
-                      <form action={transitionContentReviewStatusAction}>
-                        <input type="hidden" name="contentId" value={content.id} />
-                        <input type="hidden" name="nextStatus" value={ReviewStatus.UNVERIFIED} />
-                        <input type="hidden" name="redirectTo" value={redirectTo} />
-                        <button type="submit" className="link-pill">
-                          Reset
-                        </button>
-                      </form>
-                    ) : null}
                     <Link href={`/admin/contents/${content.id}/edit`} className="link-pill">
                       Edit
                     </Link>
@@ -210,6 +201,16 @@ export default async function AdminContentsPage({
                       </form>
                     ) : null}
                   </div>
+                </td>
+                <td>
+                  {content.editedBy ? (
+                    <div>
+                      <strong>{content.editedBy.username ?? content.editedBy.email}</strong>
+                      {content.editedAt ? <div className="muted">{content.editedAt.toLocaleDateString("zh-TW")}</div> : null}
+                    </div>
+                  ) : (
+                    <span className="muted">-</span>
+                  )}
                 </td>
               </tr>
             );

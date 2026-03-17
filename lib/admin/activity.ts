@@ -23,7 +23,10 @@ export type AccountActivityRow = {
 
 export type AccountActivityAnalytics = {
   summary: {
+    totalAccounts: number;
     totalMembers: number;
+    totalAuditUsers: number;
+    totalAdmins: number;
     activeUsers24h: number;
     signIns24h: number;
     signIns7d: number;
@@ -31,14 +34,6 @@ export type AccountActivityAnalytics = {
     suspendedUsers: number;
   };
   topActiveUsers: AccountActivityRow[];
-  recentSignIns: Array<{
-    id: number;
-    username: string | null;
-    email: string;
-    role: UserRole;
-    provider: string;
-    createdAt: Date;
-  }>;
 };
 
 function getRiskLevel(logins24h: number, isSuspended: boolean): RiskLevel {
@@ -122,13 +117,9 @@ export async function getAccountActivityAnalytics(): Promise<AccountActivityAnal
   const since24h = new Date(now - 1000 * 60 * 60 * 24);
   const since7d = new Date(now - 1000 * 60 * 60 * 24 * 7);
 
-  const [totalMembers, activeUsers24h, signIns24h, signIns7d, suspendedUsers, grouped24h, users, recentSignIns] =
+  const [totalAccounts, activeUsers24h, signIns24h, signIns7d, suspendedUsers, grouped24h, users, roleCounts] =
     await Promise.all([
-      db.user.count({
-        where: {
-          role: UserRole.MEMBER
-        }
-      }),
+      db.user.count(),
       db.user.count({
         where: {
           lastSeenAt: {
@@ -181,103 +172,79 @@ export async function getAccountActivityAnalytics(): Promise<AccountActivityAnal
         orderBy: [{ lastSeenAt: "desc" }, { loginCount: "desc" }],
         take: 12
       }),
-      db.userLoginEvent.findMany({
-        take: 12,
-        orderBy: {
-          createdAt: "desc"
-        },
-        include: {
-          user: {
-            select: {
-              username: true,
-              email: true,
-              role: true
-            }
-          }
+      db.user.groupBy({
+        by: ["role"],
+        _count: {
+          _all: true
         }
       })
     ]);
 
   const logins24hByUser = new Map(grouped24h.map((item) => [item.userId, item._count._all]));
+  const roleCountsByRole = new Map(roleCounts.map((item) => [item.role, item._count._all]));
 
   return {
     summary: {
-      totalMembers,
+      totalAccounts,
+      totalMembers: roleCountsByRole.get(UserRole.MEMBER) ?? 0,
+      totalAuditUsers: roleCountsByRole.get(UserRole.AUDIT) ?? 0,
+      totalAdmins: roleCountsByRole.get(UserRole.ADMIN) ?? 0,
       activeUsers24h,
       signIns24h,
       signIns7d,
       suspiciousUsers24h: grouped24h.filter((item) => item._count._all >= HIGH_RISK_LOGIN_THRESHOLD_24H).length,
       suspendedUsers
     },
-    topActiveUsers: buildActivityRows(users, logins24hByUser),
-    recentSignIns: recentSignIns.map((event) => ({
-      id: event.id,
-      username: event.user.username,
-      email: event.user.email,
-      role: event.user.role,
-      provider: event.provider,
-      createdAt: event.createdAt
-    }))
+    topActiveUsers: buildActivityRows(users, logins24hByUser)
   };
 }
 
-export async function getAccountActivityPageData() {
+export async function getAccountActivityPageData(options?: { page?: number; pageSize?: number }) {
   const since24h = new Date(Date.now() - 1000 * 60 * 60 * 24);
+  const page = options?.page && options.page > 0 ? options.page : 1;
+  const pageSize = options?.pageSize && options.pageSize > 0 ? options.pageSize : 20;
+  const skip = (page - 1) * pageSize;
 
   const analytics = await getAccountActivityAnalytics();
-  const grouped24h = await db.userLoginEvent.groupBy({
-    by: ["userId"],
-    where: {
-      createdAt: {
-        gte: since24h
-      }
-    },
-    _count: {
-      _all: true
-    }
-  });
-  const users = await db.user.findMany({
-    select: {
-      id: true,
-      username: true,
-      email: true,
-      role: true,
-      loginCount: true,
-      lastLoginAt: true,
-      lastSeenAt: true,
-      isSuspended: true,
-      suspendedAt: true
-    },
-    orderBy: [{ isSuspended: "desc" }, { lastSeenAt: "desc" }, { email: "asc" }]
-  });
-  const recentEvents = await db.userLoginEvent.findMany({
-    take: 40,
-    orderBy: {
-      createdAt: "desc"
-    },
-    include: {
-      user: {
-        select: {
-          username: true,
-          email: true,
-          role: true
+  const [grouped24h, totalCount, users] = await Promise.all([
+    db.userLoginEvent.groupBy({
+      by: ["userId"],
+      where: {
+        createdAt: {
+          gte: since24h
         }
+      },
+      _count: {
+        _all: true
       }
-    }
-  });
+    }),
+    db.user.count(),
+    db.user.findMany({
+      skip,
+      take: pageSize,
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        loginCount: true,
+        lastLoginAt: true,
+        lastSeenAt: true,
+        isSuspended: true,
+        suspendedAt: true
+      },
+      orderBy: [{ isSuspended: "desc" }, { lastSeenAt: "desc" }, { email: "asc" }]
+    })
+  ]);
 
   const logins24hByUser = new Map(grouped24h.map((item) => [item.userId, item._count._all]));
 
   return {
     analytics,
     users: buildActivityRows(users, logins24hByUser),
-    events: recentEvents.map((event) => ({
-      id: event.id,
-      username: event.user.username,
-      email: event.user.email,
-      role: event.user.role,
-      provider: event.provider,
-      createdAt: event.createdAt
-    }))
+    totalCount,
+    totalPages: Math.max(1, Math.ceil(totalCount / pageSize)),
+    currentPage: page,
+    currentPageSize: pageSize
   };
 }

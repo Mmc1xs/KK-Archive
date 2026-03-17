@@ -98,7 +98,8 @@ export async function updateContentAction(contentId: number, formData: FormData)
     },
     contentId,
     {
-      reviewStatusOverride
+      reviewStatusOverride,
+      reviewHandledByUserId: reviewStatusOverride === ReviewStatus.EDITED ? staff.id : undefined
     }
   );
 
@@ -179,7 +180,18 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
     where: { id: contentId },
     data: {
       reviewStatus: nextStatus as ReviewStatus,
-      isVerified: nextStatus === ReviewStatus.PASSED
+      isVerified: nextStatus === ReviewStatus.PASSED,
+      ...(nextStatus === ReviewStatus.UNVERIFIED
+        ? {
+            editedByUserId: null,
+            editedAt: null
+          }
+        : nextStatus === ReviewStatus.EDITED
+          ? {
+              editedByUserId: staff.id,
+              editedAt: new Date()
+            }
+          : {})
     }
   });
 

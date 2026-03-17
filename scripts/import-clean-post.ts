@@ -2,7 +2,8 @@ import "./load-env";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import path from "path";
-import { PrismaClient, PublishStatus, TagType } from "@prisma/client";
+import { PublishStatus, TagType } from "@prisma/client";
+import { db } from "../lib/db";
 
 type PostJson = {
   source: {
@@ -30,8 +31,6 @@ type PostJson = {
     pixivFetchError: string | null;
   };
 };
-
-const db = new PrismaClient();
 
 function slugify(input: string) {
   return input
