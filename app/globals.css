@@ -148,13 +148,13 @@ img {
 .hero-copy-top {
   display: grid;
   gap: 12px;
-  align-content: start;
+  align-content: flex-start;
 }
 
 .hero-copy-bottom {
   display: grid;
   gap: 18px;
-  align-content: end;
+  align-content: flex-end;
 }
 
 .hero-title {
@@ -203,7 +203,7 @@ img {
 .hero-intel-panel {
   display: grid;
   gap: 16px;
-  align-content: start;
+  align-content: flex-start;
   min-width: 0;
   padding: 18px;
   border: 1px solid rgba(117, 173, 222, 0.42);

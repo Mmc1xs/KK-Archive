@@ -48,7 +48,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    if (payload.role !== "ADMIN") {
+    if (payload.role !== "ADMIN" && payload.role !== "AUDIT") {
       return NextResponse.redirect(new URL("/", request.url));
     }
   } catch {

@@ -79,7 +79,7 @@ export async function clearSession() {
   store.delete(SESSION_COOKIE_NAME);
 }
 
-export async function getCurrentSession() {
+export async function getCurrentSession(options?: { touchActivity?: boolean }) {
   const store = await cookies();
   const value = store.get(SESSION_COOKIE_NAME)?.value;
   if (!value) {
@@ -107,7 +107,7 @@ export async function getCurrentSession() {
     return null;
   }
 
-  if (user) {
+  if (user && options?.touchActivity !== false) {
     await touchUserActivity(user.id);
   }
 
