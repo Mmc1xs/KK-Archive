@@ -82,6 +82,7 @@ function decodeSession(value: string): SessionPayload | null {
     timingSafeEqual(Buffer.from(signature), Buffer.from(expected));
 
   if (!isValid) {
+    console.warn("[auth] Session signature validation failed.");
     return null;
   }
 
@@ -108,13 +109,26 @@ export async function getCurrentSession(options?: { touchActivity?: boolean }) {
   const store = await cookies();
   const value = store.get(SESSION_COOKIE_NAME)?.value;
   if (!value) {
+    console.warn("[auth] No session cookie present on request.");
     return null;
   }
 
+  console.info("[auth] Session cookie detected.", {
+    cookieName: SESSION_COOKIE_NAME,
+    valueLength: value.length
+  });
+
   const payload = decodeSession(value);
   if (!payload) {
+    console.warn("[auth] Session cookie could not be decoded.");
     return null;
   }
+
+  console.info("[auth] Session payload decoded.", {
+    userId: payload.userId,
+    role: payload.role,
+    expiresAt: payload.expiresAt
+  });
 
   const user = await db.user.findUnique({
     where: { id: payload.userId },
@@ -128,7 +142,13 @@ export async function getCurrentSession(options?: { touchActivity?: boolean }) {
   });
 
   if (user?.isSuspended) {
+    console.warn("[auth] Session belongs to suspended user.", { userId: user.id });
     await clearSession();
+    return null;
+  }
+
+  if (!user) {
+    console.warn("[auth] Session user not found in database.", { userId: payload.userId });
     return null;
   }
 
