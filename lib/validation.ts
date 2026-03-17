@@ -2,6 +2,10 @@ import { ReviewStatus, TagType } from "@prisma/client";
 import { z } from "zod";
 
 const contentImageUrlSchema = z.string().url("Invalid image URL");
+const optionalUrlSchema = z.preprocess((value) => {
+  const normalized = String(value ?? "").trim();
+  return normalized ? normalized : undefined;
+}, z.string().url("Invalid source URL").optional());
 
 export const registerSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -27,6 +31,7 @@ export const contentSchema = z.object({
     .regex(/^[a-z0-9-]+$/, "Slug may only contain lowercase letters, numbers, and hyphens"),
   description: z.string().min(1, "Description is required"),
   coverImageUrl: contentImageUrlSchema,
+  sourceLink: optionalUrlSchema,
   reviewStatus: z.nativeEnum(ReviewStatus).default(ReviewStatus.UNVERIFIED),
   publishStatus: z.enum(["DRAFT", "SUMMIT", "PUBLISHED"]),
   authorTagIds: z.array(z.coerce.number().int().positive()).default([]),

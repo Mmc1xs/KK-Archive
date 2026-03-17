@@ -25,6 +25,7 @@ type ContentFormProps = {
     slug: string;
     description: string;
     coverImageUrl: string;
+    sourceLink: string | null;
     reviewStatus: "UNVERIFIED" | "EDITED" | "PASSED";
     publishStatus: "DRAFT" | "SUMMIT" | "PUBLISHED";
     images: Array<{ imageUrl: string }>;
@@ -94,6 +95,16 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
         <div className="field">
           <label htmlFor="coverImageUrl">Cover Image URL</label>
           <input id="coverImageUrl" name="coverImageUrl" defaultValue={content?.coverImageUrl ?? ""} required />
+        </div>
+        <div className="field">
+          <label htmlFor="sourceLink">Original Source Link</label>
+          <input
+            id="sourceLink"
+            name="sourceLink"
+            type="url"
+            defaultValue={content?.sourceLink ?? ""}
+            placeholder="https://www.pixiv.net/artworks/..."
+          />
         </div>
         {content ? (
           <div className="review-status-panel">

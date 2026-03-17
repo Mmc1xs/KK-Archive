@@ -220,7 +220,7 @@ img {
   display: flex;
   justify-content: space-between;
   gap: 16px;
-  align-items: start;
+  align-items: flex-start;
 }
 
 .hero-intel-header strong {
@@ -340,7 +340,7 @@ img {
   display: grid;
   grid-template-columns: 14px minmax(0, 1fr);
   gap: 10px;
-  align-items: start;
+  align-items: flex-start;
 }
 
 .hero-intel-list-item strong,
@@ -621,7 +621,7 @@ button {
 
 .detail-layout {
   grid-template-columns: 1.3fr 1fr;
-  align-items: start;
+  align-items: flex-start;
 }
 
 .admin-layout {

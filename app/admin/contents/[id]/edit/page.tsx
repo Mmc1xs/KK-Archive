@@ -38,6 +38,7 @@ export default async function EditContentPage({
           slug: content.slug,
           description: content.description,
           coverImageUrl: content.coverImageUrl,
+          sourceLink: content.sourceLink,
           reviewStatus: content.reviewStatus,
           publishStatus: content.publishStatus,
           images: content.images,

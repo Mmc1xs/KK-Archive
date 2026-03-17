@@ -153,6 +153,7 @@ async function main() {
           slug: await ensureUniqueSlugForUpdate(slugBase, existingImported.id),
           description: post.post.description,
           coverImageUrl: post.post.coverImageUrl,
+          sourceLink: post.source.pixivArtworkUrl,
           publishStatus: post.post.publishStatus,
           contentTags: {
             deleteMany: {},
@@ -188,6 +189,7 @@ async function main() {
           slug: await ensureUniqueSlug(slugBase),
           description: post.post.description,
           coverImageUrl: post.post.coverImageUrl,
+          sourceLink: post.source.pixivArtworkUrl,
           publishStatus: post.post.publishStatus,
           contentTags: {
             create: [

@@ -80,6 +80,16 @@ export default async function ContentDetailPage({
             {isStaff ? <div className={reviewStatusMeta.className}>{reviewStatusMeta.label}</div> : null}
           </div>
           <p className="muted">{content.description}</p>
+          {content.sourceLink ? (
+            <section className="tag-section">
+              <strong>Original Source</strong>
+              <div className="grid">
+                <a href={content.sourceLink} target="_blank" rel="noreferrer" className="link-pill">
+                  {content.sourceLink}
+                </a>
+              </div>
+            </section>
+          ) : null}
           {content.downloadLinks.length ? (
             <section className="tag-section">
               <strong>Download Links</strong>

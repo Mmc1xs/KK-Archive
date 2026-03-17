@@ -68,6 +68,7 @@ model Content {
   slug          String                @unique
   description   String
   coverImageUrl String                @map("cover_image_url")
+  sourceLink    String?               @map("source_link")
   isVerified    Boolean               @default(false) @map("is_verified")
   reviewStatus  ReviewStatus          @default(UNVERIFIED) @map("review_status")
   viewCount     Int                   @default(0) @map("view_count")
