@@ -35,6 +35,28 @@ function encodeSession(payload: SessionPayload) {
   return `${raw}.${signature}`;
 }
 
+function buildSessionPayload(userId: number, role: UserRole): SessionPayload {
+  return {
+    userId,
+    role,
+    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
+  };
+}
+
+export function getSessionCookieValue(userId: number, role: UserRole) {
+  return encodeSession(buildSessionPayload(userId, role));
+}
+
+export function getSessionCookieOptions(expiresAt?: number) {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    ...(expiresAt ? { expires: new Date(expiresAt) } : {})
+  };
+}
+
 function decodeSession(value: string): SessionPayload | null {
   const [raw, signature] = value.split(".");
   if (!raw || !signature) {
@@ -58,20 +80,10 @@ function decodeSession(value: string): SessionPayload | null {
 }
 
 export async function createSession(userId: number, role: UserRole) {
-  const payload: SessionPayload = {
-    userId,
-    role,
-    expiresAt: Date.now() + 1000 * 60 * 60 * 24 * 7
-  };
+  const payload = buildSessionPayload(userId, role);
 
   const store = await cookies();
-  store.set(SESSION_COOKIE_NAME, encodeSession(payload), {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    expires: new Date(payload.expiresAt)
-  });
+  store.set(SESSION_COOKIE_NAME, encodeSession(payload), getSessionCookieOptions(payload.expiresAt));
 }
 
 export async function clearSession() {
