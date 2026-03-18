@@ -58,6 +58,9 @@ export function SiteNavClient() {
       <div className="inline-actions">
         {user ? (
           <>
+            <Link href="/profile" className="link-pill">
+              Profile
+            </Link>
             <span className="muted">{user.username ?? user.email}</span>
             <a href="/auth/logout" className="link-pill">
               Logout

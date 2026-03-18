@@ -809,6 +809,16 @@ button {
   font-size: 0.92rem;
 }
 
+.admin-settlement-input {
+  width: 96px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--text);
+  font: inherit;
+}
+
 .status {
   display: inline-flex;
   padding: 6px 10px;

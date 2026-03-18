@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { toggleUserSuspendedAction, updateUserRoleAction } from "@/app/actions";
+import { toggleUserSuspendedAction, updateUserRoleAction, updateUserSettlementQuantityAction } from "@/app/actions";
 import { getAccountActivityPageData, type RiskLevel } from "@/lib/admin/activity";
 import { requireAdmin } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/utils";
@@ -177,6 +177,7 @@ export default async function AdminActivityPage({
               <th>Logins 24h</th>
               <th>Last Login</th>
               <th>Last Seen</th>
+              <th>Settlement</th>
               <th>Access</th>
               <th>Actions</th>
             </tr>
@@ -193,6 +194,22 @@ export default async function AdminActivityPage({
                 <td>{user.logins24h}</td>
                 <td>{formatDateTime(user.lastLoginAt)}</td>
                 <td>{formatDateTime(user.lastSeenAt)}</td>
+                <td>
+                  <form action={updateUserSettlementQuantityAction} className="inline-actions">
+                    <input type="hidden" name="userId" value={user.id} />
+                    <input type="hidden" name="redirectTo" value={redirectTo} />
+                    <input
+                      type="number"
+                      name="settlementQuantity"
+                      min={0}
+                      defaultValue={user.settlementQuantity}
+                      className="admin-settlement-input"
+                    />
+                    <button type="submit" className="link-pill">
+                      Save
+                    </button>
+                  </form>
+                </td>
                 <td>
                   {user.role === "ADMIN" ? (
                     <span className="muted">Admin fixed</span>

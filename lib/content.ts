@@ -572,7 +572,7 @@ export async function getAdminContentById(id: number) {
 export async function saveContent(
   input: unknown,
   contentId?: number,
-  options?: { reviewStatusOverride?: ReviewStatus; reviewHandledByUserId?: number }
+  options?: { reviewStatusOverride?: ReviewStatus; reviewHandledByUserId?: number; passHandledByUserId?: number }
 ) {
   const parsed = contentSchema.safeParse(input);
   if (!parsed.success) {
@@ -647,24 +647,44 @@ export async function saveContent(
     nextReviewStatus === ReviewStatus.UNVERIFIED
       ? {
           editedByUserId: null,
-          editedAt: null
+          editedAt: null,
+          passedByUserId: null,
+          passedAt: null
         }
       : nextReviewStatus === ReviewStatus.EDITED
         ? {
             editedByUserId: options?.reviewHandledByUserId ?? null,
-            editedAt: new Date()
+            editedAt: new Date(),
+            passedByUserId: null,
+            passedAt: null
           }
+        : nextReviewStatus === ReviewStatus.PASSED
+          ? {
+              passedByUserId: options?.passHandledByUserId ?? null,
+              passedAt: new Date()
+            }
         : {};
 
   const editedTrackingCreate =
     nextReviewStatus === ReviewStatus.EDITED
       ? {
           editedByUserId: options?.reviewHandledByUserId ?? null,
-          editedAt: new Date()
+          editedAt: new Date(),
+          passedByUserId: null,
+          passedAt: null
         }
+      : nextReviewStatus === ReviewStatus.PASSED
+        ? {
+            editedByUserId: null,
+            editedAt: null,
+            passedByUserId: options?.passHandledByUserId ?? null,
+            passedAt: new Date()
+          }
       : {
           editedByUserId: null,
-          editedAt: null
+          editedAt: null,
+          passedByUserId: null,
+          passedAt: null
         };
 
   try {

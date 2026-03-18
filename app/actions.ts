@@ -99,7 +99,8 @@ export async function updateContentAction(contentId: number, formData: FormData)
     contentId,
     {
       reviewStatusOverride,
-      reviewHandledByUserId: reviewStatusOverride === ReviewStatus.EDITED ? staff.id : undefined
+      reviewHandledByUserId: reviewStatusOverride === ReviewStatus.EDITED ? staff.id : undefined,
+      passHandledByUserId: reviewStatusOverride === ReviewStatus.PASSED ? staff.id : undefined
     }
   );
 
@@ -184,13 +185,22 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
       ...(nextStatus === ReviewStatus.UNVERIFIED
         ? {
             editedByUserId: null,
-            editedAt: null
+            editedAt: null,
+            passedByUserId: null,
+            passedAt: null
           }
         : nextStatus === ReviewStatus.EDITED
           ? {
               editedByUserId: staff.id,
-              editedAt: new Date()
+              editedAt: new Date(),
+              passedByUserId: null,
+              passedAt: null
             }
+          : nextStatus === ReviewStatus.PASSED
+            ? {
+                passedByUserId: staff.id,
+                passedAt: new Date()
+              }
           : {})
     }
   });
@@ -269,4 +279,30 @@ export async function updateUserRoleAction(formData: FormData) {
   });
 
   redirectWithMessage(redirectTo, "success", nextRole === UserRole.AUDIT ? "User promoted to audit" : "User set to member");
+}
+
+export async function updateUserSettlementQuantityAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const userId = Number(formData.get("userId"));
+  const redirectTo = String(formData.get("redirectTo") || "/admin/activity");
+  const nextValueRaw = String(formData.get("settlementQuantity") || "").trim();
+  const nextValue = Number(nextValueRaw);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    redirectWithMessage("/admin/activity", "error", "Invalid user id");
+  }
+
+  if (!Number.isInteger(nextValue) || nextValue < 0) {
+    redirectWithMessage(redirectTo, "error", "Settlement Quantity must be a non-negative integer");
+  }
+
+  await db.user.update({
+    where: { id: userId },
+    data: {
+      settlementQuantity: nextValue
+    }
+  });
+
+  redirectWithMessage(redirectTo, "success", "Settlement Quantity updated");
 }

@@ -45,11 +45,13 @@ model User {
   loginCount          Int       @default(0) @map("login_count")
   isSuspended         Boolean   @default(false) @map("is_suspended")
   suspendedAt         DateTime? @map("suspended_at")
+  settlementQuantity  Int       @default(0) @map("settlement_quantity")
   role                UserRole  @default(MEMBER)
   createdAt           DateTime  @default(now()) @map("created_at")
   updatedAt           DateTime  @updatedAt @map("updated_at")
   loginEvents         UserLoginEvent[]
   editedContents      Content[] @relation("ContentEditedBy")
+  passedContents      Content[] @relation("ContentPassedBy")
 
   @@map("users")
 }
@@ -75,12 +77,15 @@ model Content {
   reviewStatus  ReviewStatus          @default(UNVERIFIED) @map("review_status")
   editedByUserId Int?                 @map("edited_by_user_id")
   editedAt      DateTime?             @map("edited_at")
+  passedByUserId Int?                 @map("passed_by_user_id")
+  passedAt      DateTime?             @map("passed_at")
   viewCount     Int                   @default(0) @map("view_count")
   lastViewedAt  DateTime?             @map("last_viewed_at")
   publishStatus PublishStatus         @default(DRAFT) @map("publish_status")
   createdAt     DateTime              @default(now()) @map("created_at")
   updatedAt     DateTime              @updatedAt @map("updated_at")
   editedBy      User?                 @relation("ContentEditedBy", fields: [editedByUserId], references: [id], onDelete: SetNull)
+  passedBy      User?                 @relation("ContentPassedBy", fields: [passedByUserId], references: [id], onDelete: SetNull)
   images        ContentImage[]
   downloadLinks ContentDownloadLink[]
   contentTags   ContentTag[]

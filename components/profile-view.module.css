@@ -1,0 +1,206 @@
+.previewPanel {
+  display: grid;
+  gap: 22px;
+  overflow: hidden;
+}
+
+.previewHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+  gap: 20px;
+  align-items: stretch;
+}
+
+.previewHeaderCopy {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.previewTitle {
+  margin: 0;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1.05;
+}
+
+.previewMeta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.roleBadge,
+.statusBadge,
+.slotBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(117, 173, 222, 0.42);
+  background: rgba(255, 255, 255, 0.84);
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.statusBadge {
+  color: var(--text);
+}
+
+.identityCard,
+.block,
+.accountCard,
+.metricCard,
+.slotCard,
+.hiddenState {
+  border: 1px solid rgba(117, 173, 222, 0.34);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.identityCard {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+}
+
+.identityTop {
+  display: grid;
+  gap: 6px;
+}
+
+.identityTop small,
+.blockHeader small,
+.metricCard small,
+.slotCard p,
+.hiddenState span {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.identityList {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.identityItem {
+  display: grid;
+  gap: 4px;
+}
+
+.identityItem dt,
+.accountCard span,
+.metricCard span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.identityItem dd,
+.accountCard strong,
+.metricCard strong,
+.slotCard strong,
+.hiddenState strong {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.previewBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.92fr);
+  gap: 20px;
+}
+
+.bodyColumn {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.block {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+}
+
+.blockHeader {
+  display: grid;
+  gap: 6px;
+}
+
+.accountGrid,
+.metricGrid,
+.slotGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.accountGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.metricGrid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.slotGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.accountCard,
+.metricCard,
+.slotCard,
+.hiddenState {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+}
+
+.metricCardStrong {
+  border-color: rgba(63, 181, 255, 0.62);
+  box-shadow: 0 14px 28px rgba(63, 181, 255, 0.12);
+}
+
+.slotCard {
+  align-content: start;
+}
+
+.hiddenState {
+  min-height: 128px;
+  align-content: center;
+  justify-items: start;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(226, 242, 255, 0.34)),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(117, 173, 222, 0.06),
+      rgba(117, 173, 222, 0.06) 10px,
+      transparent 10px,
+      transparent 20px
+    );
+}
+
+.noteList {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+@media (max-width: 960px) {
+  .previewHeader,
+  .previewBody {
+    grid-template-columns: 1fr;
+  }
+
+  .slotGrid,
+  .accountGrid {
+    grid-template-columns: 1fr;
+  }
+}

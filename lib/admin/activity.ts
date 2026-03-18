@@ -12,6 +12,7 @@ export type AccountActivityRow = {
   username: string | null;
   email: string;
   role: UserRole;
+  settlementQuantity: number;
   loginCount: number;
   lastLoginAt: Date | null;
   lastSeenAt: Date | null;
@@ -58,6 +59,7 @@ function buildActivityRows(
     username: string | null;
     email: string;
     role: UserRole;
+    settlementQuantity: number;
     loginCount: number;
     lastLoginAt: Date | null;
     lastSeenAt: Date | null;
@@ -161,9 +163,10 @@ export async function getAccountActivityAnalytics(): Promise<AccountActivityAnal
         select: {
           id: true,
           username: true,
-          email: true,
-          role: true,
-          loginCount: true,
+      email: true,
+      role: true,
+      settlementQuantity: true,
+      loginCount: true,
           lastLoginAt: true,
           lastSeenAt: true,
           isSuspended: true,
@@ -227,6 +230,7 @@ export async function getAccountActivityPageData(options?: { page?: number; page
         username: true,
         email: true,
         role: true,
+        settlementQuantity: true,
         loginCount: true,
         lastLoginAt: true,
         lastSeenAt: true,
