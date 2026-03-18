@@ -17,12 +17,14 @@ type ProfileViewProps = {
   title: string;
   role: "MEMBER" | "AUDIT" | "ADMIN";
   status: string;
-  identity: Array<{ label: string; value: string }>;
+  identity: Array<{ label: string; value: string; actionLabel?: string; actionHref?: string }>;
   metrics?: ProfileMetric[];
   slots: ProfileSlot[];
 };
 
 export function ProfileView({ eyebrow, title, role, status, identity, metrics, slots }: ProfileViewProps) {
+  const isMember = role === "MEMBER";
+
   return (
     <section className={`panel ${styles.previewPanel}`}>
       <div className={styles.previewHeader}>
@@ -37,7 +39,7 @@ export function ProfileView({ eyebrow, title, role, status, identity, metrics, s
         <div className={styles.identityCard}>
           <div className={styles.identityTop}>
             <strong>Profile Identity</strong>
-            <small>Keep the account record clear first. Avatar and social modules can come later.</small>
+            {isMember ? null : <small>Keep the account record clear first. Avatar and social modules can come later.</small>}
           </div>
           <dl className={styles.identityList}>
             {identity.map((item) => (
@@ -50,17 +52,24 @@ export function ProfileView({ eyebrow, title, role, status, identity, metrics, s
         </div>
       </div>
 
-      <div className={styles.previewBody}>
+      <div className={`${styles.previewBody} ${isMember ? styles.previewBodySingle : ""}`}>
         <div className={styles.bodyColumn}>
           <div className={styles.block}>
             <div className={styles.blockHeader}>
               <strong>Account Details</strong>
-              <small>Stable identity data that every signed-in account can see.</small>
+              {isMember ? null : <small>Stable identity data that every signed-in account can see.</small>}
             </div>
             <div className={styles.accountGrid}>
               {identity.map((item) => (
                 <div key={item.label} className={styles.accountCard}>
-                  <span>{item.label}</span>
+                  <div className={styles.accountCardHeader}>
+                    <span>{item.label}</span>
+                    {item.actionLabel && item.actionHref ? (
+                      <a href={item.actionHref} className="link-pill">
+                        {item.actionLabel}
+                      </a>
+                    ) : null}
+                  </div>
                   <strong>{item.value}</strong>
                 </div>
               ))}
@@ -86,49 +95,40 @@ export function ProfileView({ eyebrow, title, role, status, identity, metrics, s
                 ))}
               </div>
             </div>
-          ) : (
+          ) : null}
+        </div>
+
+        {isMember ? null : (
+          <div className={styles.bodyColumn}>
             <div className={styles.block}>
               <div className={styles.blockHeader}>
-                <strong>Staff Metrics</strong>
-                <small>Members stay focused on account identity only.</small>
+                <strong>Extension Slots</strong>
+                <small>Reserved modules for settlement, creator tools, billing, or future internal panels.</small>
               </div>
-              <div className={styles.hiddenState}>
-                <strong>Member View</strong>
-                <span>This role does not display Edited Count, Passed Count, or Settlement Quantity.</span>
+              <div className={styles.slotGrid}>
+                {slots.map((slot) => (
+                  <article key={slot.title} className={styles.slotCard}>
+                    <span className={styles.slotBadge}>Reserved</span>
+                    <strong>{slot.title}</strong>
+                    <p>{slot.description}</p>
+                  </article>
+                ))}
               </div>
             </div>
-          )}
-        </div>
 
-        <div className={styles.bodyColumn}>
-          <div className={styles.block}>
-            <div className={styles.blockHeader}>
-              <strong>Extension Slots</strong>
-              <small>Reserved modules for settlement, creator tools, billing, or future internal panels.</small>
-            </div>
-            <div className={styles.slotGrid}>
-              {slots.map((slot) => (
-                <article key={slot.title} className={styles.slotCard}>
-                  <span className={styles.slotBadge}>Reserved</span>
-                  <strong>{slot.title}</strong>
-                  <p>{slot.description}</p>
-                </article>
-              ))}
+            <div className={styles.block}>
+              <div className={styles.blockHeader}>
+                <strong>Scalability Notes</strong>
+                <small>This structure keeps future expansion cheap.</small>
+              </div>
+              <ul className={styles.noteList}>
+                <li>Identity, staff metrics, and extension slots are separated, so new features do not force a full page redesign.</li>
+                <li>Settlement Quantity is independent from Passed Count and can be adjusted by admin without touching moderation history.</li>
+                <li>Future creator tools can plug into reserved slots instead of crowding the account core.</li>
+              </ul>
             </div>
           </div>
-
-          <div className={styles.block}>
-            <div className={styles.blockHeader}>
-              <strong>Scalability Notes</strong>
-              <small>This structure keeps future expansion cheap.</small>
-            </div>
-            <ul className={styles.noteList}>
-              <li>Identity, staff metrics, and extension slots are separated, so new features do not force a full page redesign.</li>
-              <li>Settlement Quantity is independent from Passed Count and can be adjusted by admin without touching moderation history.</li>
-              <li>Future creator tools can plug into reserved slots instead of crowding the account core.</li>
-            </ul>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );

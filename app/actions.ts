@@ -2,10 +2,11 @@
 
 import { ReviewStatus, UserRole } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { requireAdmin, requireStaff } from "@/lib/auth/session";
+import { requireAdmin, requireStaff, requireUserWithoutTouch } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { saveContent } from "@/lib/content";
 import { saveTag } from "@/lib/tag";
+import { usernameSchema } from "@/lib/validation";
 
 function redirectWithMessage(path: string, type: "error" | "success", message: string): never {
   const params = new URLSearchParams({ [type]: message });
@@ -305,4 +306,62 @@ export async function updateUserSettlementQuantityAction(formData: FormData) {
   });
 
   redirectWithMessage(redirectTo, "success", "Settlement Quantity updated");
+}
+
+export async function updateProfileUsernameAction(formData: FormData) {
+  const user = await requireUserWithoutTouch();
+  const redirectTo = String(formData.get("redirectTo") || "/profile/username");
+  const nextUsernameRaw = formData.get("username");
+  const parsedUsername = usernameSchema.safeParse(nextUsernameRaw);
+
+  if (!parsedUsername.success) {
+    redirectWithMessage(redirectTo, "error", parsedUsername.error.issues[0]?.message ?? "Invalid username");
+  }
+
+  const nextUsername = parsedUsername.data;
+  const currentUser = await db.user.findUnique({
+    where: { id: user.id },
+    select: {
+      username: true,
+      usernameUpdatedAt: true
+    }
+  });
+
+  if (!currentUser) {
+    redirectWithMessage(redirectTo, "error", "User not found");
+  }
+
+  if (currentUser.username === nextUsername) {
+    redirectWithMessage(redirectTo, "success", "Username is already set to that value");
+  }
+
+  if (currentUser.usernameUpdatedAt) {
+    const nextAvailableAt = new Date(currentUser.usernameUpdatedAt.getTime() + 7 * 24 * 60 * 60 * 1000);
+    if (nextAvailableAt.getTime() > Date.now()) {
+      redirectWithMessage(
+        redirectTo,
+        "error",
+        `Username can only be changed once every 7 days. Next available: ${nextAvailableAt.toLocaleString("zh-TW")}`
+      );
+    }
+  }
+
+  const existingUser = await db.user.findUnique({
+    where: { username: nextUsername },
+    select: { id: true }
+  });
+
+  if (existingUser && existingUser.id !== user.id) {
+    redirectWithMessage(redirectTo, "error", "That username is already taken");
+  }
+
+  await db.user.update({
+    where: { id: user.id },
+    data: {
+      username: nextUsername,
+      usernameUpdatedAt: new Date()
+    }
+  });
+
+  redirectWithMessage(redirectTo, "success", "Username updated");
 }

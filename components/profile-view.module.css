@@ -99,6 +99,19 @@
   font-weight: 600;
 }
 
+.accountCardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.accountCardHeader :global(.link-pill) {
+  padding: 6px 12px;
+  font-size: 0.82rem;
+}
+
 .identityItem dd,
 .accountCard strong,
 .metricCard strong,
@@ -113,6 +126,10 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.92fr);
   gap: 20px;
+}
+
+.previewBodySingle {
+  grid-template-columns: 1fr;
 }
 
 .bodyColumn {

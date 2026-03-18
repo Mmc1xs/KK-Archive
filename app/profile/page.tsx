@@ -79,9 +79,14 @@ function buildProfileSlots(role: UserRole): ProfileSlot[] {
   ];
 }
 
-export default async function ProfilePage() {
+export default async function ProfilePage({
+  searchParams
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const sessionUser = await requireUserWithoutTouch();
   const profile = await getProfileData(sessionUser.id);
+  await searchParams;
 
   if (!profile) {
     notFound();
@@ -95,7 +100,12 @@ export default async function ProfilePage() {
         role={profile.user.role}
         status={profile.user.isSuspended ? "Suspended" : "Active"}
         identity={[
-          { label: "Username", value: profile.user.username ?? "Not set" },
+          {
+            label: "Username",
+            value: profile.user.username ?? "Not set",
+            actionLabel: "Change",
+            actionHref: "/profile/username"
+          },
           { label: "Email", value: profile.user.email },
           { label: "Joined At", value: formatDateTime(profile.user.createdAt) },
           { label: "Account Status", value: profile.user.isSuspended ? "Suspended" : "Normal" }
