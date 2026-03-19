@@ -1,4 +1,13 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import {
+  AbortMultipartUploadCommand,
+  CompleteMultipartUploadCommand,
+  CreateMultipartUploadCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+  UploadPartCommand
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 function requireEnv(name: string) {
   const value = process.env[name];
@@ -36,4 +45,128 @@ export function createR2Client() {
 export function buildR2PublicUrl(key: string) {
   const { publicBaseUrl } = getR2Config();
   return `${publicBaseUrl}/${key}`;
+}
+
+export async function createR2MultipartUpload(params: {
+  key: string;
+  contentType: string;
+}) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+
+  const result = await client.send(
+    new CreateMultipartUploadCommand({
+      Bucket: bucketName,
+      Key: params.key,
+      ContentType: params.contentType
+    })
+  );
+
+  if (!result.UploadId) {
+    throw new Error("Failed to create multipart upload");
+  }
+
+  return result.UploadId;
+}
+
+export async function createR2SingleUploadUrl(params: {
+  key: string;
+  contentType: string;
+}) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+
+  return getSignedUrl(
+    client,
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: params.key,
+      ContentType: params.contentType
+    }),
+    { expiresIn: 60 * 15 }
+  );
+}
+
+export async function createR2MultipartPartUploadUrl(params: {
+  key: string;
+  uploadId: string;
+  partNumber: number;
+}) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+
+  return getSignedUrl(
+    client,
+    new UploadPartCommand({
+      Bucket: bucketName,
+      Key: params.key,
+      UploadId: params.uploadId,
+      PartNumber: params.partNumber
+    }),
+    { expiresIn: 60 * 15 }
+  );
+}
+
+export async function completeR2MultipartUpload(params: {
+  key: string;
+  uploadId: string;
+  parts: Array<{ ETag: string; PartNumber: number }>;
+}) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+
+  await client.send(
+    new CompleteMultipartUploadCommand({
+      Bucket: bucketName,
+      Key: params.key,
+      UploadId: params.uploadId,
+      MultipartUpload: {
+        Parts: params.parts
+      }
+    })
+  );
+}
+
+export async function abortR2MultipartUpload(params: {
+  key: string;
+  uploadId: string;
+}) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+
+  await client.send(
+    new AbortMultipartUploadCommand({
+      Bucket: bucketName,
+      Key: params.key,
+      UploadId: params.uploadId
+    })
+  );
+}
+
+function sanitizeDispositionFileName(fileName: string) {
+  return fileName.replace(/["\\\r\n]/g, "_");
+}
+
+export async function createR2DownloadUrl(params: {
+  key: string;
+  fileName?: string;
+  expiresInSeconds?: number;
+}) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+  const expiresIn = params.expiresInSeconds ?? 60 * 5;
+
+  return getSignedUrl(
+    client,
+    new GetObjectCommand({
+      Bucket: bucketName,
+      Key: params.key,
+      ...(params.fileName
+        ? {
+            ResponseContentDisposition: `attachment; filename="${sanitizeDispositionFileName(params.fileName)}"`
+          }
+        : {})
+    }),
+    { expiresIn }
+  );
 }

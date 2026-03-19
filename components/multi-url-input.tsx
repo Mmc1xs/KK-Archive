@@ -18,6 +18,30 @@ export function MultiUrlInput({ label, name, placeholder, initialUrls = [] }: Mu
     setUrls(initialUrls);
   }, [initialUrls]);
 
+  useEffect(() => {
+    function handleExternalLink(event: Event) {
+      const customEvent = event as CustomEvent<{ url?: string }>;
+      const next = customEvent.detail?.url?.trim();
+      if (!next) {
+        return;
+      }
+
+      try {
+        new URL(next);
+      } catch {
+        return;
+      }
+
+      setUrls((current) => (current.includes(next) ? current : [...current, next]));
+      setError("");
+    }
+
+    window.addEventListener("kkd:add-download-link", handleExternalLink as EventListener);
+    return () => {
+      window.removeEventListener("kkd:add-download-link", handleExternalLink as EventListener);
+    };
+  }, []);
+
   function tryAddUrl(raw: string) {
     const next = raw.trim();
     if (!next) {

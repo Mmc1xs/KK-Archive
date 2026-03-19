@@ -1,0 +1,35 @@
+{
+  "mode": "group",
+  "anchor_message_id": 20321,
+  "grouped_id": 13968160298803533,
+  "message_ids": [
+    20321,
+    20322,
+    20323,
+    20324,
+    20325
+  ],
+  "downloaded": [
+    {
+      "message_id": 20321,
+      "path": "output\\20321\\001_20321.jpg"
+    },
+    {
+      "message_id": 20322,
+      "path": "output\\20321\\002_20322.jpg"
+    },
+    {
+      "message_id": 20323,
+      "path": "output\\20321\\003_20323.jpg"
+    },
+    {
+      "message_id": 20324,
+      "path": "output\\20321\\004_20324.jpg"
+    },
+    {
+      "message_id": 20325,
+      "path": "output\\20321\\005_20325.jpg"
+    }
+  ],
+  "text": "#碧蓝航线\nhttps://www.pixiv.net/users/57918015\n卡片下载\n⭐️频道tips  ⭐ 标签导航"
+}

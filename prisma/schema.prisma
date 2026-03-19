@@ -24,6 +24,7 @@ enum PublishStatus {
   DRAFT
   SUMMIT
   PUBLISHED
+  INVISIBLE
 }
 
 enum TagType {
@@ -52,7 +53,10 @@ model User {
   updatedAt           DateTime  @updatedAt @map("updated_at")
   loginEvents         UserLoginEvent[]
   editedContents      Content[] @relation("ContentEditedBy")
+  firstEditedContents Content[] @relation("ContentFirstEditedBy")
   passedContents      Content[] @relation("ContentPassedBy")
+  staffUploads        StaffUpload[] @relation("StaffUploadUploader")
+  uploadedHostedFiles ContentFile[] @relation("ContentFileUploadedBy")
 
   @@map("users")
 }
@@ -73,11 +77,14 @@ model Content {
   slug          String                @unique
   description   String
   coverImageUrl String                @map("cover_image_url")
+  storageFolder String?               @map("storage_folder")
   sourceLink    String?               @map("source_link")
   isVerified    Boolean               @default(false) @map("is_verified")
   reviewStatus  ReviewStatus          @default(UNVERIFIED) @map("review_status")
   editedByUserId Int?                 @map("edited_by_user_id")
   editedAt      DateTime?             @map("edited_at")
+  firstEditedByUserId Int?            @map("first_edited_by_user_id")
+  firstEditedAt DateTime?             @map("first_edited_at")
   passedByUserId Int?                 @map("passed_by_user_id")
   passedAt      DateTime?             @map("passed_at")
   viewCount     Int                   @default(0) @map("view_count")
@@ -86,9 +93,12 @@ model Content {
   createdAt     DateTime              @default(now()) @map("created_at")
   updatedAt     DateTime              @updatedAt @map("updated_at")
   editedBy      User?                 @relation("ContentEditedBy", fields: [editedByUserId], references: [id], onDelete: SetNull)
+  firstEditedBy User?                 @relation("ContentFirstEditedBy", fields: [firstEditedByUserId], references: [id], onDelete: SetNull)
   passedBy      User?                 @relation("ContentPassedBy", fields: [passedByUserId], references: [id], onDelete: SetNull)
   images        ContentImage[]
   downloadLinks ContentDownloadLink[]
+  hostedFiles   ContentFile[]
+  staffUploads  StaffUpload[]
   contentTags   ContentTag[]
 
   @@map("contents")
@@ -114,6 +124,63 @@ model ContentDownloadLink {
   content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
   @@map("content_download_links")
+}
+
+enum StaffUploadStatus {
+  PENDING
+  UPLOADING
+  COMPLETED
+  FAILED
+  ABORTED
+}
+
+enum StaffUploadMethod {
+  SINGLE
+  MULTIPART
+}
+
+model StaffUpload {
+  id               Int               @id @default(autoincrement())
+  contentId        Int               @map("content_id")
+  uploaderId       Int               @map("uploader_id")
+  originalFileName String            @map("original_file_name")
+  objectKey        String            @map("object_key")
+  mimeType         String            @map("mime_type")
+  byteSize         Int               @map("byte_size")
+  uploadMethod     StaffUploadMethod @map("upload_method")
+  status           StaffUploadStatus @default(PENDING)
+  r2UploadId       String?           @map("r2_upload_id")
+  errorMessage     String?           @map("error_message")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  completedAt      DateTime?         @map("completed_at")
+  content          Content           @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  uploader         User              @relation("StaffUploadUploader", fields: [uploaderId], references: [id], onDelete: Restrict)
+  file             ContentFile?
+
+  @@index([contentId, status])
+  @@index([uploaderId, createdAt])
+  @@map("staff_uploads")
+}
+
+model ContentFile {
+  id               Int         @id @default(autoincrement())
+  contentId        Int         @map("content_id")
+  staffUploadId    Int?        @unique @map("staff_upload_id")
+  fileName         String      @map("file_name")
+  objectKey        String      @map("object_key")
+  mimeType         String      @map("mime_type")
+  byteSize         Int         @map("byte_size")
+  sortOrder        Int         @default(0) @map("sort_order")
+  uploadedByUserId Int         @map("uploaded_by_user_id")
+  createdAt        DateTime    @default(now()) @map("created_at")
+  content          Content     @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  staffUpload      StaffUpload? @relation(fields: [staffUploadId], references: [id], onDelete: SetNull)
+  uploadedBy       User        @relation("ContentFileUploadedBy", fields: [uploadedByUserId], references: [id], onDelete: Restrict)
+
+  @@index([contentId, sortOrder])
+  @@index([uploadedByUserId, createdAt])
+  @@map("content_files")
 }
 
 model Tag {

@@ -24,6 +24,7 @@ enum PublishStatus {
   DRAFT
   SUMMIT
   PUBLISHED
+  INVISIBLE
 }
 
 enum TagType {
@@ -52,6 +53,7 @@ model User {
   updatedAt           DateTime  @updatedAt @map("updated_at")
   loginEvents         UserLoginEvent[]
   editedContents      Content[] @relation("ContentEditedBy")
+  firstEditedContents Content[] @relation("ContentFirstEditedBy")
   passedContents      Content[] @relation("ContentPassedBy")
 
   @@map("users")
@@ -78,6 +80,8 @@ model Content {
   reviewStatus  ReviewStatus          @default(UNVERIFIED) @map("review_status")
   editedByUserId Int?                 @map("edited_by_user_id")
   editedAt      DateTime?             @map("edited_at")
+  firstEditedByUserId Int?            @map("first_edited_by_user_id")
+  firstEditedAt DateTime?             @map("first_edited_at")
   passedByUserId Int?                 @map("passed_by_user_id")
   passedAt      DateTime?             @map("passed_at")
   viewCount     Int                   @default(0) @map("view_count")
@@ -86,6 +90,7 @@ model Content {
   createdAt     DateTime              @default(now()) @map("created_at")
   updatedAt     DateTime              @updatedAt @map("updated_at")
   editedBy      User?                 @relation("ContentEditedBy", fields: [editedByUserId], references: [id], onDelete: SetNull)
+  firstEditedBy User?                 @relation("ContentFirstEditedBy", fields: [firstEditedByUserId], references: [id], onDelete: SetNull)
   passedBy      User?                 @relation("ContentPassedBy", fields: [passedByUserId], references: [id], onDelete: SetNull)
   images        ContentImage[]
   downloadLinks ContentDownloadLink[]

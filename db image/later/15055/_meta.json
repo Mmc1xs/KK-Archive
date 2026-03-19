@@ -1,0 +1,40 @@
+{
+  "mode": "group",
+  "anchor_message_id": 15055,
+  "grouped_id": 13891429131507133,
+  "message_ids": [
+    15055,
+    15056,
+    15057,
+    15058,
+    15059,
+    15060
+  ],
+  "downloaded": [
+    {
+      "message_id": 15055,
+      "path": "output\\15055\\001_15055.jpg"
+    },
+    {
+      "message_id": 15056,
+      "path": "output\\15055\\002_15056.jpg"
+    },
+    {
+      "message_id": 15057,
+      "path": "output\\15055\\003_15057.jpg"
+    },
+    {
+      "message_id": 15058,
+      "path": "output\\15055\\004_15058.jpg"
+    },
+    {
+      "message_id": 15059,
+      "path": "output\\15055\\005_15059.jpg"
+    },
+    {
+      "message_id": 15060,
+      "path": "output\\15055\\006_15060.jpg"
+    }
+  ],
+  "text": "#付费卡\nhttps://www.pixiv.net/users/57971320\n卡片下载"
+}

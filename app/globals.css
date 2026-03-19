@@ -752,7 +752,7 @@ button {
 
 .admin-contents-review-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(132px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
   gap: 12px;
 }
 
@@ -843,6 +843,11 @@ button {
 .status-verified {
   background: #dff2e5;
   color: #2f6e42;
+}
+
+.status-invisible {
+  background: #e7ecf2;
+  color: #4d5d72;
 }
 
 .admin-risk-high {
@@ -955,6 +960,138 @@ button {
   gap: 16px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.download-links-editor {
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(248, 252, 255, 0.86);
+}
+
+.download-link-row {
+  display: grid;
+  gap: 8px;
+}
+
+.download-link-row label {
+  font-weight: 700;
+}
+
+.download-link-readonly {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--muted);
+}
+
+.hosted-files-panel {
+  display: grid;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(248, 252, 255, 0.86);
+}
+
+.hosted-files-header {
+  align-items: start;
+}
+
+.hosted-files-header span {
+  display: block;
+  font-weight: 700;
+}
+
+.hosted-files-header small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.hosted-files-header code {
+  font-size: 0.92em;
+}
+
+.hosted-file-list {
+  display: grid;
+  gap: 12px;
+}
+
+.hosted-files-manager {
+  display: grid;
+  gap: 12px;
+}
+
+.hosted-files-toolbar {
+  align-items: start;
+  gap: 16px;
+}
+
+.hosted-files-toolbar strong {
+  display: block;
+}
+
+.hosted-files-toolbar small {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.hosted-file-upload-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.hidden-file-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.hosted-upload-progress {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.hosted-upload-progress small {
+  color: var(--muted);
+}
+
+.hosted-upload-progress-bar {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(117, 173, 222, 0.16);
+}
+
+.hosted-upload-progress-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), #2f86d6);
+  transition: width 0.2s ease;
+}
+
+.hosted-file-card {
+  display: grid;
+  gap: 4px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.hosted-file-card small {
+  color: var(--muted);
 }
 
 .tag-picker {

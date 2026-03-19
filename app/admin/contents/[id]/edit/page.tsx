@@ -38,11 +38,13 @@ export default async function EditContentPage({
           slug: content.slug,
           description: content.description,
           coverImageUrl: content.coverImageUrl,
+          storageFolder: content.storageFolder,
           sourceLink: content.sourceLink,
           reviewStatus: content.reviewStatus,
           publishStatus: content.publishStatus,
           images: content.images,
           downloadLinks: content.downloadLinks,
+          hostedFiles: content.hostedFiles,
           contentTags: content.contentTags
         }}
         role={staff.role}

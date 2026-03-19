@@ -4,6 +4,7 @@ import { ReviewStatus } from "@prisma/client";
 import { TagLinks } from "@/components/tag-links";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getBrowsableContentBySlug, recordContentView } from "@/lib/content";
+import { buildR2PublicUrl } from "@/lib/storage/r2";
 
 function getReviewStatusMeta(reviewStatus: ReviewStatus) {
   switch (reviewStatus) {
@@ -13,6 +14,15 @@ function getReviewStatusMeta(reviewStatus: ReviewStatus) {
       return { label: "Passed", className: "status status-passed" };
     default:
       return { label: "Unverified", className: "status status-unverified" };
+  }
+}
+
+function isTelegramUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname === "t.me" || parsed.hostname === "telegram.me" || parsed.hostname.endsWith(".t.me");
+  } catch {
+    return false;
   }
 }
 
@@ -38,6 +48,13 @@ export default async function ContentDetailPage({
   const galleryImages = content.images.slice(1);
   const isStaff = user?.role === "ADMIN" || user?.role === "AUDIT";
   const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus);
+  const hostedInternalLinkByPublicUrl = new Map(
+    content.hostedFiles.map((file) => [buildR2PublicUrl(file.objectKey), `/api/downloads/content-file/${file.id}`])
+  );
+  const hostedInternalLinkSet = new Set(content.hostedFiles.map((file) => `/api/downloads/content-file/${file.id}`));
+  const normalizedDownloadLinks = content.downloadLinks.map((link) => hostedInternalLinkByPublicUrl.get(link.url) ?? link.url);
+  const tgDownloadLink = normalizedDownloadLinks.find((url) => isTelegramUrl(url));
+  const siteDownloadLink = normalizedDownloadLinks.find((url) => hostedInternalLinkSet.has(url));
 
   return (
     <div className="page-section grid">
@@ -90,15 +107,20 @@ export default async function ContentDetailPage({
               </div>
             </section>
           ) : null}
-          {content.downloadLinks.length ? (
+          {tgDownloadLink || siteDownloadLink ? (
             <section className="tag-section">
               <strong>Download Links</strong>
-              <div className="grid">
-                {content.downloadLinks.map((link) => (
-                  <a key={link.id} href={link.url} target="_blank" rel="noreferrer" className="link-pill">
-                    {link.url}
+              <div className="tag-group">
+                {tgDownloadLink ? (
+                  <a href={tgDownloadLink} target="_blank" rel="noreferrer" className="link-pill">
+                    Telegram Download
                   </a>
-                ))}
+                ) : null}
+                {siteDownloadLink ? (
+                  <a href={siteDownloadLink} target="_blank" rel="noreferrer" className="link-pill">
+                    Website Download
+                  </a>
+                ) : null}
               </div>
             </section>
           ) : null}

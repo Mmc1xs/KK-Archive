@@ -38,7 +38,11 @@ function buildPagination(totalPages: number, currentPage: number) {
   return items;
 }
 
-function buildAdminContentsHref(review: "all" | "unverified" | "edited" | "passed", page: number, pageSize: number) {
+function buildAdminContentsHref(
+  review: "all" | "unverified" | "edited" | "passed",
+  page: number,
+  pageSize: number
+) {
   const params = new URLSearchParams();
 
   if (review !== "all") {
@@ -159,7 +163,7 @@ export default async function AdminContentsPage({
       {success ? <div className="notice">{success}</div> : null}
       {error ? <div className="notice">{error}</div> : null}
       <div className="split">
-        <p className="muted">Status rules: `PUBLISHED` is public, `SUMMIT` is visible to logged-in users, and `DRAFT` stays in admin only.</p>
+        <p className="muted">Status rules: `PUBLISHED` is public, `SUMMIT` is visible to logged-in users, `DRAFT` stays admin-only, and `INVISIBLE` is hidden from all frontend pages.</p>
         <div className="status">{`Page ${currentPage} / ${totalPages} - ${totalCount} posts`}</div>
       </div>
       <table className="table">
@@ -170,12 +174,14 @@ export default async function AdminContentsPage({
             <th>Status</th>
             <th>Review</th>
             <th>Actions</th>
-            <th>Edited By</th>
+            <th>First Edited By</th>
           </tr>
         </thead>
         <tbody>
           {contents.map((content) => {
             const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus);
+            const displayEditedBy = content.firstEditedBy ?? content.editedBy;
+            const displayEditedAt = content.firstEditedAt ?? content.editedAt;
 
             return (
               <tr key={content.id}>
@@ -203,10 +209,10 @@ export default async function AdminContentsPage({
                   </div>
                 </td>
                 <td>
-                  {content.editedBy ? (
+                  {displayEditedBy ? (
                     <div>
-                      <strong>{content.editedBy.username ?? content.editedBy.email}</strong>
-                      {content.editedAt ? <div className="muted">{content.editedAt.toLocaleDateString("zh-TW")}</div> : null}
+                      <strong>{displayEditedBy.username ?? displayEditedBy.email}</strong>
+                      {displayEditedAt ? <div className="muted">{displayEditedAt.toLocaleDateString("zh-TW")}</div> : null}
                     </div>
                   ) : (
                     <span className="muted">-</span>

@@ -30,7 +30,7 @@ export async function getProfileData(userId: number) {
   const [editedCount, passedCount] = await Promise.all([
     db.content.count({
       where: {
-        editedByUserId: user.id
+        firstEditedByUserId: user.id
       }
     }),
     user.role === UserRole.ADMIN

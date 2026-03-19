@@ -1,6 +1,7 @@
 import { PublishStatus, ReviewStatus, TagType } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
+import { buildR2PublicUrl } from "@/lib/storage/r2";
 import { contentSchema } from "@/lib/validation";
 import { revalidateTag } from "next/cache";
 
@@ -69,7 +70,9 @@ function getVisibleStatuses(isLoggedIn: boolean) {
 const getCachedHomepageContents = unstable_cache(
   async () =>
     db.content.findMany({
-      where: { publishStatus: PublishStatus.PUBLISHED },
+      where: {
+        publishStatus: PublishStatus.PUBLISHED
+      },
       orderBy: { createdAt: "desc" },
       take: 8,
       include: {
@@ -271,6 +274,14 @@ export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolea
       }
     },
     include: {
+      hostedFiles: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        select: {
+          id: true,
+          fileName: true,
+          objectKey: true
+        }
+      },
       images: {
         orderBy: { sortOrder: "asc" }
       },
@@ -511,7 +522,16 @@ export async function getAdminContentsPage(options?: {
         slug: true,
         publishStatus: true,
         reviewStatus: true,
+        firstEditedAt: true,
         editedAt: true,
+        firstEditedBy: {
+          select: {
+            id: true,
+            username: true,
+            email: true,
+            role: true
+          }
+        },
         editedBy: {
           select: {
             id: true,
@@ -554,6 +574,19 @@ export async function getAdminContentById(id: number) {
   return db.content.findUnique({
     where: { id },
     include: {
+      hostedFiles: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+        include: {
+          uploadedBy: {
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              role: true
+            }
+          }
+        }
+      },
       images: {
         orderBy: { sortOrder: "asc" }
       },
@@ -641,27 +674,64 @@ export async function saveContent(
   }
 
   const tagIds = [...authorTagIds, ...styleTagIds, ...usageTagIds, ...data.typeTagIds];
+  const normalizedManualDownloadLinks = [...new Set(data.downloadLinks.map((url) => url.trim()).filter(Boolean))];
+  let mergedDownloadLinks = normalizedManualDownloadLinks;
+  const existingContentForTracking = contentId
+    ? await db.content.findUnique({
+        where: { id: contentId },
+        select: {
+          firstEditedByUserId: true,
+          firstEditedAt: true
+        }
+      })
+    : null;
+
+  if (contentId) {
+    const hostedFiles = await db.contentFile.findMany({
+      where: { contentId },
+      select: { id: true, objectKey: true }
+    });
+
+    if (hostedFiles.length) {
+      const hostedDownloadLinks = hostedFiles.map((file) => `/api/downloads/content-file/${file.id}`);
+      const legacyHostedDownloadLinks = new Set(hostedFiles.map((file) => buildR2PublicUrl(file.objectKey)));
+      const manualLinks = normalizedManualDownloadLinks.filter((url) => !legacyHostedDownloadLinks.has(url));
+      mergedDownloadLinks = [...new Set([...manualLinks, ...hostedDownloadLinks])];
+    }
+  }
 
   const nextReviewStatus = options?.reviewStatusOverride ?? data.reviewStatus;
+  const now = new Date();
+  const shouldSetFirstEdited =
+    nextReviewStatus === ReviewStatus.EDITED &&
+    Boolean(options?.reviewHandledByUserId) &&
+    !existingContentForTracking?.firstEditedByUserId;
+
   const editedTrackingUpdate =
     nextReviewStatus === ReviewStatus.UNVERIFIED
       ? {
           editedByUserId: null,
           editedAt: null,
+          firstEditedByUserId: null,
+          firstEditedAt: null,
           passedByUserId: null,
           passedAt: null
         }
       : nextReviewStatus === ReviewStatus.EDITED
         ? {
             editedByUserId: options?.reviewHandledByUserId ?? null,
-            editedAt: new Date(),
+            editedAt: now,
+            firstEditedByUserId: shouldSetFirstEdited
+              ? options?.reviewHandledByUserId ?? null
+              : (existingContentForTracking?.firstEditedByUserId ?? null),
+            firstEditedAt: shouldSetFirstEdited ? now : (existingContentForTracking?.firstEditedAt ?? null),
             passedByUserId: null,
             passedAt: null
           }
         : nextReviewStatus === ReviewStatus.PASSED
           ? {
               passedByUserId: options?.passHandledByUserId ?? null,
-              passedAt: new Date()
+              passedAt: now
             }
         : {};
 
@@ -669,20 +739,26 @@ export async function saveContent(
     nextReviewStatus === ReviewStatus.EDITED
       ? {
           editedByUserId: options?.reviewHandledByUserId ?? null,
-          editedAt: new Date(),
+          editedAt: now,
+          firstEditedByUserId: options?.reviewHandledByUserId ?? null,
+          firstEditedAt: now,
           passedByUserId: null,
           passedAt: null
         }
       : nextReviewStatus === ReviewStatus.PASSED
         ? {
-            editedByUserId: null,
-            editedAt: null,
-            passedByUserId: options?.passHandledByUserId ?? null,
-            passedAt: new Date()
+          editedByUserId: null,
+          editedAt: null,
+          firstEditedByUserId: null,
+          firstEditedAt: null,
+          passedByUserId: options?.passHandledByUserId ?? null,
+          passedAt: now
           }
       : {
           editedByUserId: null,
           editedAt: null,
+          firstEditedByUserId: null,
+          firstEditedAt: null,
           passedByUserId: null,
           passedAt: null
         };
@@ -715,7 +791,7 @@ export async function saveContent(
         },
         downloadLinks: {
           deleteMany: {},
-          create: data.downloadLinks.map((url, index) => ({
+          create: mergedDownloadLinks.map((url, index) => ({
             url,
             sortOrder: index
           }))
@@ -743,7 +819,7 @@ export async function saveContent(
           }))
         },
         downloadLinks: {
-          create: data.downloadLinks.map((url, index) => ({
+          create: mergedDownloadLinks.map((url, index) => ({
             url,
             sortOrder: index
           }))
