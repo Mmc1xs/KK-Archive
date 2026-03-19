@@ -1,7 +1,10 @@
 import { UserRole } from "@prisma/client";
 import { createContentAction, transitionContentReviewStatusAction, updateContentAction } from "@/app/actions";
-import { MultiUrlInput } from "@/components/multi-url-input";
+import { DownloadLinksEditor } from "@/components/admin/download-links-editor";
+import { HostedFileUploader } from "@/components/admin/hosted-file-uploader";
 import { TagAutocomplete } from "@/components/tag-autocomplete";
+import { buildR2PublicUrl } from "@/lib/storage/r2";
+import { resolveContentStorageFolderValue } from "@/lib/uploads";
 
 type TagOption = {
   id: number;
@@ -25,11 +28,26 @@ type ContentFormProps = {
     slug: string;
     description: string;
     coverImageUrl: string;
+    storageFolder?: string | null;
     sourceLink: string | null;
     reviewStatus: "UNVERIFIED" | "EDITED" | "PASSED";
-    publishStatus: "DRAFT" | "SUMMIT" | "PUBLISHED";
+    publishStatus: "DRAFT" | "SUMMIT" | "PUBLISHED" | "INVISIBLE";
     images: Array<{ imageUrl: string }>;
     downloadLinks: Array<{ url: string }>;
+    hostedFiles: Array<{
+      id: number;
+      fileName: string;
+      objectKey: string;
+      mimeType: string;
+      byteSize: number;
+      createdAt: Date;
+      uploadedBy: {
+        id: number;
+        username: string | null;
+        email: string;
+        role: UserRole;
+      };
+    }>;
     contentTags: Array<{ tag: { id: number; type: string } }>;
   };
 };
@@ -57,6 +75,15 @@ function getReviewStatusMeta(reviewStatus: "UNVERIFIED" | "EDITED" | "PASSED") {
   }
 }
 
+function isTelegramUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    return parsed.hostname === "t.me" || parsed.hostname === "telegram.me" || parsed.hostname.endsWith(".t.me");
+  } catch {
+    return false;
+  }
+}
+
 export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }: ContentFormProps) {
   const action =
     mode === "create"
@@ -68,8 +95,18 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
   const styleIds = new Set(content?.contentTags.filter((item) => item.tag.type === "STYLE").map((item) => item.tag.id) ?? []);
   const usageIds = new Set(content?.contentTags.filter((item) => item.tag.type === "USAGE").map((item) => item.tag.id) ?? []);
   const typeIds = new Set(content?.contentTags.filter((item) => item.tag.type === "TYPE").map((item) => item.tag.id) ?? []);
-  const downloadLinks = content?.downloadLinks.map((item) => item.url) ?? [];
+  const hostedLegacyDownloadLinks = new Set(
+    content?.hostedFiles.map((item) => buildR2PublicUrl(item.objectKey)) ?? []
+  );
+  const hostedDownloadLinks = content?.hostedFiles.map((item) => `/api/downloads/content-file/${item.id}`) ?? [];
+  const hostedDownloadLinkSet = new Set(hostedDownloadLinks);
+  const manualDownloadLinks =
+    content?.downloadLinks
+      .map((item) => item.url)
+      .filter((url) => !hostedLegacyDownloadLinks.has(url) && !hostedDownloadLinkSet.has(url)) ?? [];
+  const telegramDownloadLink = manualDownloadLinks.find(isTelegramUrl) ?? manualDownloadLinks[0] ?? "";
   const imageUrls = content?.images.length ? content.images.map((image) => image.imageUrl) : ["", "", ""];
+  const storageFolder = content ? resolveContentStorageFolderValue(content) : "";
   while (imageUrls.length < 3) {
     imageUrls.push("");
   }
@@ -128,6 +165,7 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
             <option value="DRAFT">Draft</option>
             <option value="SUMMIT">Summit</option>
             <option value="PUBLISHED">Published</option>
+            <option value="INVISIBLE">Invisible (Hidden)</option>
           </select>
         </div>
         <TagAutocomplete
@@ -189,12 +227,29 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
             ))}
           </div>
         </div>
-        <MultiUrlInput
-          label="Download Links"
-          name="downloadLinks"
-          placeholder="Paste a download link and press Enter"
-          initialUrls={downloadLinks}
+        <DownloadLinksEditor
+          initialTelegramLink={telegramDownloadLink}
+          initialHostedLinks={hostedDownloadLinks}
         />
+        {mode === "edit" && content ? (
+          <div className="field hosted-files-panel">
+            <div className="split hosted-files-header">
+              <div>
+                <span>Hosted Files</span>
+                <small>
+                  Staff-managed shared files will live under <code>{`uploadfiles/${storageFolder}/{YYYY:MM:DD}/`}</code> in R2.
+                </small>
+              </div>
+              <div className="status status-passed">{content.hostedFiles.length} file(s)</div>
+            </div>
+            <HostedFileUploader
+              contentId={content.id}
+              role={role}
+              storageFolder={storageFolder}
+              initialFiles={content.hostedFiles}
+            />
+          </div>
+        ) : null}
         {mode === "create" ? (
           <button type="submit">Create Content</button>
         ) : (

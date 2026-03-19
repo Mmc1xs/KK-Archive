@@ -9,8 +9,10 @@ import { saveTag } from "@/lib/tag";
 import { usernameSchema } from "@/lib/validation";
 
 function redirectWithMessage(path: string, type: "error" | "success", message: string): never {
+  const safePath = path.startsWith("/") && !path.startsWith("//") ? path : "/";
   const params = new URLSearchParams({ [type]: message });
-  redirect(`${path}?${params.toString()}`);
+  const separator = safePath.includes("?") ? "&" : "?";
+  redirect(`${safePath}${separator}${params.toString()}`);
 }
 
 export async function registerAction() {
@@ -77,7 +79,9 @@ export async function updateContentAction(contentId: number, formData: FormData)
     redirectWithMessage("/admin/contents", "error", "Content not found");
   }
   const reviewStatusOverride =
-    staff.role === "ADMIN" && reviewAction === "passed" ? ReviewStatus.PASSED : ReviewStatus.EDITED;
+    staff.role === "ADMIN" && reviewAction === "passed"
+      ? ReviewStatus.PASSED
+      : ReviewStatus.EDITED;
 
   const result = await saveContent(
     {
@@ -155,7 +159,10 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
 
   const content = await db.content.findUnique({
     where: { id: contentId },
-    select: { reviewStatus: true }
+    select: {
+      reviewStatus: true,
+      firstEditedByUserId: true
+    }
   });
 
   if (!content) {
@@ -178,6 +185,7 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
     redirectWithMessage(redirectTo, "error", "You do not have permission to apply that review status");
   }
 
+  const now = new Date();
   await db.content.update({
     where: { id: contentId },
     data: {
@@ -187,20 +195,28 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
         ? {
             editedByUserId: null,
             editedAt: null,
+            firstEditedByUserId: null,
+            firstEditedAt: null,
             passedByUserId: null,
             passedAt: null
           }
         : nextStatus === ReviewStatus.EDITED
           ? {
               editedByUserId: staff.id,
-              editedAt: new Date(),
+              editedAt: now,
+              ...(!content.firstEditedByUserId
+                ? {
+                    firstEditedByUserId: staff.id,
+                    firstEditedAt: now
+                  }
+                : {}),
               passedByUserId: null,
               passedAt: null
             }
           : nextStatus === ReviewStatus.PASSED
             ? {
                 passedByUserId: staff.id,
-                passedAt: new Date()
+                passedAt: now
               }
           : {})
     }
