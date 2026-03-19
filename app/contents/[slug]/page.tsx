@@ -4,6 +4,7 @@ import { ReviewStatus } from "@prisma/client";
 import { TagLinks } from "@/components/tag-links";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getBrowsableContentBySlug, recordContentView } from "@/lib/content";
+import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 
 function getReviewStatusMeta(reviewStatus: ReviewStatus) {
@@ -49,10 +50,15 @@ export default async function ContentDetailPage({
   const isStaff = user?.role === "ADMIN" || user?.role === "AUDIT";
   const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus);
   const hostedInternalLinkByPublicUrl = new Map(
-    content.hostedFiles.map((file) => [buildR2PublicUrl(file.objectKey), `/api/downloads/content-file/${file.id}`])
+    content.hostedFiles.map((file) => [buildR2PublicUrl(file.objectKey), buildContentFileDownloadPath(file.id)])
   );
-  const hostedInternalLinkSet = new Set(content.hostedFiles.map((file) => `/api/downloads/content-file/${file.id}`));
-  const normalizedDownloadLinks = content.downloadLinks.map((link) => hostedInternalLinkByPublicUrl.get(link.url) ?? link.url);
+  const hostedInternalLinkByLegacyPath = new Map(
+    content.hostedFiles.map((file) => [buildLegacyContentFileDownloadPath(file.id), buildContentFileDownloadPath(file.id)])
+  );
+  const hostedInternalLinkSet = new Set(content.hostedFiles.map((file) => buildContentFileDownloadPath(file.id)));
+  const normalizedDownloadLinks = content.downloadLinks.map(
+    (link) => hostedInternalLinkByPublicUrl.get(link.url) ?? hostedInternalLinkByLegacyPath.get(link.url) ?? link.url
+  );
   const tgDownloadLink = normalizedDownloadLinks.find((url) => isTelegramUrl(url));
   const siteDownloadLink = normalizedDownloadLinks.find((url) => hostedInternalLinkSet.has(url));
 

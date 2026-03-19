@@ -1,6 +1,7 @@
 import { PublishStatus, ReviewStatus, TagType } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
+import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 import { contentSchema } from "@/lib/validation";
 import { revalidateTag } from "next/cache";
@@ -693,8 +694,11 @@ export async function saveContent(
     });
 
     if (hostedFiles.length) {
-      const hostedDownloadLinks = hostedFiles.map((file) => `/api/downloads/content-file/${file.id}`);
-      const legacyHostedDownloadLinks = new Set(hostedFiles.map((file) => buildR2PublicUrl(file.objectKey)));
+      const hostedDownloadLinks = hostedFiles.map((file) => buildContentFileDownloadPath(file.id));
+      const legacyHostedDownloadLinks = new Set([
+        ...hostedFiles.map((file) => buildR2PublicUrl(file.objectKey)),
+        ...hostedFiles.map((file) => buildLegacyContentFileDownloadPath(file.id))
+      ]);
       const manualLinks = normalizedManualDownloadLinks.filter((url) => !legacyHostedDownloadLinks.has(url));
       mergedDownloadLinks = [...new Set([...manualLinks, ...hostedDownloadLinks])];
     }
@@ -840,7 +844,7 @@ export async function saveContent(
       throw new Error("Each content item must have exactly one author tag.");
     }
 
-    revalidateTag("tags");
+    revalidateTag("tags", "max");
 
     return { ok: true as const, contentId: content.id };
   } catch (error) {

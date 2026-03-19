@@ -88,7 +88,7 @@ export async function saveTag(input: unknown) {
     await db.tag.create({
       data: parsed.data
     });
-    revalidateTag("tags");
+    revalidateTag("tags", "max");
     return { ok: true as const };
   } catch {
     return { ok: false as const, error: "Failed to create tag. Slug or name may already exist." };

@@ -1,8 +1,7 @@
-import { PublishStatus, UserRole } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { createR2DownloadUrl } from "@/lib/storage/r2";
+import { buildContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 
 export async function GET(
   request: Request,
@@ -14,6 +13,11 @@ export async function GET(
     return NextResponse.redirect(loginUrl);
   }
 
+  const isStaff = user.role === "ADMIN" || user.role === "AUDIT";
+  if (!isStaff) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   const routeParams = await params;
   const fileId = Number(routeParams.fileId);
   if (!Number.isInteger(fileId) || fileId <= 0) {
@@ -22,36 +26,12 @@ export async function GET(
 
   const file = await db.contentFile.findUnique({
     where: { id: fileId },
-    select: {
-      id: true,
-      objectKey: true,
-      fileName: true,
-      content: {
-        select: {
-          publishStatus: true
-        }
-      }
-    }
+    select: { id: true }
   });
 
   if (!file) {
     return NextResponse.json({ error: "File not found" }, { status: 404 });
   }
 
-  const isStaff = user.role === UserRole.ADMIN || user.role === UserRole.AUDIT;
-  const canAccessByStatus =
-    file.content.publishStatus === PublishStatus.PUBLISHED ||
-    file.content.publishStatus === PublishStatus.SUMMIT;
-
-  if (!isStaff && !canAccessByStatus) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-
-  const signedDownloadUrl = await createR2DownloadUrl({
-    key: file.objectKey,
-    fileName: file.fileName
-  });
-
-  return NextResponse.redirect(signedDownloadUrl);
+  return NextResponse.redirect(new URL(buildContentFileDownloadPath(file.id), request.url), 307);
 }
-

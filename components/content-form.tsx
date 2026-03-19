@@ -3,6 +3,7 @@ import { createContentAction, transitionContentReviewStatusAction, updateContent
 import { DownloadLinksEditor } from "@/components/admin/download-links-editor";
 import { HostedFileUploader } from "@/components/admin/hosted-file-uploader";
 import { TagAutocomplete } from "@/components/tag-autocomplete";
+import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 import { resolveContentStorageFolderValue } from "@/lib/uploads";
 
@@ -95,15 +96,18 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
   const styleIds = new Set(content?.contentTags.filter((item) => item.tag.type === "STYLE").map((item) => item.tag.id) ?? []);
   const usageIds = new Set(content?.contentTags.filter((item) => item.tag.type === "USAGE").map((item) => item.tag.id) ?? []);
   const typeIds = new Set(content?.contentTags.filter((item) => item.tag.type === "TYPE").map((item) => item.tag.id) ?? []);
+  const hostedLegacyIdDownloadLinks = new Set(content?.hostedFiles.map((item) => buildLegacyContentFileDownloadPath(item.id)) ?? []);
   const hostedLegacyDownloadLinks = new Set(
     content?.hostedFiles.map((item) => buildR2PublicUrl(item.objectKey)) ?? []
   );
-  const hostedDownloadLinks = content?.hostedFiles.map((item) => `/api/downloads/content-file/${item.id}`) ?? [];
+  const hostedDownloadLinks = content?.hostedFiles.map((item) => buildContentFileDownloadPath(item.id)) ?? [];
   const hostedDownloadLinkSet = new Set(hostedDownloadLinks);
   const manualDownloadLinks =
     content?.downloadLinks
       .map((item) => item.url)
-      .filter((url) => !hostedLegacyDownloadLinks.has(url) && !hostedDownloadLinkSet.has(url)) ?? [];
+      .filter(
+        (url) => !hostedLegacyDownloadLinks.has(url) && !hostedLegacyIdDownloadLinks.has(url) && !hostedDownloadLinkSet.has(url)
+      ) ?? [];
   const telegramDownloadLink = manualDownloadLinks.find(isTelegramUrl) ?? manualDownloadLinks[0] ?? "";
   const imageUrls = content?.images.length ? content.images.map((image) => image.imageUrl) : ["", "", ""];
   const storageFolder = content ? resolveContentStorageFolderValue(content) : "";

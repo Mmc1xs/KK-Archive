@@ -13,6 +13,20 @@ type SessionPayload = {
 };
 
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+const AUTH_DEBUG_LOGS_ENABLED = process.env.NODE_ENV !== "production" || process.env.AUTH_DEBUG_LOGS === "1";
+
+function authDebugLog(message: string, details?: Record<string, unknown>) {
+  if (!AUTH_DEBUG_LOGS_ENABLED) {
+    return;
+  }
+
+  if (details) {
+    console.info(message, details);
+    return;
+  }
+
+  console.info(message);
+}
 
 function getSessionSecret() {
   const value = process.env.SESSION_SECRET;
@@ -113,22 +127,22 @@ export async function getCurrentSession(options?: SessionAccessOptions) {
   const store = await cookies();
   const value = store.get(SESSION_COOKIE_NAME)?.value;
   if (!value) {
-    console.warn("[auth] No session cookie present on request.");
+    authDebugLog("[auth] No session cookie present on request.");
     return null;
   }
 
-  console.info("[auth] Session cookie detected.", {
+  authDebugLog("[auth] Session cookie detected.", {
     cookieName: SESSION_COOKIE_NAME,
     valueLength: value.length
   });
 
   const payload = decodeSession(value);
   if (!payload) {
-    console.warn("[auth] Session cookie could not be decoded.");
+    authDebugLog("[auth] Session cookie could not be decoded.");
     return null;
   }
 
-  console.info("[auth] Session payload decoded.", {
+  authDebugLog("[auth] Session payload decoded.", {
     userId: payload.userId,
     role: payload.role,
     expiresAt: payload.expiresAt
@@ -152,7 +166,7 @@ export async function getCurrentSession(options?: SessionAccessOptions) {
   }
 
   if (!user) {
-    console.warn("[auth] Session user not found in database.", { userId: payload.userId });
+    authDebugLog("[auth] Session user not found in database.", { userId: payload.userId });
     return null;
   }
 

@@ -62,9 +62,11 @@ export function SiteNavClient() {
               Profile
             </Link>
             <span className="muted">{user.username ?? user.email}</span>
-            <a href="/auth/logout" className="link-pill">
-              Logout
-            </a>
+            <form action="/auth/logout" method="post">
+              <button type="submit" className="link-pill">
+                Logout
+              </button>
+            </form>
           </>
         ) : loaded ? (
           <>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { StaffUploadMethod, StaffUploadStatus } from "@prisma/client";
 import { getCurrentSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl, completeR2MultipartUpload } from "@/lib/storage/r2";
 import { canAccessStaffUploadSession, canManageStaffUploads } from "@/lib/uploads";
 
@@ -144,8 +145,9 @@ export async function POST(
         }
       });
 
-  const hostedDownloadUrl = `/api/downloads/content-file/${hostedFile.id}`;
-  const legacyHostedDownloadUrl = buildR2PublicUrl(upload.objectKey);
+  const hostedDownloadUrl = buildContentFileDownloadPath(hostedFile.id);
+  const legacyHostedDownloadUrlById = buildLegacyContentFileDownloadPath(hostedFile.id);
+  const legacyHostedDownloadUrlByPublic = buildR2PublicUrl(upload.objectKey);
   const existingDownloadLink = await db.contentDownloadLink.findFirst({
     where: {
       contentId: upload.contentId,
@@ -156,12 +158,24 @@ export async function POST(
   const legacyDownloadLink = await db.contentDownloadLink.findFirst({
     where: {
       contentId: upload.contentId,
-      url: legacyHostedDownloadUrl
+      url: legacyHostedDownloadUrlByPublic
+    },
+    select: { id: true }
+  });
+  const legacyIdDownloadLink = await db.contentDownloadLink.findFirst({
+    where: {
+      contentId: upload.contentId,
+      url: legacyHostedDownloadUrlById
     },
     select: { id: true }
   });
 
-  if (!existingDownloadLink && legacyDownloadLink) {
+  if (!existingDownloadLink && legacyIdDownloadLink) {
+    await db.contentDownloadLink.update({
+      where: { id: legacyIdDownloadLink.id },
+      data: { url: hostedDownloadUrl }
+    });
+  } else if (!existingDownloadLink && legacyDownloadLink) {
     await db.contentDownloadLink.update({
       where: { id: legacyDownloadLink.id },
       data: { url: hostedDownloadUrl }
@@ -184,6 +198,15 @@ export async function POST(
       }
     });
   }
+
+  await db.contentDownloadLink.deleteMany({
+    where: {
+      contentId: upload.contentId,
+      url: {
+        in: [legacyHostedDownloadUrlById, legacyHostedDownloadUrlByPublic]
+      }
+    }
+  });
 
   await db.staffUpload.update({
     where: { id: upload.id },
