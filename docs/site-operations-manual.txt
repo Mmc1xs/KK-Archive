@@ -50,6 +50,19 @@ Notes:
 - sync:all is a short alias for clean:sync-all
 - database import happens in clean:import-new or clean:import-all
 
+Optional cleanup:
+
+If you want to quickly move folders that are still not uploaded/imported out of
+`db image/clean` into `db image/later`:
+
+1. Preview candidates:
+   npm run clean:move-unuploaded:later
+
+2. Apply move:
+   npm run clean:move-unuploaded:later:apply
+
+This avoids manual one-by-one checks.
+
 4. Open the website admin:
 
 - /admin
@@ -211,6 +224,8 @@ Content import:
 - npm run r2:upload-clean
 - npm run clean:post-json
 - npm run clean:post-json:new
+- npm run clean:move-unuploaded:later
+- npm run clean:move-unuploaded:later:apply
 
 Local dev:
 

@@ -172,3 +172,33 @@ Notes:
 - `sync:new` is a short alias for `clean:sync-new`.
 - `sync:all` is a short alias for `clean:sync-all`.
 - Database import happens in `clean:import-new` or `clean:import-all`.
+
+## Move Unuploaded Folders to `db image/later`
+
+If you do not want to manually inspect every clean folder, you can auto-move
+folders that are both:
+
+- not uploaded to R2 (no uploaded entry in `scripts/r2-upload-manifest.json`)
+- not imported into DB (no matching `https://t.me/Koikatunews/<folder>` download link)
+
+Dry-run preview (no file changes):
+
+```bash
+npm run clean:move-unuploaded:later
+```
+
+Apply move:
+
+```bash
+npm run clean:move-unuploaded:later:apply
+```
+
+The script moves matching folders from:
+
+- `db image/clean/<folder>`
+
+to:
+
+- `db image/later/<folder>`
+
+If the target folder name already exists in `later`, it appends a numeric suffix automatically.

@@ -32,6 +32,8 @@
     "clean:import-new": "tsx scripts/import-new-clean-posts.ts",
     "clean:sync-new": "tsx scripts/sync-new-clean-content.ts",
     "clean:sync-all": "tsx scripts/sync-all-clean-content.ts",
+    "clean:move-unuploaded:later": "tsx scripts/move-unuploaded-clean-to-later.ts",
+    "clean:move-unuploaded:later:apply": "tsx scripts/move-unuploaded-clean-to-later.ts --apply",
     "sync:new": "npm run clean:sync-new",
     "sync:all": "npm run clean:sync-all",
     "r2:upload-clean": "tsx scripts/upload-clean-to-r2.ts",
