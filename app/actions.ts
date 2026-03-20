@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { requireAdmin, requireStaff, requireUserWithoutTouch } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { saveContent } from "@/lib/content";
-import { saveTag } from "@/lib/tag";
+import { deleteTag, saveTag, updateTag } from "@/lib/tag";
 import { usernameSchema } from "@/lib/validation";
 
 function redirectWithMessage(path: string, type: "error" | "success", message: string): never {
@@ -130,6 +130,44 @@ export async function createTagAction(formData: FormData) {
   }
 
   redirect("/admin/tags?success=Tag created");
+}
+
+export async function updateTagAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const tagId = Number(formData.get("tagId"));
+  const redirectToRaw = String(formData.get("redirectTo") || "/admin/tags");
+  const redirectTo =
+    redirectToRaw.startsWith("/") && !redirectToRaw.startsWith("//") ? redirectToRaw : "/admin/tags";
+
+  const result = await updateTag({
+    tagId,
+    name: formData.get("name"),
+    slug: formData.get("slug")
+  });
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  redirectWithMessage("/admin/tags", "success", "Tag updated");
+}
+
+export async function deleteTagAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const tagId = Number(formData.get("tagId"));
+  const redirectToRaw = String(formData.get("redirectTo") || "/admin/tags");
+  const redirectTo =
+    redirectToRaw.startsWith("/") && !redirectToRaw.startsWith("//") ? redirectToRaw : "/admin/tags";
+
+  const result = await deleteTag(tagId);
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  redirectWithMessage("/admin/tags", "success", "Tag deleted");
 }
 
 export async function deleteContentAction(formData: FormData) {

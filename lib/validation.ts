@@ -82,6 +82,15 @@ export const tagSchema = z.object({
   type: z.nativeEnum(TagType)
 });
 
+export const updateTagSchema = z.object({
+  tagId: z.coerce.number().int().positive("Invalid tag id"),
+  name: z.string().min(1, "Name is required"),
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .regex(/^[a-z0-9-]+$/, "Slug may only contain lowercase letters, numbers, and hyphens")
+});
+
 export const contentSchema = z.object({
   title: z.string().min(1, "Title is required"),
   slug: z

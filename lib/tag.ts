@@ -1,7 +1,7 @@
 import { TagType } from "@prisma/client";
 import { revalidateTag, unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
-import { tagSchema } from "@/lib/validation";
+import { tagSchema, updateTagSchema } from "@/lib/validation";
 
 const FIXED_TYPE_TAGS = [
   { name: "Character card", slug: "type-character-card" },
@@ -26,12 +26,43 @@ export async function getAllTags() {
   return getCachedAllTags();
 }
 
+export async function getAdminTagsPage(options?: { page?: number; pageSize?: number }) {
+  await ensureFixedTypeTags();
+
+  const page = Number.isInteger(options?.page) && (options?.page ?? 0) > 0 ? (options?.page as number) : 1;
+  const pageSize =
+    Number.isInteger(options?.pageSize) && (options?.pageSize ?? 0) > 0 ? (options?.pageSize as number) : 50;
+
+  const [totalCount, items] = await Promise.all([
+    db.tag.count(),
+    db.tag.findMany({
+      orderBy: [{ type: "asc" }, { name: "asc" }],
+      skip: (page - 1) * pageSize,
+      take: pageSize
+    })
+  ]);
+
+  return {
+    items,
+    totalCount,
+    page,
+    pageSize,
+    totalPages: Math.max(1, Math.ceil(totalCount / pageSize))
+  };
+}
+
 export async function getTagOptions() {
   return getCachedTagOptions();
 }
 
 export async function getTagTypeOptions() {
   return getCachedTypeTags();
+}
+
+export async function getTagById(tagId: number) {
+  return db.tag.findUnique({
+    where: { id: tagId }
+  });
 }
 
 const getCachedAllTags = unstable_cache(
@@ -160,6 +191,91 @@ export async function saveTag(input: unknown) {
   } catch {
     return { ok: false as const, error: "Failed to create tag. Slug or name may already exist." };
   }
+}
+
+export async function updateTag(input: unknown) {
+  const parsed = updateTagSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false as const, error: parsed.error.errors[0]?.message ?? "Invalid tag data" };
+  }
+
+  const existingTag = await db.tag.findUnique({
+    where: { id: parsed.data.tagId }
+  });
+
+  if (!existingTag) {
+    return { ok: false as const, error: "Tag not found." };
+  }
+
+  if (existingTag.type === TagType.TYPE) {
+    return { ok: false as const, error: "Type tags are fixed and cannot be edited." };
+  }
+
+  if (existingTag.type !== TagType.AUTHOR) {
+    const duplicateName = await db.tag.findFirst({
+      where: {
+        id: { not: existingTag.id },
+        type: existingTag.type,
+        name: parsed.data.name
+      }
+    });
+    if (duplicateName) {
+      return { ok: false as const, error: "Style and usage tag names must stay unique." };
+    }
+  }
+
+  try {
+    await db.tag.update({
+      where: { id: existingTag.id },
+      data: {
+        name: parsed.data.name,
+        slug: parsed.data.slug
+      }
+    });
+    revalidateTag("tags", "max");
+    return { ok: true as const };
+  } catch {
+    return { ok: false as const, error: "Failed to update tag. Slug may already exist." };
+  }
+}
+
+export async function deleteTag(tagId: number) {
+  if (!Number.isInteger(tagId) || tagId <= 0) {
+    return { ok: false as const, error: "Invalid tag id" };
+  }
+
+  const tag = await db.tag.findUnique({
+    where: { id: tagId },
+    select: {
+      id: true,
+      type: true
+    }
+  });
+
+  if (!tag) {
+    return { ok: false as const, error: "Tag not found." };
+  }
+
+  if (tag.type === TagType.TYPE) {
+    return { ok: false as const, error: "Type tags are fixed and cannot be deleted." };
+  }
+
+  const usedCount = await db.contentTag.count({
+    where: {
+      tagId: tag.id
+    }
+  });
+
+  if (usedCount > 0) {
+    return { ok: false as const, error: "Tag is currently used by contents and cannot be deleted." };
+  }
+
+  await db.tag.delete({
+    where: { id: tag.id }
+  });
+
+  revalidateTag("tags", "max");
+  return { ok: true as const };
 }
 
 export function getFixedTypeTagNames() {
