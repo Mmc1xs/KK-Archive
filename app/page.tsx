@@ -72,10 +72,24 @@ export default async function HomePage() {
 
             <article className="hero-intel-card hero-intel-list">
               <div className="hero-intel-list-header">
-                <div className="eyebrow">Reserved Panel</div>
-                <span className="hero-intel-mini">Future Slot</span>
+                <div className="eyebrow">Future Roadmap</div>
               </div>
-              <div className="hero-placeholder" aria-hidden="true" />
+              <div className="hero-intel-list-items">
+                <article className="hero-intel-list-item">
+                  <span className="hero-intel-dot" aria-hidden="true" />
+                  <div>
+                    <strong>Mod Library</strong>
+                    <small>Add a dedicated mod library to support and extend the core card library workflow.</small>
+                  </div>
+                </article>
+                <article className="hero-intel-list-item">
+                  <span className="hero-intel-dot" aria-hidden="true" />
+                  <div>
+                    <strong>Post Likes</strong>
+                    <small>Add post likes so members can quickly signal useful content.</small>
+                  </div>
+                </article>
+              </div>
             </article>
 
             <article className="hero-intel-card">
