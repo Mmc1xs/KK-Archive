@@ -18,9 +18,6 @@ type ContentFormProps = {
   role?: UserRole;
   error?: string;
   tagOptions: {
-    authors: TagOption[];
-    styles: TagOption[];
-    usages: TagOption[];
     types: TagOption[];
   };
   content?: {
@@ -49,7 +46,7 @@ type ContentFormProps = {
         role: UserRole;
       };
     }>;
-    contentTags: Array<{ tag: { id: number; type: string } }>;
+    contentTags: Array<{ tag: { id: number; name: string; slug: string; type: string } }>;
   };
 };
 
@@ -92,9 +89,6 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
       : updateContentAction.bind(null, content!.id);
   const reviewStatusMeta = content ? getReviewStatusMeta(content.reviewStatus) : null;
 
-  const authorIds = new Set(content?.contentTags.filter((item) => item.tag.type === "AUTHOR").map((item) => item.tag.id) ?? []);
-  const styleIds = new Set(content?.contentTags.filter((item) => item.tag.type === "STYLE").map((item) => item.tag.id) ?? []);
-  const usageIds = new Set(content?.contentTags.filter((item) => item.tag.type === "USAGE").map((item) => item.tag.id) ?? []);
   const typeIds = new Set(content?.contentTags.filter((item) => item.tag.type === "TYPE").map((item) => item.tag.id) ?? []);
   const hostedLegacyIdDownloadLinks = new Set(content?.hostedFiles.map((item) => buildLegacyContentFileDownloadPath(item.id)) ?? []);
   const hostedLegacyDownloadLinks = new Set(
@@ -176,8 +170,9 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
           label="Author"
           idName="authorTagIds"
           newName="authorTagNames"
-          options={tagOptions.authors}
-          initialSelectedIds={[...authorIds]}
+          tagType="AUTHOR"
+          initialSelectedTags={content?.contentTags.filter((item) => item.tag.type === "AUTHOR").map((item) => item.tag) ?? []}
+          multiple={false}
           required
           placeholder="Search or create authors"
         />
@@ -185,16 +180,16 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
           label="Style"
           idName="styleTagIds"
           newName="styleTagNames"
-          options={tagOptions.styles}
-          initialSelectedIds={[...styleIds]}
+          tagType="STYLE"
+          initialSelectedTags={content?.contentTags.filter((item) => item.tag.type === "STYLE").map((item) => item.tag) ?? []}
           placeholder="Search or create styles"
         />
         <TagAutocomplete
           label="Usage"
           idName="usageTagIds"
           newName="usageTagNames"
-          options={tagOptions.usages}
-          initialSelectedIds={[...usageIds]}
+          tagType="USAGE"
+          initialSelectedTags={content?.contentTags.filter((item) => item.tag.type === "USAGE").map((item) => item.tag) ?? []}
           placeholder="Search or create usages"
         />
         <div className="field">

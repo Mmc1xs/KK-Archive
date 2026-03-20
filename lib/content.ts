@@ -1,4 +1,4 @@
-import { PublishStatus, ReviewStatus, TagType } from "@prisma/client";
+import { Prisma, PublishStatus, ReviewStatus, TagType } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
@@ -94,31 +94,33 @@ export async function getHomepageContents() {
 
 const getCachedHomepageOverviewStats = unstable_cache(
   async () => {
-    const totalPosts = await db.content.count({
-      where: {
-        publishStatus: PublishStatus.PUBLISHED
-      }
-    });
-    const indexedAuthors = await db.tag.count({
-      where: {
-        type: TagType.AUTHOR
-      }
-    });
-    const fileTypes = await db.tag.count({
-      where: {
-        type: TagType.TYPE
-      }
-    });
-    const styleTags = await db.tag.count({
-      where: {
-        type: TagType.STYLE
-      }
-    });
-    const usageTags = await db.tag.count({
-      where: {
-        type: TagType.USAGE
-      }
-    });
+    const [totalPosts, indexedAuthors, fileTypes, styleTags, usageTags] = await Promise.all([
+      db.content.count({
+        where: {
+          publishStatus: PublishStatus.PUBLISHED
+        }
+      }),
+      db.tag.count({
+        where: {
+          type: TagType.AUTHOR
+        }
+      }),
+      db.tag.count({
+        where: {
+          type: TagType.TYPE
+        }
+      }),
+      db.tag.count({
+        where: {
+          type: TagType.STYLE
+        }
+      }),
+      db.tag.count({
+        where: {
+          type: TagType.USAGE
+        }
+      })
+    ]);
 
     return {
       totalPosts,
@@ -309,6 +311,75 @@ export async function getSearchFilters() {
   };
 }
 
+type SearchFilterBootstrapOptions = {
+  author?: string;
+  styles?: string[];
+  usages?: string[];
+};
+
+function normalizeSearchFilterSlugs(values?: string[]) {
+  return [...new Set((values ?? []).map((value) => value.trim()).filter(Boolean))];
+}
+
+const getCachedSearchTypeFilters = unstable_cache(
+  async () =>
+    db.tag.findMany({
+      where: {
+        type: TagType.TYPE
+      },
+      orderBy: [{ name: "asc" }]
+    }),
+  ["search-type-filters"],
+  { revalidate: 300, tags: ["tags"] }
+);
+
+export async function getSearchFilterBootstrap(options: SearchFilterBootstrapOptions) {
+  const authorSlug = options.author?.trim();
+  const styleSlugs = normalizeSearchFilterSlugs(options.styles);
+  const usageSlugs = normalizeSearchFilterSlugs(options.usages);
+
+  const [types, selectedAuthor, selectedStyles, selectedUsages] = await Promise.all([
+    getCachedSearchTypeFilters(),
+    authorSlug
+      ? db.tag.findFirst({
+          where: {
+            type: TagType.AUTHOR,
+            slug: authorSlug
+          }
+        })
+      : Promise.resolve(null),
+    styleSlugs.length
+      ? db.tag.findMany({
+          where: {
+            type: TagType.STYLE,
+            slug: {
+              in: styleSlugs
+            }
+          },
+          orderBy: [{ name: "asc" }]
+        })
+      : Promise.resolve([]),
+    usageSlugs.length
+      ? db.tag.findMany({
+          where: {
+            type: TagType.USAGE,
+            slug: {
+              in: usageSlugs
+            }
+          },
+          orderBy: [{ name: "asc" }]
+        })
+      : Promise.resolve([])
+  ]);
+
+  return {
+    types,
+    selectedAuthor,
+    selectedStyles,
+    selectedUsages
+  };
+}
+
 const getCachedSearchFilters = unstable_cache(
   async () =>
     db.tag.findMany({
@@ -318,94 +389,42 @@ const getCachedSearchFilters = unstable_cache(
   { revalidate: 300 }
 );
 
-const getCachedPublicSearchResults = unstable_cache(
-  async (author?: string, styles?: string[], usages?: string[], types?: string[]) => {
-    const styleSlugs = styles?.filter(Boolean) ?? [];
-    const usageSlugs = usages?.filter(Boolean) ?? [];
-    const typeSlugs = types?.filter(Boolean) ?? [];
-    const andConditions = [
-      ...styleSlugs.map((slug) => ({
-        contentTags: {
-          some: {
-            tag: {
-              slug,
-              type: TagType.STYLE
-            }
-          }
-        }
-      })),
-      ...usageSlugs.map((slug) => ({
-        contentTags: {
-          some: {
-            tag: {
-              slug,
-              type: TagType.USAGE
-            }
-          }
-        }
-      })),
-      ...typeSlugs.map((slug) => ({
-        contentTags: {
-          some: {
-            tag: {
-              slug,
-              type: TagType.TYPE
-            }
-          }
-        }
-      }))
-    ];
-
-    return db.content.findMany({
-      where: {
-        publishStatus: {
-          in: [PublishStatus.PUBLISHED]
-        },
-        ...(author
-          ? {
-              contentTags: {
-                some: {
-                  tag: {
-                    slug: author,
-                    type: TagType.AUTHOR
-                  }
-                }
-              }
-            }
-          : {}),
-        ...(andConditions.length
-          ? {
-              AND: andConditions
-            }
-          : {})
-      },
-      orderBy: { createdAt: "desc" },
-      include: {
-        contentTags: {
-          include: { tag: true }
-        }
-      }
-    });
-  },
-  ["public-search-results"],
-  { revalidate: 120 }
-);
-
-export async function searchPublishedContents(filters: {
-  isLoggedIn: boolean;
+type SearchContentFilters = {
   author?: string;
   styles?: string[];
   usages?: string[];
   types?: string[];
-}) {
-  if (!filters.isLoggedIn) {
-    return getCachedPublicSearchResults(filters.author, filters.styles, filters.usages, filters.types);
-  }
+};
 
-  const styleSlugs = filters.styles?.filter(Boolean) ?? [];
-  const usageSlugs = filters.usages?.filter(Boolean) ?? [];
-  const typeSlugs = filters.types?.filter(Boolean) ?? [];
-  const andConditions = [
+const SEARCH_RESULTS_SELECT = {
+  id: true,
+  title: true,
+  slug: true,
+  description: true,
+  coverImageUrl: true,
+  reviewStatus: true,
+  contentTags: {
+    select: {
+      tag: {
+        select: {
+          name: true,
+          type: true,
+          slug: true
+        }
+      }
+    }
+  }
+} satisfies Prisma.ContentSelect;
+
+function normalizeSearchSlugs(values?: string[]) {
+  return [...new Set((values ?? []).map((value) => value.trim()).filter(Boolean))].sort();
+}
+
+function buildSearchWhere(isLoggedIn: boolean, filters: SearchContentFilters): Prisma.ContentWhereInput {
+  const styleSlugs = normalizeSearchSlugs(filters.styles);
+  const usageSlugs = normalizeSearchSlugs(filters.usages);
+  const typeSlugs = normalizeSearchSlugs(filters.types);
+  const andConditions: Prisma.ContentWhereInput[] = [
     ...styleSlugs.map((slug) => ({
       contentTags: {
         some: {
@@ -438,36 +457,101 @@ export async function searchPublishedContents(filters: {
     }))
   ];
 
-  return db.content.findMany({
-    where: {
-      publishStatus: {
-        in: getVisibleStatuses(filters.isLoggedIn)
-      },
-      ...(filters.author
-        ? {
-            contentTags: {
-              some: {
-                tag: {
-                  slug: filters.author,
-                  type: TagType.AUTHOR
-                }
+  const authorSlug = filters.author?.trim();
+
+  return {
+    publishStatus: {
+      in: getVisibleStatuses(isLoggedIn)
+    },
+    ...(authorSlug
+      ? {
+          contentTags: {
+            some: {
+              tag: {
+                slug: authorSlug,
+                type: TagType.AUTHOR
               }
             }
           }
-        : {}),
-      ...(andConditions.length
-        ? {
-            AND: andConditions
-          }
-        : {})
-    },
-    orderBy: { createdAt: "desc" },
-    include: {
-      contentTags: {
-        include: { tag: true }
-      }
-    }
-  });
+        }
+      : {}),
+    ...(andConditions.length ? { AND: andConditions } : {})
+  };
+}
+
+const getCachedPublicSearchResults = unstable_cache(
+  async (author?: string, styles?: string[], usages?: string[], types?: string[], safePage = 1, safePageSize = 24) => {
+    const where = buildSearchWhere(false, { author, styles, usages, types });
+
+    const [totalCount, items] = await Promise.all([
+      db.content.count({ where }),
+      db.content.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (safePage - 1) * safePageSize,
+        take: safePageSize,
+        select: SEARCH_RESULTS_SELECT
+      })
+    ]);
+
+    return {
+      items,
+      totalCount,
+      page: safePage,
+      pageSize: safePageSize,
+      totalPages: Math.max(1, Math.ceil(totalCount / safePageSize))
+    };
+  },
+  ["public-search-results"],
+  { revalidate: 120 }
+);
+
+export async function searchPublishedContents(filters: {
+  isLoggedIn: boolean;
+  author?: string;
+  styles?: string[];
+  usages?: string[];
+  types?: string[];
+  page?: number;
+  pageSize?: number;
+}) {
+  const safePage = Number.isInteger(filters.page) && (filters.page ?? 0) > 0 ? (filters.page as number) : 1;
+  const safePageSize = Number.isInteger(filters.pageSize) && (filters.pageSize ?? 0) > 0 ? (filters.pageSize as number) : 24;
+  const normalizedAuthor = filters.author?.trim();
+  const normalizedStyles = normalizeSearchSlugs(filters.styles);
+  const normalizedUsages = normalizeSearchSlugs(filters.usages);
+  const normalizedTypes = normalizeSearchSlugs(filters.types);
+
+  if (!filters.isLoggedIn) {
+    return getCachedPublicSearchResults(
+      normalizedAuthor,
+      normalizedStyles,
+      normalizedUsages,
+      normalizedTypes,
+      safePage,
+      safePageSize
+    );
+  }
+
+  const where = buildSearchWhere(filters.isLoggedIn, filters);
+  const [totalCount, items] = await Promise.all([
+    db.content.count({ where }),
+    db.content.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+      select: SEARCH_RESULTS_SELECT
+    })
+  ]);
+
+  return {
+    items,
+    totalCount,
+    page: safePage,
+    pageSize: safePageSize,
+    totalPages: Math.max(1, Math.ceil(totalCount / safePageSize))
+  };
 }
 
 export async function getAdminContents(filter?: { reviewStatus?: "all" | "unverified" | "edited" | "passed" }) {

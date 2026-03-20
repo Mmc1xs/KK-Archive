@@ -9,15 +9,44 @@ type SearchTagOption = {
 };
 
 type SearchFiltersProps = {
-  authors: SearchTagOption[];
-  styles: SearchTagOption[];
-  usages: SearchTagOption[];
   types: SearchTagOption[];
-  initialAuthor?: string;
-  initialStyles: string[];
-  initialUsages: string[];
+  initialAuthor?: SearchTagOption | null;
+  initialStyles: SearchTagOption[];
+  initialUsages: SearchTagOption[];
   initialTypes: string[];
 };
+
+type SearchableTagType = "AUTHOR" | "STYLE" | "USAGE";
+
+const MAX_SELECTED_STYLES = 8;
+const SUGGESTION_LIMIT = 12;
+const SEARCH_DEBOUNCE_MS = 180;
+
+async function fetchTagSuggestions(options: {
+  type: SearchableTagType;
+  query: string;
+  excludeSlugs?: string[];
+}) {
+  const params = new URLSearchParams({
+    type: options.type,
+    q: options.query,
+    limit: String(SUGGESTION_LIMIT)
+  });
+
+  (options.excludeSlugs ?? []).forEach((slug) => params.append("exclude", slug));
+
+  const response = await fetch(`/api/tags/search?${params.toString()}`, {
+    credentials: "same-origin",
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = (await response.json()) as { items?: SearchTagOption[] };
+  return data.items ?? [];
+}
 
 function SearchToggleGroup({
   label,
@@ -60,36 +89,71 @@ function SearchToggleGroup({
 }
 
 export function SearchFilters({
-  authors,
-  styles,
-  usages,
   types,
-  initialAuthor,
+  initialAuthor = null,
   initialStyles,
   initialUsages,
   initialTypes
 }: SearchFiltersProps) {
-  const [selectedAuthor, setSelectedAuthor] = useState<SearchTagOption | null>(null);
-  const [authorQuery, setAuthorQuery] = useState("");
+  const [selectedAuthor, setSelectedAuthor] = useState<SearchTagOption | null>(initialAuthor);
+  const [authorQuery, setAuthorQuery] = useState(initialAuthor?.name ?? "");
+  const [authorOptions, setAuthorOptions] = useState<SearchTagOption[]>([]);
   const [authorOpen, setAuthorOpen] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState(0);
-  const [selectedStyles, setSelectedStyles] = useState(initialStyles);
-  const [selectedUsages, setSelectedUsages] = useState(initialUsages);
+  const [authorLoading, setAuthorLoading] = useState(false);
+  const [authorHighlight, setAuthorHighlight] = useState(0);
+
+  const [selectedStyles, setSelectedStyles] = useState<SearchTagOption[]>(initialStyles);
+  const [styleQuery, setStyleQuery] = useState("");
+  const [styleOptions, setStyleOptions] = useState<SearchTagOption[]>([]);
+  const [styleOpen, setStyleOpen] = useState(false);
+  const [styleLoading, setStyleLoading] = useState(false);
+  const [styleHighlight, setStyleHighlight] = useState(0);
+
+  const [selectedUsages, setSelectedUsages] = useState<SearchTagOption[]>(initialUsages);
+  const [usageQuery, setUsageQuery] = useState("");
+  const [usageOptions, setUsageOptions] = useState<SearchTagOption[]>([]);
+  const [usageOpen, setUsageOpen] = useState(false);
+  const [usageLoading, setUsageLoading] = useState(false);
+  const [usageHighlight, setUsageHighlight] = useState(0);
+
   const [selectedTypes, setSelectedTypes] = useState(initialTypes);
-  const [styleExpanded, setStyleExpanded] = useState(true);
-  const [usageExpanded, setUsageExpanded] = useState(true);
+
   const authorRef = useRef<HTMLDivElement>(null);
+  const styleRef = useRef<HTMLDivElement>(null);
+  const usageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const initial = authors.find((author) => author.slug === initialAuthor) ?? null;
-    setSelectedAuthor(initial);
-    setAuthorQuery(initial?.name ?? "");
-  }, [authors, initialAuthor]);
+    const styleKey = initialStyles.map((item) => item.slug).sort().join("|");
+    const usageKey = initialUsages.map((item) => item.slug).sort().join("|");
+    setSelectedAuthor(initialAuthor);
+    setAuthorQuery(initialAuthor?.name ?? "");
+    setSelectedStyles(initialStyles);
+    setSelectedUsages(initialUsages);
+    setSelectedTypes(initialTypes);
+    return () => {
+      void styleKey;
+      void usageKey;
+    };
+  }, [
+    initialAuthor?.id,
+    initialAuthor?.slug,
+    initialAuthor?.name,
+    initialStyles,
+    initialUsages,
+    initialTypes
+  ]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
-      if (!authorRef.current?.contains(event.target as Node)) {
+      const node = event.target as Node;
+      if (!authorRef.current?.contains(node)) {
         setAuthorOpen(false);
+      }
+      if (!styleRef.current?.contains(node)) {
+        setStyleOpen(false);
+      }
+      if (!usageRef.current?.contains(node)) {
+        setUsageOpen(false);
       }
     }
 
@@ -97,51 +161,105 @@ export function SearchFilters({
     return () => document.removeEventListener("mousedown", handlePointerDown);
   }, []);
 
-  const filteredAuthors = useMemo(() => {
-    const normalized = authorQuery.trim().toLowerCase();
-
-    return authors.filter((author) => {
-      if (!normalized) {
-        return true;
-      }
-
-      return author.name.toLowerCase().includes(normalized) || author.slug.toLowerCase().includes(normalized);
-    });
-  }, [authorQuery, authors]);
+  const selectedStyleSlugs = useMemo(() => selectedStyles.map((item) => item.slug), [selectedStyles]);
+  const selectedUsageSlugs = useMemo(() => selectedUsages.map((item) => item.slug), [selectedUsages]);
 
   useEffect(() => {
-    setHighlightedIndex(0);
-  }, [authorQuery]);
+    if (!authorOpen) {
+      return;
+    }
+
+    let active = true;
+    const timer = setTimeout(async () => {
+      setAuthorLoading(true);
+      const items = await fetchTagSuggestions({
+        type: "AUTHOR",
+        query: authorQuery
+      });
+      if (active) {
+        setAuthorOptions(items);
+        setAuthorHighlight(0);
+        setAuthorLoading(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [authorOpen, authorQuery]);
+
+  useEffect(() => {
+    if (!styleOpen) {
+      return;
+    }
+
+    let active = true;
+    const timer = setTimeout(async () => {
+      setStyleLoading(true);
+      const items = await fetchTagSuggestions({
+        type: "STYLE",
+        query: styleQuery,
+        excludeSlugs: selectedStyleSlugs
+      });
+      if (active) {
+        setStyleOptions(items);
+        setStyleHighlight(0);
+        setStyleLoading(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [styleOpen, styleQuery, selectedStyleSlugs]);
+
+  useEffect(() => {
+    if (!usageOpen) {
+      return;
+    }
+
+    let active = true;
+    const timer = setTimeout(async () => {
+      setUsageLoading(true);
+      const items = await fetchTagSuggestions({
+        type: "USAGE",
+        query: usageQuery,
+        excludeSlugs: selectedUsageSlugs
+      });
+      if (active) {
+        setUsageOptions(items);
+        setUsageHighlight(0);
+        setUsageLoading(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [usageOpen, usageQuery, selectedUsageSlugs]);
 
   function toggleSelection(current: string[], slug: string) {
     return current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug];
   }
 
-  function selectAuthor(author: SearchTagOption) {
-    setSelectedAuthor(author);
-    setAuthorQuery(author.name);
+  function selectAuthor(option: SearchTagOption) {
+    setSelectedAuthor(option);
+    setAuthorQuery(option.name);
     setAuthorOpen(false);
-    setHighlightedIndex(0);
   }
 
   function clearAuthor() {
     setSelectedAuthor(null);
     setAuthorQuery("");
     setAuthorOpen(false);
-    setHighlightedIndex(0);
-  }
-
-  function handleAuthorChange(value: string) {
-    setAuthorQuery(value);
-    setAuthorOpen(true);
-
-    if (selectedAuthor && value !== selectedAuthor.name) {
-      setSelectedAuthor(null);
-    }
+    setAuthorHighlight(0);
   }
 
   function handleAuthorKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    if (!filteredAuthors.length) {
+    if (!authorOptions.length) {
       if (event.key === "Escape") {
         setAuthorOpen(false);
       }
@@ -151,24 +269,130 @@ export function SearchFilters({
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setAuthorOpen(true);
-      setHighlightedIndex((current) => Math.min(current + 1, filteredAuthors.length - 1));
+      setAuthorHighlight((current) => Math.min(current + 1, authorOptions.length - 1));
       return;
     }
 
     if (event.key === "ArrowUp") {
       event.preventDefault();
-      setHighlightedIndex((current) => Math.max(current - 1, 0));
+      setAuthorHighlight((current) => Math.max(current - 1, 0));
       return;
     }
 
     if (event.key === "Enter" && authorOpen) {
       event.preventDefault();
-      selectAuthor(filteredAuthors[highlightedIndex]);
+      const option = authorOptions[authorHighlight];
+      if (option) {
+        selectAuthor(option);
+      }
       return;
     }
 
     if (event.key === "Escape") {
       setAuthorOpen(false);
+    }
+  }
+
+  function addStyle(option: SearchTagOption) {
+    setSelectedStyles((current) => {
+      if (current.some((item) => item.slug === option.slug)) {
+        return current;
+      }
+      if (current.length >= MAX_SELECTED_STYLES) {
+        return current;
+      }
+      return [...current, option];
+    });
+    setStyleQuery("");
+    setStyleOpen(true);
+  }
+
+  function removeStyle(slug: string) {
+    setSelectedStyles((current) => current.filter((item) => item.slug !== slug));
+  }
+
+  function handleStyleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!styleOptions.length) {
+      if (event.key === "Escape") {
+        setStyleOpen(false);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setStyleOpen(true);
+      setStyleHighlight((current) => Math.min(current + 1, styleOptions.length - 1));
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setStyleHighlight((current) => Math.max(current - 1, 0));
+      return;
+    }
+
+    if (event.key === "Enter" && styleOpen) {
+      event.preventDefault();
+      const option = styleOptions[styleHighlight];
+      if (option) {
+        addStyle(option);
+      }
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setStyleOpen(false);
+    }
+  }
+
+  function addUsage(option: SearchTagOption) {
+    setSelectedUsages((current) => {
+      if (current.some((item) => item.slug === option.slug)) {
+        return current;
+      }
+      return [...current, option];
+    });
+    setUsageQuery("");
+    setUsageOpen(true);
+  }
+
+  function removeUsage(slug: string) {
+    setSelectedUsages((current) => current.filter((item) => item.slug !== slug));
+  }
+
+  function handleUsageKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!usageOptions.length) {
+      if (event.key === "Escape") {
+        setUsageOpen(false);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setUsageOpen(true);
+      setUsageHighlight((current) => Math.min(current + 1, usageOptions.length - 1));
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setUsageHighlight((current) => Math.max(current - 1, 0));
+      return;
+    }
+
+    if (event.key === "Enter" && usageOpen) {
+      event.preventDefault();
+      const option = usageOptions[usageHighlight];
+      if (option) {
+        addUsage(option);
+      }
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setUsageOpen(false);
     }
   }
 
@@ -182,7 +406,14 @@ export function SearchFilters({
               id="author-search"
               type="text"
               value={authorQuery}
-              onChange={(event) => handleAuthorChange(event.target.value)}
+              onChange={(event) => {
+                const nextQuery = event.target.value;
+                setAuthorQuery(nextQuery);
+                setAuthorOpen(true);
+                if (selectedAuthor && nextQuery !== selectedAuthor.name) {
+                  setSelectedAuthor(null);
+                }
+              }}
               onFocus={() => setAuthorOpen(true)}
               onKeyDown={handleAuthorKeyDown}
               placeholder="Search author"
@@ -199,17 +430,18 @@ export function SearchFilters({
 
           {authorOpen ? (
             <div className="search-author-panel">
-              {filteredAuthors.length ? (
-                filteredAuthors.slice(0, 8).map((author, index) => (
+              {authorLoading ? (
+                <div className="search-author-empty">Searching...</div>
+              ) : authorOptions.length ? (
+                authorOptions.map((author, index) => (
                   <button
                     key={`author-${author.id}`}
                     type="button"
-                    className={index === highlightedIndex ? "search-author-option active" : "search-author-option"}
+                    className={index === authorHighlight ? "search-author-option active" : "search-author-option"}
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => selectAuthor(author)}
                   >
-                    <span>{author.name}</span>
-                    <small>{author.slug}</small>
+                    <span className="search-author-label">{author.name || "Unknown author"}</span>
                   </button>
                 ))
               ) : (
@@ -229,78 +461,138 @@ export function SearchFilters({
       />
 
       <div className="field">
-        <div className="filter-section-header">
-          <span>Style</span>
-          <button
-            type="button"
-            className="filter-collapse-button"
-            onClick={() => setStyleExpanded((current) => !current)}
-            aria-expanded={styleExpanded}
-          >
-            {styleExpanded ? "Hide" : "Show"}
-          </button>
+        <label htmlFor="style-search">{`Style (${selectedStyles.length}/${MAX_SELECTED_STYLES})`}</label>
+        {selectedStyles.length ? (
+          <div className="filter-pill-group search-style-selected">
+            {selectedStyles.map((option) => (
+              <button
+                key={`styles-selected-${option.id}`}
+                type="button"
+                className="filter-pill active"
+                onClick={() => removeStyle(option.slug)}
+                aria-pressed={true}
+              >
+                {option.name} x
+              </button>
+            ))}
+          </div>
+        ) : (
+          <small className="filter-helper-text">No style selected.</small>
+        )}
+
+        <div className="search-author-picker" ref={styleRef}>
+          <div className="search-author-input-wrap">
+            <input
+              id="style-search"
+              type="text"
+              value={styleQuery}
+              onChange={(event) => {
+                setStyleQuery(event.target.value);
+                setStyleOpen(true);
+              }}
+              onFocus={() => setStyleOpen(true)}
+              onKeyDown={handleStyleKeyDown}
+              placeholder="Search style"
+              autoComplete="off"
+            />
+          </div>
+
+          {styleOpen ? (
+            <div className="search-author-panel">
+              {styleLoading ? (
+                <div className="search-author-empty">Searching...</div>
+              ) : styleOptions.length ? (
+                styleOptions.map((option, index) => (
+                  <button
+                    key={`styles-${option.id}`}
+                    type="button"
+                    className={index === styleHighlight ? "search-author-option active" : "search-author-option"}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => addStyle(option)}
+                    disabled={selectedStyles.length >= MAX_SELECTED_STYLES}
+                    title={
+                      selectedStyles.length >= MAX_SELECTED_STYLES
+                        ? `Maximum ${MAX_SELECTED_STYLES} style tags`
+                        : undefined
+                    }
+                  >
+                    <span className="search-author-label">{option.name}</span>
+                  </button>
+                ))
+              ) : (
+                <div className="search-author-empty">No matching styles.</div>
+              )}
+            </div>
+          ) : null}
         </div>
 
-        {styleExpanded ? (
-          <div className="filter-pill-group">
-            {styles.map((option) => {
-              const isActive = selectedStyles.includes(option.slug);
-
-              return (
-                <button
-                  key={`styles-${option.id}`}
-                  type="button"
-                  className={isActive ? "filter-pill active" : "filter-pill"}
-                  onClick={() => setSelectedStyles((current) => toggleSelection(current, option.slug))}
-                  aria-pressed={isActive}
-                >
-                  {option.name}
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
-
-        {selectedStyles.map((slug) => (
-          <input key={`styles-${slug}`} type="hidden" name="styles" value={slug} />
+        {selectedStyles.map((item) => (
+          <input key={`styles-${item.slug}`} type="hidden" name="styles" value={item.slug} />
         ))}
       </div>
 
       <div className="field">
-        <div className="filter-section-header">
-          <span>Usage</span>
-          <button
-            type="button"
-            className="filter-collapse-button"
-            onClick={() => setUsageExpanded((current) => !current)}
-            aria-expanded={usageExpanded}
-          >
-            {usageExpanded ? "Hide" : "Show"}
-          </button>
+        <label htmlFor="usage-search">Usage</label>
+        {selectedUsages.length ? (
+          <div className="filter-pill-group search-style-selected">
+            {selectedUsages.map((option) => (
+              <button
+                key={`usages-selected-${option.id}`}
+                type="button"
+                className="filter-pill active"
+                onClick={() => removeUsage(option.slug)}
+                aria-pressed={true}
+              >
+                {option.name} x
+              </button>
+            ))}
+          </div>
+        ) : (
+          <small className="filter-helper-text">No usage selected.</small>
+        )}
+
+        <div className="search-author-picker" ref={usageRef}>
+          <div className="search-author-input-wrap">
+            <input
+              id="usage-search"
+              type="text"
+              value={usageQuery}
+              onChange={(event) => {
+                setUsageQuery(event.target.value);
+                setUsageOpen(true);
+              }}
+              onFocus={() => setUsageOpen(true)}
+              onKeyDown={handleUsageKeyDown}
+              placeholder="Search usage"
+              autoComplete="off"
+            />
+          </div>
+
+          {usageOpen ? (
+            <div className="search-author-panel">
+              {usageLoading ? (
+                <div className="search-author-empty">Searching...</div>
+              ) : usageOptions.length ? (
+                usageOptions.map((option, index) => (
+                  <button
+                    key={`usages-${option.id}`}
+                    type="button"
+                    className={index === usageHighlight ? "search-author-option active" : "search-author-option"}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => addUsage(option)}
+                  >
+                    <span className="search-author-label">{option.name}</span>
+                  </button>
+                ))
+              ) : (
+                <div className="search-author-empty">No matching usages.</div>
+              )}
+            </div>
+          ) : null}
         </div>
 
-        {usageExpanded ? (
-          <div className="filter-pill-group">
-            {usages.map((option) => {
-              const isActive = selectedUsages.includes(option.slug);
-
-              return (
-                <button
-                  key={`usages-${option.id}`}
-                  type="button"
-                  className={isActive ? "filter-pill active" : "filter-pill"}
-                  onClick={() => setSelectedUsages((current) => toggleSelection(current, option.slug))}
-                  aria-pressed={isActive}
-                >
-                  {option.name}
-                </button>
-              );
-            })}
-          </div>
-        ) : null}
-
-        {selectedUsages.map((slug) => (
-          <input key={`usages-${slug}`} type="hidden" name="usages" value={slug} />
+        {selectedUsages.map((item) => (
+          <input key={`usages-${item.slug}`} type="hidden" name="usages" value={item.slug} />
         ))}
       </div>
 

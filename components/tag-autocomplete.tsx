@@ -15,65 +15,106 @@ type SelectedTag = {
   isNew?: boolean;
 };
 
+type SearchableTagType = "AUTHOR" | "STYLE" | "USAGE";
+
 type TagAutocompleteProps = {
   label: string;
   idName: string;
   newName: string;
-  options: TagOption[];
-  initialSelectedIds?: number[];
+  tagType: SearchableTagType;
+  initialSelectedTags?: TagOption[];
   multiple?: boolean;
   required?: boolean;
   placeholder: string;
 };
 
+const OPTION_LIMIT = 10;
+const SEARCH_DEBOUNCE_MS = 180;
+
+async function fetchTagSuggestions(options: {
+  type: SearchableTagType;
+  query: string;
+  excludeSlugs?: string[];
+}) {
+  const params = new URLSearchParams({
+    type: options.type,
+    q: options.query,
+    limit: String(OPTION_LIMIT)
+  });
+
+  (options.excludeSlugs ?? []).forEach((slug) => params.append("exclude", slug));
+
+  const response = await fetch(`/api/tags/search?${params.toString()}`, {
+    credentials: "same-origin",
+    cache: "no-store"
+  });
+
+  if (!response.ok) {
+    return [];
+  }
+
+  const data = (await response.json()) as { items?: TagOption[] };
+  return data.items ?? [];
+}
+
 export function TagAutocomplete({
   label,
   idName,
   newName,
-  options,
-  initialSelectedIds = [],
+  tagType,
+  initialSelectedTags = [],
   multiple = true,
   required = false,
   placeholder
 }: TagAutocompleteProps) {
   const [query, setQuery] = useState("");
-  const [selectedTags, setSelectedTags] = useState<SelectedTag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<SelectedTag[]>(
+    multiple
+      ? initialSelectedTags.map((tag) => ({ id: tag.id, name: tag.name, slug: tag.slug }))
+      : initialSelectedTags.slice(0, 1).map((tag) => ({ id: tag.id, name: tag.name, slug: tag.slug }))
+  );
+  const [options, setOptions] = useState<TagOption[]>([]);
   const [highlightedIndex, setHighlightedIndex] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const initialTags = initialSelectedIds
-      .map((id) => options.find((option) => option.id === id))
-      .filter(Boolean)
-      .map((tag) => ({ id: tag!.id, name: tag!.name, slug: tag!.slug }));
-
+    const initialTags = initialSelectedTags.map((tag) => ({ id: tag.id, name: tag.name, slug: tag.slug }));
     setSelectedTags(multiple ? initialTags : initialTags.slice(0, 1));
-  }, [initialSelectedIds, multiple, options]);
+  }, [initialSelectedTags, multiple]);
 
-  const selectedIds = useMemo(
-    () => selectedTags.map((tag) => tag.id).filter((id): id is number => typeof id === "number"),
+  const selectedSlugs = useMemo(
+    () => selectedTags.map((tag) => tag.slug).filter((slug): slug is string => Boolean(slug)),
     [selectedTags]
   );
 
-  const filteredOptions = useMemo(() => {
-    const normalized = query.trim().toLowerCase();
-    return options.filter((option) => {
-      if (selectedIds.includes(option.id)) {
-        return false;
-      }
-
-      if (!normalized) {
-        return true;
-      }
-
-      return option.name.toLowerCase().includes(normalized) || option.slug.toLowerCase().includes(normalized);
-    });
-  }, [options, query, selectedIds]);
-
   useEffect(() => {
-    setHighlightedIndex(0);
-  }, [query]);
+    if (!isOpen) {
+      return;
+    }
+
+    let active = true;
+    const timer = setTimeout(async () => {
+      setIsLoading(true);
+      const nextOptions = await fetchTagSuggestions({
+        type: tagType,
+        query,
+        excludeSlugs: selectedSlugs
+      });
+
+      if (active) {
+        setOptions(nextOptions);
+        setHighlightedIndex(0);
+        setIsLoading(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [isOpen, query, selectedSlugs, tagType]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -131,7 +172,7 @@ export function TagAutocomplete({
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setIsOpen(true);
-      setHighlightedIndex((current) => Math.min(current + 1, Math.max(filteredOptions.length - 1, 0)));
+      setHighlightedIndex((current) => Math.min(current + 1, Math.max(options.length - 1, 0)));
       return;
     }
 
@@ -143,8 +184,8 @@ export function TagAutocomplete({
 
     if (event.key === "Enter") {
       event.preventDefault();
-      if (filteredOptions[highlightedIndex] && query.trim()) {
-        addExistingTag(filteredOptions[highlightedIndex]);
+      if (options[highlightedIndex] && query.trim()) {
+        addExistingTag(options[highlightedIndex]);
       } else {
         addNewTag(query);
       }
@@ -153,6 +194,10 @@ export function TagAutocomplete({
 
     if (event.key === "Backspace" && !query && selectedTags.length) {
       removeTag(selectedTags.length - 1);
+    }
+
+    if (event.key === "Escape") {
+      setIsOpen(false);
     }
   }
 
@@ -187,8 +232,10 @@ export function TagAutocomplete({
 
         {isOpen ? (
           <div className="tag-picker-panel">
-            {filteredOptions.length ? (
-              filteredOptions.slice(0, 8).map((option, index) => (
+            {isLoading ? (
+              <div className="tag-option-empty">Searching...</div>
+            ) : options.length ? (
+              options.map((option, index) => (
                 <button
                   key={`${idName}-${option.id}`}
                   type="button"

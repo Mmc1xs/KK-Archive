@@ -30,6 +30,10 @@ export async function getTagOptions() {
   return getCachedTagOptions();
 }
 
+export async function getTagTypeOptions() {
+  return getCachedTypeTags();
+}
+
 const getCachedAllTags = unstable_cache(
   async () => {
     await ensureFixedTypeTags();
@@ -60,6 +64,69 @@ const getCachedTagOptions = unstable_cache(
     tags: ["tags"]
   }
 );
+
+const getCachedTypeTags = unstable_cache(
+  async () => {
+    await ensureFixedTypeTags();
+    return db.tag.findMany({
+      where: {
+        type: TagType.TYPE
+      },
+      orderBy: [{ name: "asc" }]
+    });
+  },
+  ["tag-type-options"],
+  {
+    revalidate: 300,
+    tags: ["tags"]
+  }
+);
+
+type SearchTagsByTypeOptions = {
+  type: TagType;
+  query?: string;
+  limit?: number;
+  excludeSlugs?: string[];
+};
+
+export async function searchTagsByType(options: SearchTagsByTypeOptions) {
+  const normalizedQuery = options.query?.trim() ?? "";
+  const limit = Math.min(Math.max(options.limit ?? 12, 1), 30);
+  const excludeSlugs = [...new Set((options.excludeSlugs ?? []).map((slug) => slug.trim()).filter(Boolean))];
+
+  return db.tag.findMany({
+    where: {
+      type: options.type,
+      ...(normalizedQuery
+        ? {
+            OR: [
+              {
+                name: {
+                  contains: normalizedQuery,
+                  mode: "insensitive"
+                }
+              },
+              {
+                slug: {
+                  contains: normalizedQuery,
+                  mode: "insensitive"
+                }
+              }
+            ]
+          }
+        : {}),
+      ...(excludeSlugs.length
+        ? {
+            slug: {
+              notIn: excludeSlugs
+            }
+          }
+        : {})
+    },
+    orderBy: [{ name: "asc" }],
+    take: limit
+  });
+}
 
 export async function saveTag(input: unknown) {
   const parsed = tagSchema.safeParse(input);

@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { ContentForm } from "@/components/content-form";
 import { requireStaff } from "@/lib/auth/session";
 import { getAdminContentById } from "@/lib/content";
-import { getTagOptions } from "@/lib/tag";
+import { getTagTypeOptions } from "@/lib/tag";
 
 export default async function EditContentPage({
   params,
@@ -14,9 +14,9 @@ export default async function EditContentPage({
   const staff = await requireStaff({ touchActivity: false });
   const routeParams = await params;
   const contentId = Number(routeParams.id);
-  const [query, tagOptions, content] = await Promise.all([
+  const [query, types, content] = await Promise.all([
     searchParams,
-    getTagOptions(),
+    getTagTypeOptions(),
     getAdminContentById(contentId)
   ]);
 
@@ -31,7 +31,7 @@ export default async function EditContentPage({
       <ContentForm
         mode="edit"
         error={error}
-        tagOptions={tagOptions}
+        tagOptions={{ types }}
         content={{
           id: content.id,
           title: content.title,

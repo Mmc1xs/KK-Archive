@@ -1,6 +1,6 @@
 import { ContentForm } from "@/components/content-form";
 import { requireAdmin } from "@/lib/auth/session";
-import { getTagOptions } from "@/lib/tag";
+import { getTagTypeOptions } from "@/lib/tag";
 
 export default async function NewContentPage({
   searchParams
@@ -8,12 +8,12 @@ export default async function NewContentPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   await requireAdmin({ touchActivity: false });
-  const [params, tagOptions] = await Promise.all([searchParams, getTagOptions()]);
+  const [params, types] = await Promise.all([searchParams, getTagTypeOptions()]);
   const error = typeof params.error === "string" ? params.error : undefined;
 
   return (
     <div className="page-section admin-layout">
-      <ContentForm mode="create" error={error} tagOptions={tagOptions} />
+      <ContentForm mode="create" error={error} tagOptions={{ types }} />
     </div>
   );
 }
