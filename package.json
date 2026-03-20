@@ -18,6 +18,7 @@
     "db:push": "prisma db push",
     "db:push:postgres": "prisma db push --schema prisma/schema.postgres.prisma",
     "db:harden:supabase": "prisma db execute --schema prisma/schema.postgres.prisma --file scripts/harden-supabase-public.sql",
+    "db:indexes:performance": "prisma db execute --schema prisma/schema.postgres.prisma --file scripts/add-performance-indexes.sql",
     "db:seed": "tsx prisma/seed.ts",
     "db:migrate:sqlite-to-postgres": "npm run db:generate:migrate:sqlite && npm run db:generate:migrate:postgres && tsx scripts/migrate-sqlite-to-postgres.ts",
     "db:backfill-usernames": "tsx scripts/backfill-usernames.ts",

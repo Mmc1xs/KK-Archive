@@ -483,23 +483,22 @@ const getCachedPublicSearchResults = unstable_cache(
   async (author?: string, styles?: string[], usages?: string[], types?: string[], safePage = 1, safePageSize = 24) => {
     const where = buildSearchWhere(false, { author, styles, usages, types });
 
-    const [totalCount, items] = await Promise.all([
-      db.content.count({ where }),
-      db.content.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        skip: (safePage - 1) * safePageSize,
-        take: safePageSize,
-        select: SEARCH_RESULTS_SELECT
-      })
-    ]);
+    const rows = await db.content.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize + 1,
+      select: SEARCH_RESULTS_SELECT
+    });
+    const hasNext = rows.length > safePageSize;
+    const items = hasNext ? rows.slice(0, safePageSize) : rows;
 
     return {
       items,
-      totalCount,
       page: safePage,
       pageSize: safePageSize,
-      totalPages: Math.max(1, Math.ceil(totalCount / safePageSize))
+      hasNext,
+      hasPrevious: safePage > 1
     };
   },
   ["public-search-results"],
@@ -534,23 +533,22 @@ export async function searchPublishedContents(filters: {
   }
 
   const where = buildSearchWhere(filters.isLoggedIn, filters);
-  const [totalCount, items] = await Promise.all([
-    db.content.count({ where }),
-    db.content.findMany({
-      where,
-      orderBy: { createdAt: "desc" },
-      skip: (safePage - 1) * safePageSize,
-      take: safePageSize,
-      select: SEARCH_RESULTS_SELECT
-    })
-  ]);
+  const rows = await db.content.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    skip: (safePage - 1) * safePageSize,
+    take: safePageSize + 1,
+    select: SEARCH_RESULTS_SELECT
+  });
+  const hasNext = rows.length > safePageSize;
+  const items = hasNext ? rows.slice(0, safePageSize) : rows;
 
   return {
     items,
-    totalCount,
     page: safePage,
     pageSize: safePageSize,
-    totalPages: Math.max(1, Math.ceil(totalCount / safePageSize))
+    hasNext,
+    hasPrevious: safePage > 1
   };
 }
 

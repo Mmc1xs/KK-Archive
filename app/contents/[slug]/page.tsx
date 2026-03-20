@@ -40,7 +40,9 @@ export default async function ContentDetailPage({
     notFound();
   }
 
-  await recordContentView(content.id);
+  void recordContentView(content.id).catch(() => {
+    // Non-blocking analytics: view tracking failures should not block page rendering.
+  });
 
   const authors = content.contentTags.filter((item) => item.tag.type === "AUTHOR").map((item) => item.tag);
   const styles = content.contentTags.filter((item) => item.tag.type === "STYLE").map((item) => item.tag);

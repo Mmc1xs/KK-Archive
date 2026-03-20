@@ -67,6 +67,8 @@ model UserLoginEvent {
   createdAt DateTime @default(now()) @map("created_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([createdAt])
+  @@index([userId, createdAt])
   @@map("user_login_events")
 }
 
@@ -97,6 +99,8 @@ model Content {
   downloadLinks ContentDownloadLink[]
   contentTags   ContentTag[]
 
+  @@index([publishStatus, createdAt])
+  @@index([reviewStatus, updatedAt])
   @@map("contents")
 }
 
@@ -141,5 +145,6 @@ model ContentTag {
   tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([contentId, tagId])
+  @@index([tagId, contentId])
   @@map("content_tags")
 }

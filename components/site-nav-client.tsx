@@ -1,49 +1,8 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { getCurrentSession } from "@/lib/auth/session";
 
-type SessionUser = {
-  id: number;
-  email: string;
-  username: string | null;
-  role: "ADMIN" | "AUDIT" | "MEMBER";
-};
-
-export function SiteNavClient() {
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-
-    async function loadSession() {
-      try {
-        const response = await fetch("/api/session", {
-          credentials: "same-origin",
-          cache: "no-store"
-        });
-        if (!response.ok) {
-          return;
-        }
-
-        const data = (await response.json()) as { user: SessionUser | null };
-        if (active) {
-          setUser(data.user);
-        }
-      } finally {
-        if (active) {
-          setLoaded(true);
-        }
-      }
-    }
-
-    void loadSession();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+export async function SiteNavClient() {
+  const user = await getCurrentSession({ touchActivity: false });
 
   return (
     <>
@@ -68,7 +27,7 @@ export function SiteNavClient() {
               </button>
             </form>
           </>
-        ) : loaded ? (
+        ) : (
           <>
             <Link href="/login" className="link-pill">
               Login
@@ -76,10 +35,6 @@ export function SiteNavClient() {
             <Link href="/register" className="button">
               Register
             </Link>
-          </>
-        ) : (
-          <>
-            <span className="muted">Loading...</span>
           </>
         )}
       </div>

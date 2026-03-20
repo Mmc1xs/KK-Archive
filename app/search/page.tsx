@@ -13,38 +13,6 @@ function readValues(value: string | string[] | undefined) {
   return Array.isArray(value) ? value : [value];
 }
 
-function buildPagination(totalPages: number, currentPage: number) {
-  if (totalPages <= 7) {
-    return Array.from({ length: totalPages }, (_, index) => index + 1) as Array<number | "ellipsis">;
-  }
-
-  const pages = new Set<number>([1, totalPages, currentPage - 1, currentPage, currentPage + 1]);
-
-  if (currentPage <= 3) {
-    pages.add(2);
-    pages.add(3);
-    pages.add(4);
-  }
-
-  if (currentPage >= totalPages - 2) {
-    pages.add(totalPages - 1);
-    pages.add(totalPages - 2);
-    pages.add(totalPages - 3);
-  }
-
-  const sortedPages = [...pages].filter((page) => page >= 1 && page <= totalPages).sort((a, b) => a - b);
-  const items: Array<number | "ellipsis"> = [];
-
-  sortedPages.forEach((page, index) => {
-    if (index > 0 && page - sortedPages[index - 1] > 1) {
-      items.push("ellipsis");
-    }
-    items.push(page);
-  });
-
-  return items;
-}
-
 function buildSearchHref(options: {
   page: number;
   author?: string;
@@ -96,7 +64,6 @@ export default async function SearchPage({
       pageSize: PAGE_SIZE
     })
   ]);
-  const paginationItems = buildPagination(resultsPage.totalPages, resultsPage.page);
 
   return (
     <div className="page-section search-layout">
@@ -118,7 +85,7 @@ export default async function SearchPage({
             <div className="eyebrow">Visible Results</div>
             <h2 className="title-lg">Search Results</h2>
           </div>
-          <span className="status">{`Page ${resultsPage.page} / ${resultsPage.totalPages} - ${resultsPage.totalCount} results`}</span>
+          <span className="status">{`Page ${resultsPage.page} - ${resultsPage.items.length} shown`}</span>
         </div>
 
         <div className="grid content-grid search-results-grid">
@@ -127,58 +94,43 @@ export default async function SearchPage({
           ))}
         </div>
 
-        {resultsPage.totalPages > 1 ? (
+        {resultsPage.hasPrevious || resultsPage.hasNext ? (
           <nav className="pagination-nav" aria-label="Search pagination">
             <Link
               href={buildSearchHref({
-                page: resultsPage.page > 1 ? resultsPage.page - 1 : 1,
+                page: resultsPage.hasPrevious ? resultsPage.page - 1 : 1,
                 author,
                 styles,
                 usages,
                 types
               })}
               className={
-                resultsPage.page > 1 ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"
+                resultsPage.hasPrevious ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"
               }
-              aria-disabled={resultsPage.page <= 1}
+              aria-disabled={!resultsPage.hasPrevious}
             >
               Previous
             </Link>
             <div className="pagination-pages">
-              {paginationItems.map((item, index) =>
-                item === "ellipsis" ? (
-                  <span key={`ellipsis-${index}`} className="pagination-ellipsis" aria-hidden="true">
-                    ...
-                  </span>
-                ) : (
-                  <Link
-                    key={item}
-                    href={buildSearchHref({ page: item, author, styles, usages, types })}
-                    className={
-                      item === resultsPage.page ? "button secondary pagination-page-current" : "link-pill pagination-page"
-                    }
-                    aria-current={item === resultsPage.page ? "page" : undefined}
-                  >
-                    {item}
-                  </Link>
-                )
-              )}
+              <span className="button secondary pagination-page-current" aria-current="page">
+                {`Page ${resultsPage.page}`}
+              </span>
               <span className="pagination-summary">{resultsPage.pageSize} / page</span>
             </div>
             <Link
               href={buildSearchHref({
-                page: resultsPage.page < resultsPage.totalPages ? resultsPage.page + 1 : resultsPage.totalPages,
+                page: resultsPage.hasNext ? resultsPage.page + 1 : resultsPage.page,
                 author,
                 styles,
                 usages,
                 types
               })}
               className={
-                resultsPage.page < resultsPage.totalPages
+                resultsPage.hasNext
                   ? "link-pill pagination-arrow"
                   : "link-pill pagination-arrow pagination-disabled"
               }
-              aria-disabled={resultsPage.page >= resultsPage.totalPages}
+              aria-disabled={!resultsPage.hasNext}
             >
               Next
             </Link>
