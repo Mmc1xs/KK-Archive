@@ -11,9 +11,6 @@ export const metadata: Metadata = {
   title: "KK Archive | Koikatsu Cards, Presets, Scenes and Shared Files",
   description:
     "A searchable archive for Koikatsu-related files, including cards, presets, scenes, textures, overlays, and other shared resources organized with structured tags.",
-  alternates: {
-    canonical: "/"
-  },
   openGraph: {
     title: "KK Archive | Koikatsu Cards, Presets, Scenes and Shared Files",
     description:
@@ -41,9 +38,18 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <div className="shell">
             <div className="site-footer-inner">
               <span className="muted">KK Archive</span>
-              <Link href="/privacy" className="site-footer-link">
-                Privacy
-              </Link>
+              <div className="site-footer-links">
+                <span className="site-footer-link muted">Made By Mmc1xs</span>
+                <a href="mailto:mmc1xs@koikatsucards.com" className="site-footer-link">
+                  Business Inquiries
+                </a>
+                <Link href="/support" className="site-footer-link">
+                  Support Me
+                </Link>
+                <Link href="/privacy" className="site-footer-link">
+                  Privacy
+                </Link>
+              </div>
             </div>
           </div>
         </footer>
