@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { TagType } from "@prisma/client";
 import { searchTagsByType } from "@/lib/tag";
 
-const ALLOWED_TYPES = new Set<TagType>([TagType.AUTHOR, TagType.STYLE, TagType.USAGE]);
+const ALLOWED_TYPES = new Set<TagType>([TagType.AUTHOR, TagType.WORK, TagType.CHARACTER, TagType.STYLE, TagType.USAGE]);
 
 function parseType(rawType: string | null) {
   if (!rawType) {
@@ -32,12 +32,19 @@ export async function GET(request: Request) {
   const query = searchParams.get("q") ?? "";
   const limit = Number(searchParams.get("limit") ?? "12");
   const excludeSlugs = searchParams.getAll("exclude");
+  const workIdRaw = searchParams.get("workId");
+  const workId = workIdRaw ? Number(workIdRaw) : undefined;
+
+  if (type === TagType.CHARACTER && (!workId || !Number.isInteger(workId) || workId <= 0)) {
+    return NextResponse.json({ items: [] });
+  }
 
   const tags = await searchTagsByType({
     type,
     query,
     limit: Number.isFinite(limit) ? limit : 12,
-    excludeSlugs
+    excludeSlugs,
+    workTagId: type === TagType.CHARACTER ? workId : undefined
   });
 
   return NextResponse.json({

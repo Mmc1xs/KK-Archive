@@ -30,6 +30,19 @@ async function generateUniqueTagSlug(name: string, type: TagType) {
   return slug;
 }
 
+async function generateUniqueCharacterSlug(name: string, workTagId: number) {
+  const baseSlug = `character-${workTagId}-${slugifyTagName(name)}`;
+  let slug = baseSlug;
+  let counter = 2;
+
+  while (await db.tag.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
+
+  return slug;
+}
+
 async function resolveTagIds(type: TagType, existingIds: number[], newNames: string[]) {
   const ids = [...existingIds];
   const normalizedNewNames = [...new Set(newNames.map((name) => name.trim()).filter(Boolean))];
@@ -55,6 +68,60 @@ async function resolveTagIds(type: TagType, existingIds: number[], newNames: str
         name: newName,
         slug: await generateUniqueTagSlug(newName, type),
         type
+      }
+    });
+
+    ids.push(createdTag.id);
+  }
+
+  return [...new Set(ids)];
+}
+
+async function resolveCharacterTagIds(existingIds: number[], newNames: string[], workTagId: number) {
+  const ids: number[] = [];
+  const uniqueExistingIds = [...new Set(existingIds)];
+  const normalizedNewNames = [...new Set(newNames.map((name) => name.trim()).filter(Boolean))];
+
+  if (uniqueExistingIds.length) {
+    const existingCharacters = await db.tag.findMany({
+      where: {
+        id: { in: uniqueExistingIds },
+        type: TagType.CHARACTER
+      }
+    });
+
+    if (existingCharacters.length !== uniqueExistingIds.length) {
+      throw new Error("Character tag not found");
+    }
+
+    const invalidCharacter = existingCharacters.find((tag) => tag.workTagId !== workTagId);
+    if (invalidCharacter) {
+      throw new Error("Selected character does not belong to the selected work");
+    }
+
+    ids.push(...existingCharacters.map((tag) => tag.id));
+  }
+
+  for (const newName of normalizedNewNames) {
+    const existingByName = await db.tag.findFirst({
+      where: {
+        type: TagType.CHARACTER,
+        workTagId,
+        name: newName
+      }
+    });
+
+    if (existingByName) {
+      ids.push(existingByName.id);
+      continue;
+    }
+
+    const createdTag = await db.tag.create({
+      data: {
+        name: newName,
+        slug: await generateUniqueCharacterSlug(newName, workTagId),
+        type: TagType.CHARACTER,
+        workTagId
       }
     });
 
@@ -305,6 +372,8 @@ export async function getSearchFilters() {
 
   return {
     authors: tags.filter((tag) => tag.type === TagType.AUTHOR),
+    works: tags.filter((tag) => tag.type === TagType.WORK),
+    characters: tags.filter((tag) => tag.type === TagType.CHARACTER),
     styles: tags.filter((tag) => tag.type === TagType.STYLE),
     usages: tags.filter((tag) => tag.type === TagType.USAGE),
     types: tags.filter((tag) => tag.type === TagType.TYPE)
@@ -700,11 +769,20 @@ export async function saveContent(
 
   const data = parsed.data;
   const authorSelections = data.authorTagIds.length + data.authorTagNames.length;
+  const workSelections = data.workTagIds.length + data.workTagNames.length;
+  const characterSelections = data.characterTagIds.length + data.characterTagNames.length;
   if (authorSelections !== 1) {
     return { ok: false as const, error: "Exactly one author is required" };
   }
+  if (workSelections !== 1) {
+    return { ok: false as const, error: "Exactly one work is required" };
+  }
+  if (characterSelections !== 1) {
+    return { ok: false as const, error: "Exactly one character is required" };
+  }
 
   const authorTagIds = await resolveTagIds(TagType.AUTHOR, data.authorTagIds, data.authorTagNames);
+  const workTagIds = await resolveTagIds(TagType.WORK, data.workTagIds, data.workTagNames);
 
   const authorTags = authorTagIds.length
     ? await db.tag.findMany({
@@ -716,6 +794,42 @@ export async function saveContent(
     : [];
   if (authorTags.length !== authorTagIds.length) {
     return { ok: false as const, error: "Author tag not found" };
+  }
+
+  const workTags = workTagIds.length
+    ? await db.tag.findMany({
+        where: {
+          id: { in: workTagIds },
+          type: TagType.WORK
+        }
+      })
+    : [];
+  if (workTags.length !== workTagIds.length || workTagIds.length !== 1) {
+    return { ok: false as const, error: "Work tag not found" };
+  }
+
+  let characterTagIds: number[] = [];
+  try {
+    characterTagIds = await resolveCharacterTagIds(data.characterTagIds, data.characterTagNames, workTagIds[0]);
+  } catch (error) {
+    return {
+      ok: false as const,
+      error: error instanceof Error ? error.message : "Invalid character selection"
+    };
+  }
+
+  const characterTags = characterTagIds.length
+    ? await db.tag.findMany({
+        where: {
+          id: { in: characterTagIds },
+          type: TagType.CHARACTER,
+          workTagId: workTagIds[0]
+        }
+      })
+    : [];
+
+  if (characterTags.length !== characterTagIds.length || characterTagIds.length !== 1) {
+    return { ok: false as const, error: "Character tag not found for selected work" };
   }
 
   const styleTagIds = await resolveTagIds(TagType.STYLE, data.styleTagIds, data.styleTagNames);
@@ -756,7 +870,7 @@ export async function saveContent(
     return { ok: false as const, error: "Exactly one type is required" };
   }
 
-  const tagIds = [...authorTagIds, ...styleTagIds, ...usageTagIds, ...data.typeTagIds];
+  const tagIds = [...authorTagIds, ...workTagIds, ...characterTagIds, ...styleTagIds, ...usageTagIds, ...data.typeTagIds];
   const normalizedManualDownloadLinks = [...new Set(data.downloadLinks.map((url) => url.trim()).filter(Boolean))];
   let mergedDownloadLinks = normalizedManualDownloadLinks;
   const existingContentForTracking = contentId
@@ -921,9 +1035,25 @@ export async function saveContent(
         }
       }
     });
+    const workCount = await db.contentTag.count({
+      where: {
+        contentId: content.id,
+        tag: {
+          type: TagType.WORK
+        }
+      }
+    });
+    const characterCount = await db.contentTag.count({
+      where: {
+        contentId: content.id,
+        tag: {
+          type: TagType.CHARACTER
+        }
+      }
+    });
 
-    if (authorCount !== 1) {
-      throw new Error("Each content item must have exactly one author tag.");
+    if (authorCount !== 1 || workCount !== 1 || characterCount !== 1) {
+      throw new Error("Each content item must have exactly one author, one work, and one character tag.");
     }
 
     revalidateTag("tags", "max");

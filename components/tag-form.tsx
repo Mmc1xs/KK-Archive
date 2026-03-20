@@ -19,6 +19,7 @@ export function TagForm({ error }: { error?: string }) {
           <label htmlFor="type">Type</label>
           <select id="type" name="type" defaultValue="AUTHOR">
             <option value="AUTHOR">Author</option>
+            <option value="WORK">Work</option>
             <option value="STYLE">Style</option>
             <option value="USAGE">Usage</option>
           </select>

@@ -92,6 +92,7 @@ export default async function AdminTagsPage({
               <th>Name</th>
               <th>Slug</th>
               <th>Type</th>
+              <th>Work</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -101,6 +102,7 @@ export default async function AdminTagsPage({
                 <td>{tag.name}</td>
                 <td>{tag.slug}</td>
                 <td>{tag.type}</td>
+                <td>{tag.type === TagType.CHARACTER ? (tag.workTag?.name ?? "-") : "-"}</td>
                 <td>
                   {tag.type === TagType.TYPE ? (
                     <span className="muted">Fixed</span>

@@ -3,6 +3,7 @@ import { createContentAction, transitionContentReviewStatusAction, updateContent
 import { DownloadLinksEditor } from "@/components/admin/download-links-editor";
 import { HostedFileUploader } from "@/components/admin/hosted-file-uploader";
 import { TagAutocomplete } from "@/components/tag-autocomplete";
+import { WorkCharacterFields } from "@/components/work-character-fields";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 import { resolveContentStorageFolderValue } from "@/lib/uploads";
@@ -175,6 +176,10 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
           multiple={false}
           required
           placeholder="Search or create authors"
+        />
+        <WorkCharacterFields
+          initialWorkTags={content?.contentTags.filter((item) => item.tag.type === "WORK").map((item) => item.tag) ?? []}
+          initialCharacterTags={content?.contentTags.filter((item) => item.tag.type === "CHARACTER").map((item) => item.tag) ?? []}
         />
         <TagAutocomplete
           label="Style"

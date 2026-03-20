@@ -15,7 +15,9 @@ type SelectedTag = {
   isNew?: boolean;
 };
 
-type SearchableTagType = "AUTHOR" | "STYLE" | "USAGE";
+export type SelectedAutocompleteTag = SelectedTag;
+
+type SearchableTagType = "AUTHOR" | "WORK" | "CHARACTER" | "STYLE" | "USAGE";
 
 type TagAutocompleteProps = {
   label: string;
@@ -26,6 +28,9 @@ type TagAutocompleteProps = {
   multiple?: boolean;
   required?: boolean;
   placeholder: string;
+  contextWorkTagId?: number;
+  disabled?: boolean;
+  onSelectedTagsChange?: (tags: SelectedAutocompleteTag[]) => void;
 };
 
 const OPTION_LIMIT = 10;
@@ -35,12 +40,17 @@ async function fetchTagSuggestions(options: {
   type: SearchableTagType;
   query: string;
   excludeSlugs?: string[];
+  contextWorkTagId?: number;
 }) {
   const params = new URLSearchParams({
     type: options.type,
     q: options.query,
     limit: String(OPTION_LIMIT)
   });
+
+  if (typeof options.contextWorkTagId === "number" && options.contextWorkTagId > 0) {
+    params.set("workId", String(options.contextWorkTagId));
+  }
 
   (options.excludeSlugs ?? []).forEach((slug) => params.append("exclude", slug));
 
@@ -65,7 +75,10 @@ export function TagAutocomplete({
   initialSelectedTags = [],
   multiple = true,
   required = false,
-  placeholder
+  placeholder,
+  contextWorkTagId,
+  disabled = false,
+  onSelectedTagsChange
 }: TagAutocompleteProps) {
   const [query, setQuery] = useState("");
   const [selectedTags, setSelectedTags] = useState<SelectedTag[]>(
@@ -84,6 +97,10 @@ export function TagAutocomplete({
     setSelectedTags(multiple ? initialTags : initialTags.slice(0, 1));
   }, [initialSelectedTags, multiple]);
 
+  useEffect(() => {
+    onSelectedTagsChange?.(selectedTags);
+  }, [onSelectedTagsChange, selectedTags]);
+
   const selectedSlugs = useMemo(
     () => selectedTags.map((tag) => tag.slug).filter((slug): slug is string => Boolean(slug)),
     [selectedTags]
@@ -100,7 +117,8 @@ export function TagAutocomplete({
       const nextOptions = await fetchTagSuggestions({
         type: tagType,
         query,
-        excludeSlugs: selectedSlugs
+        excludeSlugs: selectedSlugs,
+        contextWorkTagId
       });
 
       if (active) {
@@ -114,7 +132,7 @@ export function TagAutocomplete({
       active = false;
       clearTimeout(timer);
     };
-  }, [isOpen, query, selectedSlugs, tagType]);
+  }, [contextWorkTagId, isOpen, query, selectedSlugs, tagType]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -227,6 +245,7 @@ export function TagAutocomplete({
             onKeyDown={handleKeyDown}
             placeholder={selectedTags.length && !multiple ? "" : placeholder}
             required={required && selectedTags.length === 0}
+            disabled={disabled}
           />
         </div>
 

@@ -59,9 +59,14 @@ export default async function AdminTagEditPage({
           <label htmlFor="type">Type</label>
           <input id="type" value={tag.type} disabled />
         </div>
+        {tag.type === TagType.CHARACTER ? (
+          <div className="field">
+            <label htmlFor="workTag">Work</label>
+            <input id="workTag" value={tag.workTag?.name ?? "-"} disabled />
+          </div>
+        ) : null}
         <button type="submit">Update Tag</button>
       </form>
     </section>
   );
 }
-

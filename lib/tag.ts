@@ -38,7 +38,16 @@ export async function getAdminTagsPage(options?: { page?: number; pageSize?: num
     db.tag.findMany({
       orderBy: [{ type: "asc" }, { name: "asc" }],
       skip: (page - 1) * pageSize,
-      take: pageSize
+      take: pageSize,
+      include: {
+        workTag: {
+          select: {
+            id: true,
+            name: true,
+            slug: true
+          }
+        }
+      }
     })
   ]);
 
@@ -61,7 +70,16 @@ export async function getTagTypeOptions() {
 
 export async function getTagById(tagId: number) {
   return db.tag.findUnique({
-    where: { id: tagId }
+    where: { id: tagId },
+    include: {
+      workTag: {
+        select: {
+          id: true,
+          name: true,
+          slug: true
+        }
+      }
+    }
   });
 }
 
@@ -84,6 +102,8 @@ const getCachedTagOptions = unstable_cache(
     const tags = await getCachedAllTags();
     return {
       authors: tags.filter((tag) => tag.type === TagType.AUTHOR),
+      works: tags.filter((tag) => tag.type === TagType.WORK),
+      characters: tags.filter((tag) => tag.type === TagType.CHARACTER),
       styles: tags.filter((tag) => tag.type === TagType.STYLE),
       usages: tags.filter((tag) => tag.type === TagType.USAGE),
       types: tags.filter((tag) => tag.type === TagType.TYPE)
@@ -118,6 +138,7 @@ type SearchTagsByTypeOptions = {
   query?: string;
   limit?: number;
   excludeSlugs?: string[];
+  workTagId?: number;
 };
 
 export async function searchTagsByType(options: SearchTagsByTypeOptions) {
@@ -128,6 +149,11 @@ export async function searchTagsByType(options: SearchTagsByTypeOptions) {
   return db.tag.findMany({
     where: {
       type: options.type,
+      ...(options.type === TagType.CHARACTER && Number.isInteger(options.workTagId) && (options.workTagId ?? 0) > 0
+        ? {
+            workTagId: options.workTagId
+          }
+        : {}),
       ...(normalizedQuery
         ? {
             OR: [
@@ -165,11 +191,11 @@ export async function saveTag(input: unknown) {
     return { ok: false as const, error: parsed.error.errors[0]?.message ?? "Invalid tag data" };
   }
 
-  if (parsed.data.type === TagType.TYPE) {
-    return { ok: false as const, error: "Type tags are fixed and cannot be created manually." };
+  if (parsed.data.type === TagType.TYPE || parsed.data.type === TagType.CHARACTER) {
+    return { ok: false as const, error: "Type and character tags are not created from this screen." };
   }
 
-  if (parsed.data.type !== TagType.AUTHOR) {
+  if (parsed.data.type === TagType.STYLE || parsed.data.type === TagType.USAGE || parsed.data.type === TagType.WORK) {
     const existingTag = await db.tag.findFirst({
       where: {
         name: parsed.data.name,
@@ -178,7 +204,7 @@ export async function saveTag(input: unknown) {
     });
 
     if (existingTag) {
-      return { ok: false as const, error: "Style and usage tag names must stay unique." };
+      return { ok: false as const, error: "Style, usage, and work tag names must stay unique." };
     }
   }
 
@@ -211,7 +237,7 @@ export async function updateTag(input: unknown) {
     return { ok: false as const, error: "Type tags are fixed and cannot be edited." };
   }
 
-  if (existingTag.type !== TagType.AUTHOR) {
+  if (existingTag.type === TagType.STYLE || existingTag.type === TagType.USAGE || existingTag.type === TagType.WORK) {
     const duplicateName = await db.tag.findFirst({
       where: {
         id: { not: existingTag.id },
@@ -220,7 +246,21 @@ export async function updateTag(input: unknown) {
       }
     });
     if (duplicateName) {
-      return { ok: false as const, error: "Style and usage tag names must stay unique." };
+      return { ok: false as const, error: "Style, usage, and work tag names must stay unique." };
+    }
+  }
+
+  if (existingTag.type === TagType.CHARACTER) {
+    const duplicateCharacter = await db.tag.findFirst({
+      where: {
+        id: { not: existingTag.id },
+        type: TagType.CHARACTER,
+        workTagId: existingTag.workTagId,
+        name: parsed.data.name
+      }
+    });
+    if (duplicateCharacter) {
+      return { ok: false as const, error: "Character name must be unique within the same work." };
     }
   }
 
@@ -258,6 +298,19 @@ export async function deleteTag(tagId: number) {
 
   if (tag.type === TagType.TYPE) {
     return { ok: false as const, error: "Type tags are fixed and cannot be deleted." };
+  }
+
+  if (tag.type === TagType.WORK) {
+    const characterCount = await db.tag.count({
+      where: {
+        type: TagType.CHARACTER,
+        workTagId: tag.id
+      }
+    });
+
+    if (characterCount > 0) {
+      return { ok: false as const, error: "Work tag has characters linked to it and cannot be deleted." };
+    }
   }
 
   const usedCount = await db.contentTag.count({

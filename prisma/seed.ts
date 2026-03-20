@@ -52,6 +52,11 @@ async function main() {
       create: { name: "Artist A", slug: "artist-a", type: TagType.AUTHOR }
     }),
     prisma.tag.upsert({
+      where: { slug: "blue-archive" },
+      update: {},
+      create: { name: "Blue Archive", slug: "blue-archive", type: TagType.WORK }
+    }),
+    prisma.tag.upsert({
       where: { slug: "watercolor" },
       update: {},
       create: { name: "Watercolor", slug: "watercolor", type: TagType.STYLE }
@@ -87,6 +92,19 @@ async function main() {
       create: { name: "Texture", slug: "type-texture", type: TagType.TYPE }
     })
   ]);
+
+  const characterTag = await prisma.tag.upsert({
+    where: { slug: "character-blue-archive-hoshino" },
+    update: {
+      workTagId: tags[1].id
+    },
+    create: {
+      name: "Hoshino",
+      slug: "character-blue-archive-hoshino",
+      type: TagType.CHARACTER,
+      workTagId: tags[1].id
+    }
+  });
 
   const content = await prisma.content.upsert({
     where: { slug: "morning-garden" },
@@ -130,20 +148,6 @@ async function main() {
     where: {
       contentId_tagId: {
         contentId: content.id,
-        tagId: tags[1].id
-      }
-    },
-    update: {},
-    create: {
-      contentId: content.id,
-      tagId: tags[1].id
-    }
-  });
-
-  await prisma.contentTag.upsert({
-    where: {
-      contentId_tagId: {
-        contentId: content.id,
         tagId: tags[2].id
       }
     },
@@ -165,6 +169,48 @@ async function main() {
     create: {
       contentId: content.id,
       tagId: tags[3].id
+    }
+  });
+
+  await prisma.contentTag.upsert({
+    where: {
+      contentId_tagId: {
+        contentId: content.id,
+        tagId: tags[4].id
+      }
+    },
+    update: {},
+    create: {
+      contentId: content.id,
+      tagId: tags[4].id
+    }
+  });
+
+  await prisma.contentTag.upsert({
+    where: {
+      contentId_tagId: {
+        contentId: content.id,
+        tagId: tags[1].id
+      }
+    },
+    update: {},
+    create: {
+      contentId: content.id,
+      tagId: tags[1].id
+    }
+  });
+
+  await prisma.contentTag.upsert({
+    where: {
+      contentId_tagId: {
+        contentId: content.id,
+        tagId: characterTag.id
+      }
+    },
+    update: {},
+    create: {
+      contentId: content.id,
+      tagId: characterTag.id
     }
   });
 }

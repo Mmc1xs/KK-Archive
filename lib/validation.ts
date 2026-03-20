@@ -104,6 +104,10 @@ export const contentSchema = z.object({
   publishStatus: z.enum(["DRAFT", "SUMMIT", "PUBLISHED", "INVISIBLE"]),
   authorTagIds: z.array(z.coerce.number().int().positive()).default([]),
   authorTagNames: z.array(z.string().trim().min(1)).max(1, "Exactly one author is required").default([]),
+  workTagIds: z.array(z.coerce.number().int().positive()).default([]),
+  workTagNames: z.array(z.string().trim().min(1)).max(1, "Exactly one work is required").default([]),
+  characterTagIds: z.array(z.coerce.number().int().positive()).default([]),
+  characterTagNames: z.array(z.string().trim().min(1)).max(1, "Exactly one character is required").default([]),
   styleTagIds: z.array(z.coerce.number().int().positive()).default([]),
   styleTagNames: z.array(z.string().trim().min(1)).default([]),
   usageTagIds: z.array(z.coerce.number().int().positive()).default([]),
@@ -117,6 +121,10 @@ export function normalizeTagType(type: string) {
   switch (type) {
     case "author":
       return TagType.AUTHOR;
+    case "work":
+      return TagType.WORK;
+    case "character":
+      return TagType.CHARACTER;
     case "style":
       return TagType.STYLE;
     case "usage":

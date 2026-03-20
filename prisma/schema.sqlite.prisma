@@ -28,6 +28,8 @@ enum PublishStatus {
 
 enum TagType {
   AUTHOR
+  WORK
+  CHARACTER
   STYLE
   USAGE
   TYPE
@@ -191,10 +193,14 @@ model Tag {
   name        String
   slug        String       @unique
   type        TagType
+  workTagId   Int?         @map("work_tag_id")
+  workTag     Tag?         @relation("CharacterWork", fields: [workTagId], references: [id], onDelete: Restrict)
+  characters  Tag[]        @relation("CharacterWork")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
   contentTags ContentTag[]
 
+  @@index([type, workTagId, name])
   @@map("tags")
 }
 

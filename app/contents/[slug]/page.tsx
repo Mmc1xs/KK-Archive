@@ -45,6 +45,8 @@ export default async function ContentDetailPage({
   });
 
   const authors = content.contentTags.filter((item) => item.tag.type === "AUTHOR").map((item) => item.tag);
+  const works = content.contentTags.filter((item) => item.tag.type === "WORK").map((item) => item.tag);
+  const characters = content.contentTags.filter((item) => item.tag.type === "CHARACTER").map((item) => item.tag);
   const styles = content.contentTags.filter((item) => item.tag.type === "STYLE").map((item) => item.tag);
   const usages = content.contentTags.filter((item) => item.tag.type === "USAGE").map((item) => item.tag);
   const types = content.contentTags.filter((item) => item.tag.type === "TYPE").map((item) => item.tag);
@@ -135,6 +137,8 @@ export default async function ContentDetailPage({
           <div className="grid">
             <TagLinks title="Type" tags={types} type="type" />
             <TagLinks title="Author" tags={authors} type="author" />
+            <TagLinks title="Work" tags={works} type="work" />
+            <TagLinks title="Character" tags={characters} type="character" />
             <TagLinks title="Style" tags={styles} type="style" />
             <TagLinks title="Usage" tags={usages} type="usage" />
           </div>
