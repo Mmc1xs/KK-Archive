@@ -2,11 +2,27 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { SiteNavClient } from "@/components/site-nav-client";
+import { getSiteOrigin } from "@/lib/site-origin";
+
+const siteOrigin = getSiteOrigin();
 
 export const metadata: Metadata = {
+  metadataBase: new URL(siteOrigin),
   title: "KK Archive | Koikatsu Cards, Presets, Scenes and Shared Files",
   description:
-    "A searchable archive for Koikatsu-related files, including cards, presets, scenes, textures, overlays, and other shared resources organized with structured tags."
+    "A searchable archive for Koikatsu-related files, including cards, presets, scenes, textures, overlays, and other shared resources organized with structured tags.",
+  alternates: {
+    canonical: "/"
+  },
+  openGraph: {
+    title: "KK Archive | Koikatsu Cards, Presets, Scenes and Shared Files",
+    description:
+      "A searchable archive for Koikatsu-related files, including cards, presets, scenes, textures, overlays, and other shared resources organized with structured tags.",
+    url: siteOrigin,
+    siteName: "KK Archive",
+    locale: "zh_TW",
+    type: "website"
+  }
 };
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

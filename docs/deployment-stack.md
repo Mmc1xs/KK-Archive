@@ -13,6 +13,26 @@ Recommended production split for this project:
 - The current clean image library is already larger than Supabase Free Storage.
 - Moving image delivery away from the app server reduces future bandwidth pressure.
 
+## Domain and SEO Baseline
+
+For production domain stability and SEO consolidation:
+
+- Set your custom domain (for example `koikatsucards.com`) as Vercel Production primary.
+- Redirect `*.vercel.app` to your custom domain using `308 Permanent Redirect`.
+- Set `SITE_URL` in production env to your final domain origin:
+
+```bash
+SITE_URL="https://koikatsucards.com"
+```
+
+The app uses `SITE_URL` for:
+
+- canonical metadata base URL
+- `robots.txt` sitemap reference
+- `sitemap.xml` entry URLs
+
+If `SITE_URL` is missing, the app falls back to host values from Vercel. That is acceptable for preview but not ideal for production SEO.
+
 ## Phase 1
 
 - Keep the current app working locally.
