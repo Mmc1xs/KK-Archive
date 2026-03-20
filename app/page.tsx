@@ -3,6 +3,7 @@ import { ContentCard } from "@/components/content-card";
 import { getHomepageContents, getHomepageOverviewStats } from "@/lib/content";
 
 export const revalidate = 300;
+export const preferredRegion = "hkg1";
 
 export default async function HomePage() {
   const [contents, overviewStats] = await Promise.all([getHomepageContents(), getHomepageOverviewStats()]);

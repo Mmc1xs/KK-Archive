@@ -141,10 +141,53 @@ type SearchTagsByTypeOptions = {
   workTagId?: number;
 };
 
+const getCachedTagSearchResults = unstable_cache(
+  async (type: TagType, normalizedQuery: string, limit: number, workTagId: number | null) =>
+    db.tag.findMany({
+      where: {
+        type,
+        ...(type === TagType.CHARACTER && workTagId
+          ? {
+              workTagId
+            }
+          : {}),
+        ...(normalizedQuery
+          ? {
+              OR: [
+                {
+                  name: {
+                    contains: normalizedQuery,
+                    mode: "insensitive"
+                  }
+                },
+                {
+                  slug: {
+                    contains: normalizedQuery,
+                    mode: "insensitive"
+                  }
+                }
+              ]
+            }
+          : {})
+      },
+      orderBy: [{ name: "asc" }],
+      take: limit
+    }),
+  ["tag-search-results"],
+  {
+    revalidate: 120,
+    tags: ["tags"]
+  }
+);
+
 export async function searchTagsByType(options: SearchTagsByTypeOptions) {
   const normalizedQuery = options.query?.trim() ?? "";
   const limit = Math.min(Math.max(options.limit ?? 12, 1), 30);
   const excludeSlugs = [...new Set((options.excludeSlugs ?? []).map((slug) => slug.trim()).filter(Boolean))];
+
+  if (!excludeSlugs.length) {
+    return getCachedTagSearchResults(options.type, normalizedQuery, limit, options.workTagId ?? null);
+  }
 
   return db.tag.findMany({
     where: {

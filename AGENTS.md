@@ -18,6 +18,16 @@ Build a maintainable image browsing website with structured tag-based search.
 - Keep admin routes protected by role checks.
 - Avoid unnecessary abstractions.
 
+## Performance & Security guardrails
+- Keep public pages cache-friendly; do not make the entire app dynamic just to read session state.
+- Scope session reads to protected routes/components whenever possible.
+- Add and maintain database indexes for frequent filters/sorts (especially foreign key + sort order patterns).
+- Keep search/filter APIs lightweight and cache-aware; avoid unnecessary repeated requests.
+- Prefer deployment/runtime regions close to the primary database region.
+- Never expose raw private storage credentials; member downloads should use controlled server-issued links/tokens.
+- Set explicit cache policies for static storage assets (such as images) when object names are immutable.
+- Track route-level latency (TTFB/total time) and optimize bottlenecks before adding new heavy features.
+
 ## Before coding
 - Propose folder structure.
 - Propose database schema.

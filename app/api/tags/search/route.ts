@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { TagType } from "@prisma/client";
 import { searchTagsByType } from "@/lib/tag";
 
+export const preferredRegion = "hkg1";
+
 const ALLOWED_TYPES = new Set<TagType>([TagType.AUTHOR, TagType.WORK, TagType.CHARACTER, TagType.STYLE, TagType.USAGE]);
 
 function parseType(rawType: string | null) {
@@ -47,11 +49,18 @@ export async function GET(request: Request) {
     workTagId: type === TagType.CHARACTER ? workId : undefined
   });
 
-  return NextResponse.json({
-    items: tags.map((tag) => ({
-      id: tag.id,
-      name: tag.name,
-      slug: tag.slug
-    }))
-  });
+  return NextResponse.json(
+    {
+      items: tags.map((tag) => ({
+        id: tag.id,
+        name: tag.name,
+        slug: tag.slug
+      }))
+    },
+    {
+      headers: {
+        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=600"
+      }
+    }
+  );
 }

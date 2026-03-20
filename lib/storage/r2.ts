@@ -9,6 +9,10 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+declare global {
+  var r2ClientSingleton: S3Client | undefined;
+}
+
 function requireEnv(name: string) {
   const value = process.env[name];
   if (!value) {
@@ -30,9 +34,13 @@ export function getR2Config() {
 }
 
 export function createR2Client() {
+  if (global.r2ClientSingleton) {
+    return global.r2ClientSingleton;
+  }
+
   const { accountId } = getR2Config();
 
-  return new S3Client({
+  const client = new S3Client({
     region: "auto",
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: {
@@ -40,6 +48,9 @@ export function createR2Client() {
       secretAccessKey: requireEnv("R2_SECRET_ACCESS_KEY")
     }
   });
+
+  global.r2ClientSingleton = client;
+  return client;
 }
 
 export function buildR2PublicUrl(key: string) {
@@ -58,7 +69,8 @@ export async function createR2MultipartUpload(params: {
     new CreateMultipartUploadCommand({
       Bucket: bucketName,
       Key: params.key,
-      ContentType: params.contentType
+      ContentType: params.contentType,
+      CacheControl: "public, max-age=31536000, immutable"
     })
   );
 
@@ -81,7 +93,8 @@ export async function createR2SingleUploadUrl(params: {
     new PutObjectCommand({
       Bucket: bucketName,
       Key: params.key,
-      ContentType: params.contentType
+      ContentType: params.contentType,
+      CacheControl: "public, max-age=31536000, immutable"
     }),
     { expiresIn: 60 * 15 }
   );

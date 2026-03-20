@@ -118,6 +118,7 @@ model ContentImage {
   createdAt DateTime @default(now()) @map("created_at")
   content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
+  @@index([contentId, sortOrder])
   @@map("content_images")
 }
 
@@ -129,6 +130,7 @@ model ContentDownloadLink {
   createdAt DateTime @default(now()) @map("created_at")
   content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
 
+  @@index([contentId, sortOrder])
   @@map("content_download_links")
 }
 

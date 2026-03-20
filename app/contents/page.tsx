@@ -4,6 +4,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { getBrowsableContentsPage } from "@/lib/content";
 
 const PAGE_SIZE = 12;
+export const preferredRegion = "hkg1";
 
 function buildPagination(totalPages: number, currentPage: number) {
   if (totalPages <= 7) {

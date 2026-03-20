@@ -5,6 +5,7 @@ import { getCurrentSession } from "@/lib/auth/session";
 import { getSearchFilterBootstrap, searchPublishedContents } from "@/lib/content";
 
 const PAGE_SIZE = 12;
+export const preferredRegion = "hkg1";
 
 function readValues(value: string | string[] | undefined) {
   if (!value) {

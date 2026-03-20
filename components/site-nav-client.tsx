@@ -1,8 +1,55 @@
-import Link from "next/link";
-import { getCurrentSession } from "@/lib/auth/session";
+"use client";
 
-export async function SiteNavClient() {
-  const user = await getCurrentSession({ touchActivity: false });
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+type SessionUser = {
+  id: number;
+  email: string;
+  username: string | null;
+  role: "ADMIN" | "AUDIT" | "MEMBER";
+};
+
+export function SiteNavClient() {
+  const [user, setUser] = useState<SessionUser | null>(null);
+  const [resolved, setResolved] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadSession() {
+      try {
+        const response = await fetch("/api/session", {
+          method: "GET",
+          credentials: "same-origin",
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          if (active) {
+            setResolved(true);
+          }
+          return;
+        }
+
+        const data = (await response.json()) as { user: SessionUser | null };
+        if (active) {
+          setUser(data.user ?? null);
+          setResolved(true);
+        }
+      } catch {
+        if (active) {
+          setResolved(true);
+        }
+      }
+    }
+
+    void loadSession();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <>
@@ -15,7 +62,7 @@ export async function SiteNavClient() {
         {user && (user.role === "ADMIN" || user.role === "AUDIT") ? <Link href="/admin">Admin</Link> : null}
       </div>
       <div className="inline-actions">
-        {user ? (
+        {resolved && user ? (
           <>
             <Link href="/profile" className="link-pill">
               Profile
@@ -27,7 +74,7 @@ export async function SiteNavClient() {
               </button>
             </form>
           </>
-        ) : (
+        ) : resolved ? (
           <>
             <Link href="/login" className="link-pill">
               Login
@@ -36,6 +83,8 @@ export async function SiteNavClient() {
               Register
             </Link>
           </>
+        ) : (
+          <span className="muted">...</span>
         )}
       </div>
     </>

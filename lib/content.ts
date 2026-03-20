@@ -336,6 +336,10 @@ const getCachedPublicBrowsableContentsPage = unstable_cache(
 );
 
 export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolean) {
+  if (!isLoggedIn) {
+    return getCachedPublicBrowsableContentBySlug(slug);
+  }
+
   return db.content.findFirst({
     where: {
       slug,
@@ -366,6 +370,39 @@ export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolea
     }
   });
 }
+
+const getCachedPublicBrowsableContentBySlug = unstable_cache(
+  async (slug: string) =>
+    db.content.findFirst({
+      where: {
+        slug,
+        publishStatus: PublishStatus.PUBLISHED
+      },
+      include: {
+        hostedFiles: {
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+          select: {
+            id: true,
+            fileName: true,
+            objectKey: true
+          }
+        },
+        images: {
+          orderBy: { sortOrder: "asc" }
+        },
+        downloadLinks: {
+          orderBy: { sortOrder: "asc" }
+        },
+        contentTags: {
+          include: {
+            tag: true
+          }
+        }
+      }
+    }),
+  ["public-browsable-content-by-slug"],
+  { revalidate: 120 }
+);
 
 export async function getSearchFilters() {
   const tags = await getCachedSearchFilters();

@@ -7,6 +7,8 @@ import { getBrowsableContentBySlug, recordContentView } from "@/lib/content";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 
+export const preferredRegion = "hkg1";
+
 function getReviewStatusMeta(reviewStatus: ReviewStatus) {
   switch (reviewStatus) {
     case ReviewStatus.EDITED:
