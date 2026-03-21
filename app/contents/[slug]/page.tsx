@@ -4,14 +4,16 @@ import { notFound } from "next/navigation";
 import { ReviewStatus } from "@prisma/client";
 import { TagLinks } from "@/components/tag-links";
 import { getCurrentSession } from "@/lib/auth/session";
-import { getBrowsableContentBySlug, recordContentView } from "@/lib/content";
+import { getBrowsableContentBySlug, getBrowsableContentMetadataBySlug, recordContentView } from "@/lib/content";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 
 export const preferredRegion = "hkg1";
 
 function getPrimaryTagName(
-  content: Awaited<ReturnType<typeof getBrowsableContentBySlug>>,
+  content:
+    | Awaited<ReturnType<typeof getBrowsableContentBySlug>>
+    | Awaited<ReturnType<typeof getBrowsableContentMetadataBySlug>>,
   type: "AUTHOR" | "WORK" | "CHARACTER" | "TYPE"
 ) {
   return content?.contentTags.find((item) => item.tag.type === type)?.tag.name?.trim();
@@ -39,7 +41,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const content = await getBrowsableContentBySlug(slug, false);
+  const content = await getBrowsableContentMetadataBySlug(slug);
 
   if (!content) {
     return {
@@ -95,7 +97,7 @@ export default async function ContentDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const user = await getCurrentSession();
+  const user = await getCurrentSession({ touchActivity: false });
   const content = await getBrowsableContentBySlug(slug, Boolean(user));
 
   if (!content) {

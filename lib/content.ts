@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { Prisma, PublishStatus, ReviewStatus, TagType } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
@@ -337,7 +338,7 @@ const getCachedPublicBrowsableContentsPage = unstable_cache(
 
 export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolean) {
   if (!isLoggedIn) {
-    return getCachedPublicBrowsableContentBySlug(slug);
+    return getRequestScopedPublicBrowsableContentBySlug(slug);
   }
 
   return db.content.findFirst({
@@ -403,6 +404,43 @@ const getCachedPublicBrowsableContentBySlug = unstable_cache(
   ["public-browsable-content-by-slug"],
   { revalidate: 120 }
 );
+
+const getRequestScopedPublicBrowsableContentBySlug = cache(async (slug: string) =>
+  getCachedPublicBrowsableContentBySlug(slug)
+);
+
+const getCachedPublicBrowsableContentMetadataBySlug = unstable_cache(
+  async (slug: string) =>
+    db.content.findFirst({
+      where: {
+        slug,
+        publishStatus: PublishStatus.PUBLISHED
+      },
+      select: {
+        title: true,
+        contentTags: {
+          select: {
+            tag: {
+              select: {
+                type: true,
+                name: true
+              }
+            }
+          }
+        }
+      }
+    }),
+  ["public-browsable-content-metadata-by-slug"],
+  { revalidate: 120 }
+);
+
+const getRequestScopedPublicBrowsableContentMetadataBySlug = cache(async (slug: string) =>
+  getCachedPublicBrowsableContentMetadataBySlug(slug)
+);
+
+export async function getBrowsableContentMetadataBySlug(slug: string) {
+  return getRequestScopedPublicBrowsableContentMetadataBySlug(slug);
+}
 
 export async function getSearchFilters() {
   const tags = await getCachedSearchFilters();

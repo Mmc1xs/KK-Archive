@@ -58,7 +58,7 @@ export default async function SearchPage({
   const types = readValues(params.types);
   const pageParam = typeof params.page === "string" ? Number(params.page) : 1;
   const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const user = await getCurrentSession();
+  const user = await getCurrentSession({ touchActivity: false });
 
   const [searchFilterBootstrap, resultsPage] = await Promise.all([
     getSearchFilterBootstrap({ author, styles, usages }),

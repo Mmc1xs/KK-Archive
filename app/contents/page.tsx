@@ -51,7 +51,7 @@ export default async function ContentsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const user = await getCurrentSession();
+  const user = await getCurrentSession({ touchActivity: false });
   const pageParam = typeof params.page === "string" ? Number(params.page) : 1;
   const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
   const { items, totalPages, totalCount } = await getBrowsableContentsPage(Boolean(user), currentPage, PAGE_SIZE);
