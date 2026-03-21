@@ -31,7 +31,9 @@ export function ContentCard({ content }: ContentCardProps) {
       <div className="card-body">
         <div className="eyebrow">{eyebrowLabel}</div>
         <h3>
-          <Link href={`/contents/${content.slug}`}>{content.title}</Link>
+          <Link href={`/contents/${content.slug}`} prefetch={false}>
+            {content.title}
+          </Link>
         </h3>
         {content.reviewStatus === "UNVERIFIED" ? <div className="card-warning-chip">Unverified</div> : null}
         <p className="muted">{author}</p>
