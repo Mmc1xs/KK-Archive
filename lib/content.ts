@@ -162,40 +162,35 @@ export async function getHomepageContents() {
 
 const getCachedHomepageOverviewStats = unstable_cache(
   async () => {
-    const [totalPosts, indexedAuthors, fileTypes, styleTags, usageTags] = await Promise.all([
+    const [totalPosts, groupedTagCounts] = await Promise.all([
       db.content.count({
         where: {
           publishStatus: PublishStatus.PUBLISHED
         }
       }),
-      db.tag.count({
+      db.tag.groupBy({
+        by: ["type"],
         where: {
-          type: TagType.AUTHOR
-        }
-      }),
-      db.tag.count({
-        where: {
-          type: TagType.TYPE
-        }
-      }),
-      db.tag.count({
-        where: {
-          type: TagType.STYLE
-        }
-      }),
-      db.tag.count({
-        where: {
-          type: TagType.USAGE
+          type: {
+            in: [TagType.AUTHOR, TagType.TYPE, TagType.STYLE, TagType.USAGE]
+          }
+        },
+        _count: {
+          _all: true
         }
       })
     ]);
 
+    const tagCounts = new Map(
+      groupedTagCounts.map((entry) => [entry.type, entry._count._all])
+    );
+
     return {
       totalPosts,
-      indexedAuthors,
-      fileTypes,
-      styleTags,
-      usageTags
+      indexedAuthors: tagCounts.get(TagType.AUTHOR) ?? 0,
+      fileTypes: tagCounts.get(TagType.TYPE) ?? 0,
+      styleTags: tagCounts.get(TagType.STYLE) ?? 0,
+      usageTags: tagCounts.get(TagType.USAGE) ?? 0
     };
   },
   ["homepage-overview-stats"],
