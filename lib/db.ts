@@ -4,6 +4,16 @@ declare global {
   var prisma: PrismaClient | undefined;
 }
 
+function isBuildTimeExecution() {
+  const lifecycleEvent = process.env.npm_lifecycle_event;
+
+  return (
+    lifecycleEvent === "build" ||
+    lifecycleEvent === "build:postgres" ||
+    process.env.NEXT_PHASE === "phase-production-build"
+  );
+}
+
 function withSupabasePoolerCompatibility(url?: string) {
   if (!url) {
     return url;
@@ -36,6 +46,14 @@ function withSupabasePoolerCompatibility(url?: string) {
 }
 
 function getRuntimeDatabaseUrl() {
+  if (isBuildTimeExecution()) {
+    return (
+      process.env.POSTGRES_SESSION_URL ||
+      process.env.POSTGRES_DIRECT_URL ||
+      withSupabasePoolerCompatibility(process.env.POSTGRES_POOLED_URL)
+    );
+  }
+
   if (process.env.NODE_ENV === "production") {
     return withSupabasePoolerCompatibility(process.env.POSTGRES_POOLED_URL);
   }
