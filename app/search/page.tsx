@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { SearchFilters } from "@/components/search-filters";
@@ -6,6 +7,12 @@ import { getSearchFilterBootstrap, searchPublishedContents } from "@/lib/content
 
 const PAGE_SIZE = 12;
 export const preferredRegion = "hkg1";
+
+export const metadata: Metadata = {
+  title: "Search Koikatsu Cards by Tags | Koikatsu Card Archive",
+  description:
+    "Search Koikatsu cards, presets, scenes, textures, overlays, and shared files by author, work, character, style, usage, and type."
+};
 
 function readValues(value: string | string[] | undefined) {
   if (!value) {

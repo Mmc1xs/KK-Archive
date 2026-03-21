@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -5,6 +6,12 @@ import { getBrowsableContentsPage } from "@/lib/content";
 
 const PAGE_SIZE = 12;
 export const preferredRegion = "hkg1";
+
+export const metadata: Metadata = {
+  title: "Browse Koikatsu Cards and Presets | Koikatsu Card Archive",
+  description:
+    "Explore published Koikatsu cards, presets, scenes, textures, overlays, and shared resources in one searchable archive."
+};
 
 function buildPagination(totalPages: number, currentPage: number) {
   if (totalPages <= 7) {

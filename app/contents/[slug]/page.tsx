@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ReviewStatus } from "@prisma/client";
@@ -8,6 +9,65 @@ import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 
 export const preferredRegion = "hkg1";
+
+function getPrimaryTagName(
+  content: Awaited<ReturnType<typeof getBrowsableContentBySlug>>,
+  type: "AUTHOR" | "WORK" | "CHARACTER" | "TYPE"
+) {
+  return content?.contentTags.find((item) => item.tag.type === type)?.tag.name?.trim();
+}
+
+function normalizeTypeLabel(raw?: string) {
+  if (!raw) {
+    return "Content";
+  }
+
+  const compact = raw.trim();
+  if (!compact) {
+    return "Content";
+  }
+
+  return compact
+    .split(/[\s-_]+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const content = await getBrowsableContentBySlug(slug, false);
+
+  if (!content) {
+    return {
+      title: "Content Not Found | Koikatsu Card Archive"
+    };
+  }
+
+  const work = getPrimaryTagName(content, "WORK");
+  const character = getPrimaryTagName(content, "CHARACTER");
+  const author = getPrimaryTagName(content, "AUTHOR");
+  const type = normalizeTypeLabel(getPrimaryTagName(content, "TYPE"));
+  const normalizedCharacter = character?.toLowerCase();
+  const useCharacter =
+    normalizedCharacter && normalizedCharacter !== "unknown character" && normalizedCharacter !== "unknown";
+
+  const titleParts = [
+    useCharacter ? character : content.title,
+    work,
+    `Koikatsu ${type}`
+  ].filter(Boolean);
+
+  const descriptionSource = work ?? author ?? "the Koikatsu archive";
+
+  return {
+    title: titleParts.join(" | "),
+    description: `View ${content.title} from ${descriptionSource} in the Koikatsu archive, with preview images, structured tags, original source details, and available download options.`
+  };
+}
 
 function getReviewStatusMeta(reviewStatus: ReviewStatus) {
   switch (reviewStatus) {

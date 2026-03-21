@@ -1,9 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { getHomepageContents, getHomepageOverviewStats } from "@/lib/content";
 
 export const revalidate = 300;
 export const preferredRegion = "hkg1";
+
+export const metadata: Metadata = {
+  title: "Koikatsu Card Archive | Presets, Scenes, Textures and Shared Files",
+  description:
+    "Browse a structured Koikatsu archive for character cards, presets, scenes, textures, overlays, and shared files with tag-based filtering."
+};
 
 export default async function HomePage() {
   const [contents, overviewStats] = await Promise.all([getHomepageContents(), getHomepageOverviewStats()]);
