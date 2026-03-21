@@ -153,7 +153,7 @@ const getCachedHomepageContents = unstable_cache(
       }
     }),
   ["homepage-contents"],
-  { revalidate: 300 }
+  { revalidate: 600 }
 );
 
 export async function getHomepageContents() {
@@ -194,7 +194,7 @@ const getCachedHomepageOverviewStats = unstable_cache(
     };
   },
   ["homepage-overview-stats"],
-  { revalidate: 300 }
+  { revalidate: 600 }
 );
 
 export async function getHomepageOverviewStats() {
@@ -328,7 +328,7 @@ const getCachedPublicBrowsableContentsPage = unstable_cache(
     };
   },
   ["public-browsable-contents-page"],
-  { revalidate: 120 }
+  { revalidate: 600 }
 );
 
 export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolean) {
@@ -395,9 +395,9 @@ const getCachedPublicBrowsableContentBySlug = unstable_cache(
           }
         }
       }
-    }),
+  }),
   ["public-browsable-content-by-slug"],
-  { revalidate: 120 }
+  { revalidate: 900 }
 );
 
 const getRequestScopedPublicBrowsableContentBySlug = cache(async (slug: string) =>
@@ -424,9 +424,9 @@ const getCachedPublicBrowsableContentMetadataBySlug = unstable_cache(
           }
         }
       }
-    }),
+  }),
   ["public-browsable-content-metadata-by-slug"],
-  { revalidate: 120 }
+  { revalidate: 1800 }
 );
 
 const getRequestScopedPublicBrowsableContentMetadataBySlug = cache(async (slug: string) =>
@@ -469,7 +469,7 @@ const getCachedSearchTypeFilters = unstable_cache(
       orderBy: [{ name: "asc" }]
     }),
   ["search-type-filters"],
-  { revalidate: 300, tags: ["tags"] }
+  { revalidate: 900, tags: ["tags"] }
 );
 
 export async function getSearchFilterBootstrap(options: SearchFilterBootstrapOptions) {
@@ -523,9 +523,9 @@ const getCachedSearchFilters = unstable_cache(
   async () =>
     db.tag.findMany({
       orderBy: [{ type: "asc" }, { name: "asc" }]
-    }),
+  }),
   ["search-filters"],
-  { revalidate: 300 }
+  { revalidate: 900 }
 );
 
 type SearchContentFilters = {
@@ -641,7 +641,7 @@ const getCachedPublicSearchResults = unstable_cache(
     };
   },
   ["public-search-results"],
-  { revalidate: 120 }
+  { revalidate: 600 }
 );
 
 export async function searchPublishedContents(filters: {
