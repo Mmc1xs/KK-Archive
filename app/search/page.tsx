@@ -24,6 +24,8 @@ function readValues(value: string | string[] | undefined) {
 function buildSearchHref(options: {
   page: number;
   author?: string;
+  work?: string;
+  character?: string;
   styles: string[];
   usages: string[];
   types: string[];
@@ -32,6 +34,12 @@ function buildSearchHref(options: {
 
   if (options.author) {
     params.set("author", options.author);
+  }
+  if (options.work) {
+    params.set("work", options.work);
+  }
+  if (options.character) {
+    params.set("character", options.character);
   }
 
   options.styles.forEach((slug) => params.append("styles", slug));
@@ -53,6 +61,8 @@ export default async function SearchPage({
 }) {
   const params = await searchParams;
   const author = typeof params.author === "string" ? params.author : undefined;
+  const work = typeof params.work === "string" ? params.work : undefined;
+  const character = typeof params.character === "string" ? params.character : undefined;
   const styles = readValues(params.styles);
   const usages = readValues(params.usages);
   const types = readValues(params.types);
@@ -61,10 +71,12 @@ export default async function SearchPage({
   const user = await getCurrentSession({ touchActivity: false });
 
   const [searchFilterBootstrap, resultsPage] = await Promise.all([
-    getSearchFilterBootstrap({ author, styles, usages }),
+    getSearchFilterBootstrap({ author, work, character, styles, usages }),
     searchPublishedContents({
       isLoggedIn: Boolean(user),
       author,
+      work,
+      character,
       styles,
       usages,
       types,
@@ -81,6 +93,8 @@ export default async function SearchPage({
         <SearchFilters
           types={searchFilterBootstrap.types}
           initialAuthor={searchFilterBootstrap.selectedAuthor}
+          initialWork={searchFilterBootstrap.selectedWork}
+          initialCharacter={searchFilterBootstrap.selectedCharacter}
           initialStyles={searchFilterBootstrap.selectedStyles}
           initialUsages={searchFilterBootstrap.selectedUsages}
           initialTypes={types}
@@ -108,6 +122,8 @@ export default async function SearchPage({
               href={buildSearchHref({
                 page: resultsPage.hasPrevious ? resultsPage.page - 1 : 1,
                 author,
+                work,
+                character,
                 styles,
                 usages,
                 types
@@ -129,6 +145,8 @@ export default async function SearchPage({
               href={buildSearchHref({
                 page: resultsPage.hasNext ? resultsPage.page + 1 : resultsPage.page,
                 author,
+                work,
+                character,
                 styles,
                 usages,
                 types

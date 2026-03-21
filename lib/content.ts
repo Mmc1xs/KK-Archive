@@ -528,6 +528,8 @@ export async function getSearchFilters() {
 
 type SearchFilterBootstrapOptions = {
   author?: string;
+  work?: string;
+  character?: string;
   styles?: string[];
   usages?: string[];
 };
@@ -550,16 +552,26 @@ const getCachedSearchTypeFilters = unstable_cache(
 
 export async function getSearchFilterBootstrap(options: SearchFilterBootstrapOptions) {
   const authorSlug = options.author?.trim();
+  const workSlug = options.work?.trim();
+  const characterSlug = options.character?.trim();
   const styleSlugs = normalizeSearchFilterSlugs(options.styles);
   const usageSlugs = normalizeSearchFilterSlugs(options.usages);
 
-  const [types, selectedAuthor, selectedStyles, selectedUsages] = await Promise.all([
+  const [types, selectedAuthor, selectedWork, selectedStyles, selectedUsages] = await Promise.all([
     getCachedSearchTypeFilters(),
     authorSlug
       ? db.tag.findFirst({
           where: {
             type: TagType.AUTHOR,
             slug: authorSlug
+          }
+        })
+      : Promise.resolve(null),
+    workSlug
+      ? db.tag.findFirst({
+          where: {
+            type: TagType.WORK,
+            slug: workSlug
           }
         })
       : Promise.resolve(null),
@@ -587,9 +599,22 @@ export async function getSearchFilterBootstrap(options: SearchFilterBootstrapOpt
       : Promise.resolve([])
   ]);
 
+  const selectedCharacter =
+    characterSlug && selectedWork
+      ? await db.tag.findFirst({
+          where: {
+            type: TagType.CHARACTER,
+            slug: characterSlug,
+            workTagId: selectedWork.id
+          }
+        })
+      : null;
+
   return {
     types,
     selectedAuthor,
+    selectedWork,
+    selectedCharacter,
     selectedStyles,
     selectedUsages
   };
@@ -606,6 +631,8 @@ const getCachedSearchFilters = unstable_cache(
 
 type SearchContentFilters = {
   author?: string;
+  work?: string;
+  character?: string;
   styles?: string[];
   usages?: string[];
   types?: string[];
@@ -639,7 +666,37 @@ function buildSearchWhere(isLoggedIn: boolean, filters: SearchContentFilters): P
   const styleSlugs = normalizeSearchSlugs(filters.styles);
   const usageSlugs = normalizeSearchSlugs(filters.usages);
   const typeSlugs = normalizeSearchSlugs(filters.types);
+  const workSlug = filters.work?.trim();
+  const characterSlug = filters.character?.trim();
   const andConditions: Prisma.ContentWhereInput[] = [
+    ...(workSlug
+      ? [
+          {
+            contentTags: {
+              some: {
+                tag: {
+                  slug: workSlug,
+                  type: TagType.WORK
+                }
+              }
+            }
+          } satisfies Prisma.ContentWhereInput
+        ]
+      : []),
+    ...(characterSlug
+      ? [
+          {
+            contentTags: {
+              some: {
+                tag: {
+                  slug: characterSlug,
+                  type: TagType.CHARACTER
+                }
+              }
+            }
+          } satisfies Prisma.ContentWhereInput
+        ]
+      : []),
     ...styleSlugs.map((slug) => ({
       contentTags: {
         some: {
@@ -695,8 +752,17 @@ function buildSearchWhere(isLoggedIn: boolean, filters: SearchContentFilters): P
 }
 
 const getCachedPublicSearchResults = unstable_cache(
-  async (author?: string, styles?: string[], usages?: string[], types?: string[], safePage = 1, safePageSize = 24) => {
-    const where = buildSearchWhere(false, { author, styles, usages, types });
+  async (
+    author?: string,
+    work?: string,
+    character?: string,
+    styles?: string[],
+    usages?: string[],
+    types?: string[],
+    safePage = 1,
+    safePageSize = 24
+  ) => {
+    const where = buildSearchWhere(false, { author, work, character, styles, usages, types });
 
     const rows = await db.content.findMany({
       where,
@@ -723,6 +789,8 @@ const getCachedPublicSearchResults = unstable_cache(
 export async function searchPublishedContents(filters: {
   isLoggedIn: boolean;
   author?: string;
+  work?: string;
+  character?: string;
   styles?: string[];
   usages?: string[];
   types?: string[];
@@ -732,6 +800,8 @@ export async function searchPublishedContents(filters: {
   const safePage = Number.isInteger(filters.page) && (filters.page ?? 0) > 0 ? (filters.page as number) : 1;
   const safePageSize = Number.isInteger(filters.pageSize) && (filters.pageSize ?? 0) > 0 ? (filters.pageSize as number) : 24;
   const normalizedAuthor = filters.author?.trim();
+  const normalizedWork = filters.work?.trim();
+  const normalizedCharacter = filters.character?.trim();
   const normalizedStyles = normalizeSearchSlugs(filters.styles);
   const normalizedUsages = normalizeSearchSlugs(filters.usages);
   const normalizedTypes = normalizeSearchSlugs(filters.types);
@@ -739,6 +809,8 @@ export async function searchPublishedContents(filters: {
   if (!filters.isLoggedIn) {
     return getCachedPublicSearchResults(
       normalizedAuthor,
+      normalizedWork,
+      normalizedCharacter,
       normalizedStyles,
       normalizedUsages,
       normalizedTypes,
@@ -747,7 +819,14 @@ export async function searchPublishedContents(filters: {
     );
   }
 
-  const where = buildSearchWhere(filters.isLoggedIn, filters);
+  const where = buildSearchWhere(filters.isLoggedIn, {
+    ...filters,
+    work: normalizedWork,
+    character: normalizedCharacter,
+    styles: normalizedStyles,
+    usages: normalizedUsages,
+    types: normalizedTypes
+  });
   const rows = await db.content.findMany({
     where,
     orderBy: { createdAt: "desc" },

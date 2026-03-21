@@ -11,12 +11,14 @@ type SearchTagOption = {
 type SearchFiltersProps = {
   types: SearchTagOption[];
   initialAuthor?: SearchTagOption | null;
+  initialWork?: SearchTagOption | null;
+  initialCharacter?: SearchTagOption | null;
   initialStyles: SearchTagOption[];
   initialUsages: SearchTagOption[];
   initialTypes: string[];
 };
 
-type SearchableTagType = "AUTHOR" | "STYLE" | "USAGE";
+type SearchableTagType = "AUTHOR" | "WORK" | "CHARACTER" | "STYLE" | "USAGE";
 
 const MAX_SELECTED_STYLES = 8;
 const SUGGESTION_LIMIT = 12;
@@ -26,6 +28,7 @@ async function fetchTagSuggestions(options: {
   type: SearchableTagType;
   query: string;
   excludeSlugs?: string[];
+  workId?: number;
 }) {
   const params = new URLSearchParams({
     type: options.type,
@@ -34,6 +37,9 @@ async function fetchTagSuggestions(options: {
   });
 
   (options.excludeSlugs ?? []).forEach((slug) => params.append("exclude", slug));
+  if (options.type === "CHARACTER" && options.workId) {
+    params.set("workId", String(options.workId));
+  }
 
   const response = await fetch(`/api/tags/search?${params.toString()}`, {
     credentials: "same-origin",
@@ -91,6 +97,8 @@ function SearchToggleGroup({
 export function SearchFilters({
   types,
   initialAuthor = null,
+  initialWork = null,
+  initialCharacter = null,
   initialStyles,
   initialUsages,
   initialTypes
@@ -101,6 +109,20 @@ export function SearchFilters({
   const [authorOpen, setAuthorOpen] = useState(false);
   const [authorLoading, setAuthorLoading] = useState(false);
   const [authorHighlight, setAuthorHighlight] = useState(0);
+
+  const [selectedWork, setSelectedWork] = useState<SearchTagOption | null>(initialWork);
+  const [workQuery, setWorkQuery] = useState(initialWork?.name ?? "");
+  const [workOptions, setWorkOptions] = useState<SearchTagOption[]>([]);
+  const [workOpen, setWorkOpen] = useState(false);
+  const [workLoading, setWorkLoading] = useState(false);
+  const [workHighlight, setWorkHighlight] = useState(0);
+
+  const [selectedCharacter, setSelectedCharacter] = useState<SearchTagOption | null>(initialCharacter);
+  const [characterQuery, setCharacterQuery] = useState(initialCharacter?.name ?? "");
+  const [characterOptions, setCharacterOptions] = useState<SearchTagOption[]>([]);
+  const [characterOpen, setCharacterOpen] = useState(false);
+  const [characterLoading, setCharacterLoading] = useState(false);
+  const [characterHighlight, setCharacterHighlight] = useState(0);
 
   const [selectedStyles, setSelectedStyles] = useState<SearchTagOption[]>(initialStyles);
   const [styleQuery, setStyleQuery] = useState("");
@@ -119,6 +141,8 @@ export function SearchFilters({
   const [selectedTypes, setSelectedTypes] = useState(initialTypes);
 
   const authorRef = useRef<HTMLDivElement>(null);
+  const workRef = useRef<HTMLDivElement>(null);
+  const characterRef = useRef<HTMLDivElement>(null);
   const styleRef = useRef<HTMLDivElement>(null);
   const usageRef = useRef<HTMLDivElement>(null);
 
@@ -127,6 +151,10 @@ export function SearchFilters({
     const usageKey = initialUsages.map((item) => item.slug).sort().join("|");
     setSelectedAuthor(initialAuthor);
     setAuthorQuery(initialAuthor?.name ?? "");
+    setSelectedWork(initialWork);
+    setWorkQuery(initialWork?.name ?? "");
+    setSelectedCharacter(initialCharacter);
+    setCharacterQuery(initialCharacter?.name ?? "");
     setSelectedStyles(initialStyles);
     setSelectedUsages(initialUsages);
     setSelectedTypes(initialTypes);
@@ -138,6 +166,12 @@ export function SearchFilters({
     initialAuthor?.id,
     initialAuthor?.slug,
     initialAuthor?.name,
+    initialWork?.id,
+    initialWork?.slug,
+    initialWork?.name,
+    initialCharacter?.id,
+    initialCharacter?.slug,
+    initialCharacter?.name,
     initialStyles,
     initialUsages,
     initialTypes
@@ -148,6 +182,12 @@ export function SearchFilters({
       const node = event.target as Node;
       if (!authorRef.current?.contains(node)) {
         setAuthorOpen(false);
+      }
+      if (!workRef.current?.contains(node)) {
+        setWorkOpen(false);
+      }
+      if (!characterRef.current?.contains(node)) {
+        setCharacterOpen(false);
       }
       if (!styleRef.current?.contains(node)) {
         setStyleOpen(false);
@@ -188,6 +228,64 @@ export function SearchFilters({
       clearTimeout(timer);
     };
   }, [authorOpen, authorQuery]);
+
+  useEffect(() => {
+    if (!workOpen) {
+      return;
+    }
+
+    let active = true;
+    const timer = setTimeout(async () => {
+      setWorkLoading(true);
+      const items = await fetchTagSuggestions({
+        type: "WORK",
+        query: workQuery
+      });
+      if (active) {
+        setWorkOptions(items);
+        setWorkHighlight(0);
+        setWorkLoading(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [workOpen, workQuery]);
+
+  useEffect(() => {
+    if (!characterOpen) {
+      return;
+    }
+
+    if (!selectedWork) {
+      setCharacterOptions([]);
+      setCharacterHighlight(0);
+      setCharacterLoading(false);
+      return;
+    }
+
+    let active = true;
+    const timer = setTimeout(async () => {
+      setCharacterLoading(true);
+      const items = await fetchTagSuggestions({
+        type: "CHARACTER",
+        query: characterQuery,
+        workId: selectedWork.id
+      });
+      if (active) {
+        setCharacterOptions(items);
+        setCharacterHighlight(0);
+        setCharacterLoading(false);
+      }
+    }, SEARCH_DEBOUNCE_MS);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [characterOpen, characterQuery, selectedWork]);
 
   useEffect(() => {
     if (!styleOpen) {
@@ -256,6 +354,111 @@ export function SearchFilters({
     setAuthorQuery("");
     setAuthorOpen(false);
     setAuthorHighlight(0);
+  }
+
+  function selectWork(option: SearchTagOption) {
+    setSelectedWork(option);
+    setWorkQuery(option.name);
+    setWorkOpen(false);
+    setSelectedCharacter(null);
+    setCharacterQuery("");
+    setCharacterOptions([]);
+    setCharacterHighlight(0);
+  }
+
+  function clearWork() {
+    setSelectedWork(null);
+    setWorkQuery("");
+    setWorkOpen(false);
+    setWorkHighlight(0);
+    setSelectedCharacter(null);
+    setCharacterQuery("");
+    setCharacterOptions([]);
+    setCharacterOpen(false);
+    setCharacterHighlight(0);
+  }
+
+  function handleWorkKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!workOptions.length) {
+      if (event.key === "Escape") {
+        setWorkOpen(false);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setWorkOpen(true);
+      setWorkHighlight((current) => Math.min(current + 1, workOptions.length - 1));
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setWorkHighlight((current) => Math.max(current - 1, 0));
+      return;
+    }
+
+    if (event.key === "Enter" && workOpen) {
+      event.preventDefault();
+      const option = workOptions[workHighlight];
+      if (option) {
+        selectWork(option);
+      }
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setWorkOpen(false);
+    }
+  }
+
+  function selectCharacter(option: SearchTagOption) {
+    setSelectedCharacter(option);
+    setCharacterQuery(option.name);
+    setCharacterOpen(false);
+  }
+
+  function clearCharacter() {
+    setSelectedCharacter(null);
+    setCharacterQuery("");
+    setCharacterOpen(false);
+    setCharacterHighlight(0);
+  }
+
+  function handleCharacterKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (!characterOptions.length) {
+      if (event.key === "Escape") {
+        setCharacterOpen(false);
+      }
+      return;
+    }
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setCharacterOpen(true);
+      setCharacterHighlight((current) => Math.min(current + 1, characterOptions.length - 1));
+      return;
+    }
+
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setCharacterHighlight((current) => Math.max(current - 1, 0));
+      return;
+    }
+
+    if (event.key === "Enter" && characterOpen) {
+      event.preventDefault();
+      const option = characterOptions[characterHighlight];
+      if (option) {
+        selectCharacter(option);
+      }
+      return;
+    }
+
+    if (event.key === "Escape") {
+      setCharacterOpen(false);
+    }
   }
 
   function handleAuthorKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -446,6 +649,121 @@ export function SearchFilters({
                 ))
               ) : (
                 <div className="search-author-empty">No matching authors.</div>
+              )}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="field">
+        <label htmlFor="work-search">Work</label>
+        <div className="search-author-picker" ref={workRef}>
+          <div className="search-author-input-wrap">
+            <input
+              id="work-search"
+              type="text"
+              value={workQuery}
+              onChange={(event) => {
+                const nextQuery = event.target.value;
+                setWorkQuery(nextQuery);
+                setWorkOpen(true);
+                if (selectedWork && nextQuery !== selectedWork.name) {
+                  setSelectedWork(null);
+                  setSelectedCharacter(null);
+                  setCharacterQuery("");
+                }
+              }}
+              onFocus={() => setWorkOpen(true)}
+              onKeyDown={handleWorkKeyDown}
+              placeholder="Search work"
+              autoComplete="off"
+            />
+            {selectedWork ? (
+              <button type="button" className="search-inline-clear" onClick={clearWork}>
+                Clear
+              </button>
+            ) : null}
+          </div>
+
+          {selectedWork ? <input type="hidden" name="work" value={selectedWork.slug} /> : null}
+
+          {workOpen ? (
+            <div className="search-author-panel">
+              {workLoading ? (
+                <div className="search-author-empty">Searching...</div>
+              ) : workOptions.length ? (
+                workOptions.map((work, index) => (
+                  <button
+                    key={`work-${work.id}`}
+                    type="button"
+                    className={index === workHighlight ? "search-author-option active" : "search-author-option"}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectWork(work)}
+                  >
+                    <span className="search-author-label">{work.name || "Unknown work"}</span>
+                  </button>
+                ))
+              ) : (
+                <div className="search-author-empty">No matching works.</div>
+              )}
+            </div>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="field">
+        <label htmlFor="character-search">Character</label>
+        <div className="search-author-picker" ref={characterRef}>
+          <div className="search-author-input-wrap">
+            <input
+              id="character-search"
+              type="text"
+              value={characterQuery}
+              onChange={(event) => {
+                const nextQuery = event.target.value;
+                setCharacterQuery(nextQuery);
+                setCharacterOpen(true);
+                if (selectedCharacter && nextQuery !== selectedCharacter.name) {
+                  setSelectedCharacter(null);
+                }
+              }}
+              onFocus={() => setCharacterOpen(true)}
+              onKeyDown={handleCharacterKeyDown}
+              placeholder={selectedWork ? "Search character" : "Select work first"}
+              autoComplete="off"
+              disabled={!selectedWork}
+            />
+            {selectedCharacter ? (
+              <button type="button" className="search-inline-clear" onClick={clearCharacter}>
+                Clear
+              </button>
+            ) : null}
+          </div>
+
+          {selectedCharacter ? <input type="hidden" name="character" value={selectedCharacter.slug} /> : null}
+
+          {characterOpen ? (
+            <div className="search-author-panel">
+              {!selectedWork ? (
+                <div className="search-author-empty">Select a work first.</div>
+              ) : characterLoading ? (
+                <div className="search-author-empty">Searching...</div>
+              ) : characterOptions.length ? (
+                characterOptions.map((character, index) => (
+                  <button
+                    key={`character-${character.id}`}
+                    type="button"
+                    className={
+                      index === characterHighlight ? "search-author-option active" : "search-author-option"
+                    }
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => selectCharacter(character)}
+                  >
+                    <span className="search-author-label">{character.name || "Unknown character"}</span>
+                  </button>
+                ))
+              ) : (
+                <div className="search-author-empty">No matching characters.</div>
               )}
             </div>
           ) : null}
