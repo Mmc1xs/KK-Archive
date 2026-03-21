@@ -44,6 +44,27 @@ async function generateUniqueCharacterSlug(name: string, workTagId: number) {
   return slug;
 }
 
+const TAIPEI_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+function getTaipeiDayBucket(date = new Date()) {
+  const shifted = new Date(date.getTime() + TAIPEI_OFFSET_MS);
+  return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), shifted.getUTCDate()) - TAIPEI_OFFSET_MS);
+}
+
+function getTaipeiMonthBucket(date = new Date()) {
+  const shifted = new Date(date.getTime() + TAIPEI_OFFSET_MS);
+  return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth(), 1) - TAIPEI_OFFSET_MS);
+}
+
+function getNextTaipeiMonthBucket(date = new Date()) {
+  const shifted = new Date(date.getTime() + TAIPEI_OFFSET_MS);
+  return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, 1) - TAIPEI_OFFSET_MS);
+}
+
+function addUtcDays(date: Date, days: number) {
+  return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
+}
+
 async function resolveTagIds(type: TagType, existingIds: number[], newNames: string[]) {
   const ids = [...existingIds];
   const normalizedNewNames = [...new Set(newNames.map((name) => name.trim()).filter(Boolean))];
@@ -202,45 +223,100 @@ export async function getHomepageOverviewStats() {
 }
 
 export async function recordContentView(contentId: number) {
-  await db.content.update({
-    where: { id: contentId },
-    data: {
-      viewCount: {
-        increment: 1
+  const viewedAt = new Date();
+  const dayBucket = getTaipeiDayBucket(viewedAt);
+
+  await db.$transaction([
+    db.content.update({
+      where: { id: contentId },
+      data: {
+        viewCount: {
+          increment: 1
+        },
+        lastViewedAt: viewedAt
+      }
+    }),
+    db.contentViewDaily.upsert({
+      where: {
+        contentId_viewDate: {
+          contentId,
+          viewDate: dayBucket
+        }
       },
-      lastViewedAt: new Date()
-    }
-  });
+      update: {
+        viewCount: {
+          increment: 1
+        }
+      },
+      create: {
+        contentId,
+        viewDate: dayBucket,
+        viewCount: 1
+      }
+    })
+  ]);
 }
 
 export async function getContentViewAnalytics() {
-  const totalViews = await db.content.aggregate({
-    _sum: {
-      viewCount: true
-    }
-  });
-  const viewedContents = await db.content.count({
-    where: {
-      viewCount: {
-        gt: 0
+  const now = new Date();
+  const dayBucket = getTaipeiDayBucket(now);
+  const nextDayBucket = addUtcDays(dayBucket, 1);
+  const monthBucket = getTaipeiMonthBucket(now);
+  const nextMonthBucket = getNextTaipeiMonthBucket(now);
+
+  const [totalViews, viewedContents, dayViews, monthViews, topViewedContents] = await Promise.all([
+    db.content.aggregate({
+      _sum: {
+        viewCount: true
       }
-    }
-  });
-  const topViewedContents = await db.content.findMany({
-    orderBy: [{ viewCount: "desc" }, { lastViewedAt: "desc" }],
-    take: 6,
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      publishStatus: true,
-      viewCount: true,
-      lastViewedAt: true
-    }
-  });
+    }),
+    db.content.count({
+      where: {
+        viewCount: {
+          gt: 0
+        }
+      }
+    }),
+    db.contentViewDaily.aggregate({
+      _sum: {
+        viewCount: true
+      },
+      where: {
+        viewDate: {
+          gte: dayBucket,
+          lt: nextDayBucket
+        }
+      }
+    }),
+    db.contentViewDaily.aggregate({
+      _sum: {
+        viewCount: true
+      },
+      where: {
+        viewDate: {
+          gte: monthBucket,
+          lt: nextMonthBucket
+        }
+      }
+    }),
+    db.content.findMany({
+      orderBy: [{ viewCount: "desc" }, { lastViewedAt: "desc" }],
+      take: 6,
+      select: {
+        id: true,
+        title: true,
+        slug: true,
+        publishStatus: true,
+        viewCount: true,
+        lastViewedAt: true
+      }
+    })
+  ]);
 
   return {
     totalViews: totalViews._sum.viewCount ?? 0,
+    perDayViews: dayViews._sum.viewCount ?? 0,
+    perMonthViews: monthViews._sum.viewCount ?? 0,
     viewedContents,
     topViewedContents
   };

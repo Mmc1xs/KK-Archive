@@ -32,6 +32,16 @@ export default async function AdminViewsPage() {
             <small>Total content detail page opens recorded so far</small>
           </article>
           <article className="admin-stat-card">
+            <span className="eyebrow">Per-day Views</span>
+            <strong>{contentViews.perDayViews}</strong>
+            <small>Total content detail page opens recorded for today</small>
+          </article>
+          <article className="admin-stat-card">
+            <span className="eyebrow">Per-month Views</span>
+            <strong>{contentViews.perMonthViews}</strong>
+            <small>Total content detail page opens recorded for this month</small>
+          </article>
+          <article className="admin-stat-card">
             <span className="eyebrow">Viewed Posts</span>
             <strong>{contentViews.viewedContents}</strong>
             <small>How many posts have at least one recorded view</small>

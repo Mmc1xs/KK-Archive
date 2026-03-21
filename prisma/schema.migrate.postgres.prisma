@@ -100,10 +100,25 @@ model Content {
   images        ContentImage[]
   downloadLinks ContentDownloadLink[]
   contentTags   ContentTag[]
+  dailyViews    ContentViewDaily[]
 
   @@index([publishStatus, createdAt])
   @@index([reviewStatus, updatedAt])
   @@map("contents")
+}
+
+model ContentViewDaily {
+  contentId Int      @map("content_id")
+  viewDate  DateTime @map("view_date")
+  viewCount Int      @default(0) @map("view_count")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, viewDate])
+  @@index([viewDate])
+  @@index([viewDate, viewCount])
+  @@map("content_view_daily")
 }
 
 model ContentImage {
