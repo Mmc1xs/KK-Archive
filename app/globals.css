@@ -824,12 +824,14 @@ button {
   display: grid;
   justify-items: end;
   gap: 14px;
+  min-width: min(100%, 600px);
 }
 
 .admin-contents-review-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  grid-template-columns: repeat(3, minmax(132px, 1fr));
   gap: 12px;
+  width: 100%;
 }
 
 .admin-review-stat {
@@ -850,6 +852,17 @@ button {
   border-color: var(--accent);
   box-shadow: 0 16px 32px rgba(65, 170, 255, 0.12);
   background: linear-gradient(180deg, rgba(65, 170, 255, 0.08), rgba(255, 255, 255, 0.94));
+}
+
+@media (max-width: 980px) {
+  .admin-contents-toolbar {
+    min-width: 100%;
+    justify-items: stretch;
+  }
+
+  .admin-contents-review-stats {
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  }
 }
 
 .admin-stat-card,
