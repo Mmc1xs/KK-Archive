@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { getContentViewAnalytics } from "@/lib/content";
-import { requireAdmin } from "@/lib/auth/session";
+import { requireStaff } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/utils";
 
 export default async function AdminViewsPage() {
-  await requireAdmin({ touchActivity: false });
+  await requireStaff({ touchActivity: false });
   const contentViews = await getContentViewAnalytics();
 
   return (
@@ -12,7 +12,7 @@ export default async function AdminViewsPage() {
       <section className="panel">
         <div className="split">
           <div>
-            <div className="eyebrow">Admin Only</div>
+            <div className="eyebrow">Staff Access</div>
             <h1 className="title-lg">Content View Details</h1>
           </div>
           <div className="inline-actions">
