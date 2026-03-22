@@ -15,13 +15,13 @@ export default async function AdminPage() {
           <Link href="/admin/contents" className="button">
             {isAdmin ? "Manage Contents" : "Review Contents"}
           </Link>
+          <Link href="/admin/views" className="button secondary">
+            Content Views
+          </Link>
           {isAdmin ? (
             <>
               <Link href="/admin/activity" className="button secondary">
                 Account Activity
-              </Link>
-              <Link href="/admin/views" className="button secondary">
-                Content Views
               </Link>
               <Link href="/admin/tags" className="link-pill">
                 Manage Tags
@@ -67,6 +67,9 @@ export default async function AdminPage() {
             </Link>
             <Link href="/admin/contents?review=edited" className="link-pill">
               View Edited
+            </Link>
+            <Link href="/admin/views" className="link-pill">
+              Open View Reports
             </Link>
           </div>
         </section>
