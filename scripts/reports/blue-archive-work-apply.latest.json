@@ -1,0 +1,1610 @@
+{
+  "generatedAt": "2026-03-22T05:25:16.214Z",
+  "workCanonicalName": "Blue Archive",
+  "workCanonicalSlug": "blue-archive",
+  "totalCandidates": 177,
+  "processedCount": 177,
+  "workAppliedCount": 2,
+  "characterAppliedCount": 0,
+  "workOnlyCount": 2,
+  "skippedCount": 175,
+  "ambiguousCharacterCount": 0,
+  "unmatchedCharacterCount": 2,
+  "applied": [
+    {
+      "slug": "pixiv-108830451",
+      "title": "【キャラ配布】鬼方カヨコ",
+      "sourceLink": "https://www.pixiv.net/artworks/108830451",
+      "workApplied": true,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "unmatched"
+    },
+    {
+      "slug": "pixiv-131636934",
+      "title": "【キャラ配布】鬼方カヨコ",
+      "sourceLink": "https://www.pixiv.net/artworks/131636934",
+      "workApplied": true,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "unmatched"
+    }
+  ],
+  "skipped": [
+    {
+      "slug": "pixiv-140091845",
+      "title": "調月リオ● キャラ配 布 / Rio Card",
+      "sourceLink": "https://www.pixiv.net/artworks/140091845",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-121251999",
+      "title": "ニヤニヤ教授",
+      "sourceLink": "https://www.pixiv.net/artworks/121251999",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-108316595",
+      "title": "5月①爱丽丝(女仆) /Tendou Alice /天童アリス",
+      "sourceLink": "https://www.pixiv.net/artworks/108316595",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tendou Alice",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123150913",
+      "title": "[card]妃咲v2.0",
+      "sourceLink": "https://www.pixiv.net/artworks/123150913",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124312081",
+      "title": "伊落マリー● キャラ配 布 / Mari Card",
+      "sourceLink": "https://www.pixiv.net/artworks/124312081",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Iochi Mari",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-114929292",
+      "title": "秤アツコ",
+      "sourceLink": "https://www.pixiv.net/artworks/114929292",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hakari Atsuko",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-130594811",
+      "title": "【衣装配布】アズサの衣装カード公開",
+      "sourceLink": "https://www.pixiv.net/artworks/130594811",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Shirasu Azusa",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-122224376",
+      "title": "8月② 明日奈(BunnyGirl)/Asuna/アスナ",
+      "sourceLink": "https://www.pixiv.net/artworks/122224376",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ichinose Asuna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-117801758",
+      "title": "Card bluearchive Igusa Haruka",
+      "sourceLink": "https://www.pixiv.net/artworks/117801758",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-104205323",
+      "title": "12月③ 鹫见芹娜 /Serina /鷲見セリナ",
+      "sourceLink": "https://www.pixiv.net/artworks/104205323",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Sumi Serina",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-122712309",
+      "title": "Blue archive　Kasumi Kinugawa",
+      "sourceLink": "https://www.pixiv.net/artworks/122712309",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Kinugawa Kasumi",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-115333623",
+      "title": "Card koikatsu bluearchive Maki",
+      "sourceLink": "https://www.pixiv.net/artworks/115333623",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-135672636",
+      "title": "【UPDATE】（V2）【キャラ配布】生塩ノア",
+      "sourceLink": "https://www.pixiv.net/artworks/135672636",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ushio Noa",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-136071234",
+      "title": "仲正イチカ  修复",
+      "sourceLink": "https://www.pixiv.net/artworks/136071234",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Nakamasa Ichika",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-133374600",
+      "title": "脸部委托展示/FACE Commission Showcase",
+      "sourceLink": "https://www.pixiv.net/artworks/133374600",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119213405",
+      "title": "5月② 星野(swimsuit)/Hoshino/ホシノ",
+      "sourceLink": "https://www.pixiv.net/artworks/119213405",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Takanashi Hoshino",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119248945",
+      "title": "Post 5651",
+      "sourceLink": "https://www.pixiv.net/artworks/119248945",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-113607686",
+      "title": "Kuda Izuna (kk card)",
+      "sourceLink": "https://www.pixiv.net/artworks/113607686",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Kuda Izuna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-103578498",
+      "title": "阿慈谷ヒフミ",
+      "sourceLink": "https://www.pixiv.net/artworks/103578498",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ajitani Hifumi",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-138985425",
+      "title": "ブルーアーカイブ　ミチル(ドレス)　千鳥ミチル card",
+      "sourceLink": "https://www.pixiv.net/artworks/138985425",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-133005148",
+      "title": "聖園ミカ[重制]",
+      "sourceLink": "https://www.pixiv.net/artworks/133005148",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Misono Mika",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-136914102",
+      "title": "配布 ステラソラ コハク(水着)  card",
+      "sourceLink": "https://www.pixiv.net/artworks/136914102",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-120985975",
+      "title": "真纪",
+      "sourceLink": "https://www.pixiv.net/artworks/120985975",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-120307101",
+      "title": "Sorasaki Hina ver.Kai",
+      "sourceLink": "https://www.pixiv.net/artworks/120307101",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Sorasaki Hina",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-137288098",
+      "title": "10月 莉音/リオ/Rio",
+      "sourceLink": "https://www.pixiv.net/artworks/137288098",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-118367554",
+      "title": "Blue Archive maki Update.",
+      "sourceLink": "https://www.pixiv.net/artworks/118367554",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-137887207",
+      "title": "【碧蓝档案】妃咲 Kisaki",
+      "sourceLink": "https://www.pixiv.net/artworks/137887207",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ryuge Kisaki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-136805955",
+      "title": "調月リオ",
+      "sourceLink": "https://www.pixiv.net/artworks/136805955",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124566069",
+      "title": "11月① 玛丽(idol)/Mari/マリー",
+      "sourceLink": "https://www.pixiv.net/artworks/124566069",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Iochi Mari",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124262631",
+      "title": "优香",
+      "sourceLink": "https://www.pixiv.net/artworks/124262631",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hayase Yuuka",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123941545",
+      "title": "Kazusa (card release) rework",
+      "sourceLink": "https://www.pixiv.net/artworks/123941545",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132551170-2",
+      "title": "Yuuka Koikatsu Character Card!",
+      "sourceLink": "https://www.pixiv.net/artworks/132551170",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hayase Yuuka",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132550821-2",
+      "title": "Toki Asuma Koikatsu Edited Card",
+      "sourceLink": "https://www.pixiv.net/artworks/132550821",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Asuma Toki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-105728237",
+      "title": "2月① 圣园未花 /Misono Mika /聖園ミカ",
+      "sourceLink": "https://www.pixiv.net/artworks/105728237",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Misono Mika",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-112798012",
+      "title": "[coordinate]护士装 明日奈",
+      "sourceLink": "https://www.pixiv.net/artworks/112798012",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ichinose Asuna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-125448552",
+      "title": "小春",
+      "sourceLink": "https://www.pixiv.net/artworks/125448552",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Shimoe Koharu",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-109700642",
+      "title": "Post 14122",
+      "sourceLink": "https://www.pixiv.net/artworks/109700642",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-125542927",
+      "title": "12月① 白子(恐怖)/Shiroko(Terror)/シロコ",
+      "sourceLink": "https://www.pixiv.net/artworks/125542927",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Sunaookami Shiroko",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-107441813",
+      "title": "4月① 睦月(正月) /Asagi Mutsuki /浅黄ムツキ",
+      "sourceLink": "https://www.pixiv.net/artworks/107441813",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Asagi Mutsuki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124589455",
+      "title": "Post 12784",
+      "sourceLink": "https://www.pixiv.net/artworks/124589455",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-136606544",
+      "title": "ブルーアーカイブ レイサ(マジカル) 宇沢レイサ card",
+      "sourceLink": "https://www.pixiv.net/artworks/136606544",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-137389454",
+      "title": "ブルーアーカイブ　スバル　梯スバル card",
+      "sourceLink": "https://www.pixiv.net/artworks/137389454",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119633725-2",
+      "title": "Blue Archive - Asuna",
+      "sourceLink": "https://www.pixiv.net/artworks/119633725",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ichinose Asuna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-126629656",
+      "title": "1月① 优香(Pajama)/早瀬ユウカ(パジャマ)/Yuuka",
+      "sourceLink": "https://www.pixiv.net/artworks/126629656",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hayase Yuuka",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-117889227",
+      "title": "Hanekawa Hasumi",
+      "sourceLink": "https://www.pixiv.net/artworks/117889227",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hanekawa Hasumi",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-113072545",
+      "title": "Hanako",
+      "sourceLink": "https://www.pixiv.net/artworks/113072545",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Urawa Hanako",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-126479247",
+      "title": "莉音",
+      "sourceLink": "https://www.pixiv.net/artworks/126479247",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-112286181",
+      "title": "Post 18175",
+      "sourceLink": "https://www.pixiv.net/artworks/112286181",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119633725",
+      "title": "Blue Archive - Asuna",
+      "sourceLink": "https://www.pixiv.net/artworks/119633725",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ichinose Asuna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-134043430",
+      "title": "Post 24501",
+      "sourceLink": "https://www.pixiv.net/artworks/134043430",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-135585162",
+      "title": "Post 26453",
+      "sourceLink": "https://www.pixiv.net/artworks/135585162",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-128534514",
+      "title": "3月① 圣娅/セイア/Seia",
+      "sourceLink": "https://www.pixiv.net/artworks/128534514",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Yurizono Seia",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-95916574",
+      "title": "Post 19306",
+      "sourceLink": "https://www.pixiv.net/artworks/95916574",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-114784352",
+      "title": "[配布]泳装花子",
+      "sourceLink": "https://www.pixiv.net/artworks/114784352",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Urawa Hanako",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124909621",
+      "title": "調月リオ● キャラ配 布 / Rio Card",
+      "sourceLink": "https://www.pixiv.net/artworks/124909621",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124576391",
+      "title": "橘ノゾミ & 橘ヒカリ",
+      "sourceLink": "https://www.pixiv.net/artworks/124576391",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129770501",
+      "title": "調月リオ",
+      "sourceLink": "https://www.pixiv.net/artworks/129770501",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-134259983",
+      "title": "Post 25421",
+      "sourceLink": "https://www.pixiv.net/artworks/134259983",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-139233617",
+      "title": "12月① 贵音/タカネ/Takane",
+      "sourceLink": "https://www.pixiv.net/artworks/139233617",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-140278371",
+      "title": "ブルーアーカイブ ケイ card",
+      "sourceLink": "https://www.pixiv.net/artworks/140278371",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-140513349",
+      "title": "ブルーアーカイブ アリス(臨戦) 天童アリス  card",
+      "sourceLink": "https://www.pixiv.net/artworks/140513349",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tendou Alice",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132742875",
+      "title": "【7月限定先行配布】御稜ナグサ",
+      "sourceLink": "https://www.pixiv.net/artworks/132742875",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-141929384",
+      "title": "1月② 星野(中秋)/Hoshino/ホシノ",
+      "sourceLink": "https://www.pixiv.net/artworks/141929384",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Takanashi Hoshino",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-134287874",
+      "title": "Post 24799",
+      "sourceLink": "https://www.pixiv.net/artworks/134287874",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-107023291",
+      "title": "BlueArchive Kazusa",
+      "sourceLink": "https://www.pixiv.net/artworks/107023291",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129578153",
+      "title": "Tsukatsuki Rio's Plugsuit",
+      "sourceLink": "https://www.pixiv.net/artworks/129578153",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-136022896",
+      "title": "ブルーアーカイブ リツ 薄葉リツ card",
+      "sourceLink": "https://www.pixiv.net/artworks/136022896",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119990226",
+      "title": "ブルーアーカイブ　カンナ(水着)　尾刃カンナ card",
+      "sourceLink": "https://www.pixiv.net/artworks/119990226",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Oga Kanna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132989707",
+      "title": "ブルーアーカイブ セイア(水着) 百合園セイア card",
+      "sourceLink": "https://www.pixiv.net/artworks/132989707",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Yurizono Seia",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-120771116",
+      "title": "ブルーアーカイブ　ホシノ(臨戦) 小鳥遊ホシノ card",
+      "sourceLink": "https://www.pixiv.net/artworks/120771116",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Takanashi Hoshino",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-125531795",
+      "title": "【キャラ配布】早瀬ユウカ Hayase Yuuka 📫",
+      "sourceLink": "https://www.pixiv.net/artworks/125531795",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hayase Yuuka",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132400884",
+      "title": "Post 22784",
+      "sourceLink": "https://www.pixiv.net/artworks/132400884",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-120901504",
+      "title": "ノア Update",
+      "sourceLink": "https://www.pixiv.net/artworks/120901504",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ushio Noa",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-140216301",
+      "title": "【1月先行配布】調月リオver3",
+      "sourceLink": "https://www.pixiv.net/artworks/140216301",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123894923",
+      "title": "蒼森ミネ● キャラ配 布 / Mine Card",
+      "sourceLink": "https://www.pixiv.net/artworks/123894923",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Aomori Mine",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-120963767",
+      "title": "ホシノ＊テラー● キャラ配 布 / Hoshino Terror",
+      "sourceLink": "https://www.pixiv.net/artworks/120963767",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Takanashi Hoshino",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-120898389",
+      "title": "羽沼マコト● キャラ配 布 / Makoto Card",
+      "sourceLink": "https://www.pixiv.net/artworks/120898389",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-133060336",
+      "title": "ブルーアーカイブ ハスミ(水着) 羽川ハスミ card",
+      "sourceLink": "https://www.pixiv.net/artworks/133060336",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hanekawa Hasumi",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129369594",
+      "title": "七神リン・キャラ配 布  / Rin Card",
+      "sourceLink": "https://www.pixiv.net/artworks/129369594",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-103177415",
+      "title": "間宵シグレ",
+      "sourceLink": "https://www.pixiv.net/artworks/103177415",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123612464",
+      "title": "コイカツ！でアイドルマリー（衣装増量）",
+      "sourceLink": "https://www.pixiv.net/artworks/123612464",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Iochi Mari",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-117972865",
+      "title": "ブルーアーカイブ シロコ(過去) 砂狼シロコcard",
+      "sourceLink": "https://www.pixiv.net/artworks/117972865",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Sunaookami Shiroko",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119759982",
+      "title": "コイカツ！で尾刃カンナ",
+      "sourceLink": "https://www.pixiv.net/artworks/119759982",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Oga Kanna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129616763",
+      "title": "ブルーアーカイブ ヒカリ 橘ヒカリ card",
+      "sourceLink": "https://www.pixiv.net/artworks/129616763",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-126827589",
+      "title": "【衣装配布】カズサの衣装カード公開",
+      "sourceLink": "https://www.pixiv.net/artworks/126827589",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-135085677",
+      "title": "【キャラ配布】浦和ハナコ",
+      "sourceLink": "https://www.pixiv.net/artworks/135085677",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Urawa Hanako",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-135816467",
+      "title": "Post 26215",
+      "sourceLink": "https://www.pixiv.net/artworks/135816467",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-128910983",
+      "title": "ブルーアーカイブ レイ 野正レイ card",
+      "sourceLink": "https://www.pixiv.net/artworks/128910983",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129583346",
+      "title": "ブルーアーカイブ ノゾミ  橘ノゾミ card",
+      "sourceLink": "https://www.pixiv.net/artworks/129583346",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124651265",
+      "title": "[Character Release] Nozomi",
+      "sourceLink": "https://www.pixiv.net/artworks/124651265",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-99204446",
+      "title": "Yurizono Seia 百合園セイア",
+      "sourceLink": "https://www.pixiv.net/artworks/99204446",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Yurizono Seia",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-108873585",
+      "title": "Blue Archive - Haruna v2 (ハルナ)",
+      "sourceLink": "https://www.pixiv.net/artworks/108873585",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Kurodate Haruna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129124921",
+      "title": "Post 20080",
+      "sourceLink": "https://www.pixiv.net/artworks/129124921",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-98574171",
+      "title": "BlueArchive Iroha",
+      "sourceLink": "https://www.pixiv.net/artworks/98574171",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Natsume Iroha",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124316748",
+      "title": "Smollko",
+      "sourceLink": "https://www.pixiv.net/artworks/124316748",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Sunaookami Shiroko",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-140166520",
+      "title": "ブルーアーカイブ  トキ(臨戦) 飛鳥馬トキ card",
+      "sourceLink": "https://www.pixiv.net/artworks/140166520",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Asuma Toki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-122780375",
+      "title": "Izayoi Nonomi Distribution",
+      "sourceLink": "https://www.pixiv.net/artworks/122780375",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-128627301",
+      "title": "ブルーアーカイブ スミレ(アルバイト) 乙花スミレ card",
+      "sourceLink": "https://www.pixiv.net/artworks/128627301",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-128377342",
+      "title": "【キャラ配布】空崎日奈",
+      "sourceLink": "https://www.pixiv.net/artworks/128377342",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123602101",
+      "title": "ブルーアーカイブ マリー(アイドル) 伊落マリー card",
+      "sourceLink": "https://www.pixiv.net/artworks/123602101",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Iochi Mari",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-122778087",
+      "title": "Post 10642",
+      "sourceLink": "https://www.pixiv.net/artworks/122778087",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-126402065",
+      "title": "仲正イチカ● キャラ配 布 / Ichika Card",
+      "sourceLink": "https://www.pixiv.net/artworks/126402065",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Nakamasa Ichika",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-127651241",
+      "title": "ブルーアーカイブ セナ(私服) 氷室セナ card",
+      "sourceLink": "https://www.pixiv.net/artworks/127651241",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Himuro Sena",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-127642930",
+      "title": "Post 18636",
+      "sourceLink": "https://www.pixiv.net/artworks/127642930",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119734269",
+      "title": "37",
+      "sourceLink": "https://www.pixiv.net/artworks/119734269",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-122099006",
+      "title": "Hanekawa Hasuimi (Remaster)",
+      "sourceLink": "https://www.pixiv.net/artworks/122099006",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-122787196",
+      "title": "ブルーアーカイブ　キサキ　竜華キサキ card",
+      "sourceLink": "https://www.pixiv.net/artworks/122787196",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ryuge Kisaki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-116129634",
+      "title": "玛丽（重制）",
+      "sourceLink": "https://www.pixiv.net/artworks/116129634",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Iochi Mari",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-115554675",
+      "title": "伊吕波",
+      "sourceLink": "https://www.pixiv.net/artworks/115554675",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-121937064",
+      "title": "笑面教授",
+      "sourceLink": "https://www.pixiv.net/artworks/121937064",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119483628",
+      "title": "心奈",
+      "sourceLink": "https://www.pixiv.net/artworks/119483628",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-92766518",
+      "title": "BlueArchive Azusa",
+      "sourceLink": "https://www.pixiv.net/artworks/92766518",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Shirasu Azusa",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-130473772",
+      "title": "4月② 伊织/イオリ/Iori(swimsuit)",
+      "sourceLink": "https://www.pixiv.net/artworks/130473772",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-109639257",
+      "title": "Kisaki",
+      "sourceLink": "https://www.pixiv.net/artworks/109639257",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ryuge Kisaki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-95379000",
+      "title": "Kakudate Karin",
+      "sourceLink": "https://www.pixiv.net/artworks/95379000",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129719474",
+      "title": "Rio's Plugsuit slide-down edit",
+      "sourceLink": "https://www.pixiv.net/artworks/129719474",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-130010069",
+      "title": "「コイカツ」 一之瀬アスナ ● キャラ配布",
+      "sourceLink": "https://www.pixiv.net/artworks/130010069",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ichinose Asuna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123024671",
+      "title": "ブルーアーカイブ アスナ(チアリーダー) 一ノ瀬アスナ card",
+      "sourceLink": "https://www.pixiv.net/artworks/123024671",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ichinose Asuna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-107344564",
+      "title": "Avant garde RIO",
+      "sourceLink": "https://www.pixiv.net/artworks/107344564",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124449006",
+      "title": "Post 12461",
+      "sourceLink": "https://www.pixiv.net/artworks/124449006",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124473099",
+      "title": "ブルーアーカイブ 京極サツキ サツキ card",
+      "sourceLink": "https://www.pixiv.net/artworks/124473099",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-111075052",
+      "title": "8月① 下江小春 /Koharu /コハル(水着)",
+      "sourceLink": "https://www.pixiv.net/artworks/111075052",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Shimoe Koharu",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132329637",
+      "title": "6月 橘光/橘ヒカリ/Hikari",
+      "sourceLink": "https://www.pixiv.net/artworks/132329637",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132960566",
+      "title": "7月① 橘望/橘 ノゾミ/Nozomi",
+      "sourceLink": "https://www.pixiv.net/artworks/132960566",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-122636858",
+      "title": "コイカツ！で猫塚ヒビキ",
+      "sourceLink": "https://www.pixiv.net/artworks/122636858",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Nekozuka Hibiki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124737816",
+      "title": "Black Friday Gift! Mari Card!",
+      "sourceLink": "https://www.pixiv.net/artworks/124737816",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Iochi Mari",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124605345",
+      "title": "明星 ヒマリ　ー　ブルーアーカイブ",
+      "sourceLink": "https://www.pixiv.net/artworks/124605345",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Myojou Himari",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-125466699",
+      "title": "asanagi Kisaki",
+      "sourceLink": "https://www.pixiv.net/artworks/125466699",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ryuge Kisaki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-125306815",
+      "title": "[MOD]小鳥遊ホシノ(星野) 5.0",
+      "sourceLink": "https://www.pixiv.net/artworks/125306815",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Takanashi Hoshino",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-125485956",
+      "title": "ブルーアーカイブ  ユウカ(パジャマ) 早瀬ユウカ card",
+      "sourceLink": "https://www.pixiv.net/artworks/125485956",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hayase Yuuka",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132550821",
+      "title": "Toki Asuma Koikatsu Edited Card",
+      "sourceLink": "https://www.pixiv.net/artworks/132550821",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Asuma Toki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-122098822",
+      "title": "Tsukatsuki Rio (Remaster)",
+      "sourceLink": "https://www.pixiv.net/artworks/122098822",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129013894",
+      "title": "Post 19787",
+      "sourceLink": "https://www.pixiv.net/artworks/129013894",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-121930632",
+      "title": "漆原カグヤ● キャラ配 布 / Kaguya Card",
+      "sourceLink": "https://www.pixiv.net/artworks/121930632",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-118639391",
+      "title": "[Early release] Ichinose Asuna",
+      "sourceLink": "https://www.pixiv.net/artworks/118639391",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ichinose Asuna",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123445343",
+      "title": "ブルーアーカイブ トキ(チアリーダー) 飛鳥馬トキ card",
+      "sourceLink": "https://www.pixiv.net/artworks/123445343",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Asuma Toki",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132551170",
+      "title": "Yuuka Koikatsu Character Card!",
+      "sourceLink": "https://www.pixiv.net/artworks/132551170",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hayase Yuuka",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-116298200",
+      "title": "[38 v.] Saori (Blue Archive)",
+      "sourceLink": "https://www.pixiv.net/artworks/116298200",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Joumae Saori",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-124638956",
+      "title": "Post 12880",
+      "sourceLink": "https://www.pixiv.net/artworks/124638956",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-131353038",
+      "title": "【キャラ配布】合歓垣フブキ",
+      "sourceLink": "https://www.pixiv.net/artworks/131353038",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-121938910",
+      "title": "ブルーアーカイブ　マリナ(チーパオ)　池倉マリナ card",
+      "sourceLink": "https://www.pixiv.net/artworks/121938910",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ikura Marina",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119999005",
+      "title": "キャラカード配布",
+      "sourceLink": "https://www.pixiv.net/artworks/119999005",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-130398260",
+      "title": "ブルーアーカイブ　フィーナ(ガイド)朝比奈フィーナ  card",
+      "sourceLink": "https://www.pixiv.net/artworks/130398260",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-128531826",
+      "title": "【キャラ配布】桐藤ナギサ",
+      "sourceLink": "https://www.pixiv.net/artworks/128531826",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-129680662",
+      "title": "Post 20867",
+      "sourceLink": "https://www.pixiv.net/artworks/129680662",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-128456376",
+      "title": "【キャラ配布】ニコ Niko (ブルーアーカイブ)",
+      "sourceLink": "https://www.pixiv.net/artworks/128456376",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-128603867",
+      "title": "天童アリス(アイドル)&ケイ(short)",
+      "sourceLink": "https://www.pixiv.net/artworks/128603867",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tendou Alice",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119572367",
+      "title": "Satania",
+      "sourceLink": "https://www.pixiv.net/artworks/119572367",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-127952649",
+      "title": "ブルーアーカイブ ジュリ(アルバイト) 牛牧ジュリ card",
+      "sourceLink": "https://www.pixiv.net/artworks/127952649",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Ushimaki Juri",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-127878000",
+      "title": "Post 17927",
+      "sourceLink": "https://www.pixiv.net/artworks/127878000",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-127718148",
+      "title": "Shirasu Azusa - Blue Archive",
+      "sourceLink": "https://www.pixiv.net/artworks/127718148",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Shirasu Azusa",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-127108730",
+      "title": "【Free】調月リオver2",
+      "sourceLink": "https://www.pixiv.net/artworks/127108730",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-118456194",
+      "title": "コイカツ！で奥空アヤネ（＆トキ小修整・追加）",
+      "sourceLink": "https://www.pixiv.net/artworks/118456194",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123894849",
+      "title": "歌住サクラコ● キャラ配 布 / Sakurako Card",
+      "sourceLink": "https://www.pixiv.net/artworks/123894849",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Utazumi Sakurako",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-123816017",
+      "title": "ブルーアーカイブ サクラコ(アイドル) 歌住サクラコ card",
+      "sourceLink": "https://www.pixiv.net/artworks/123816017",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Utazumi Sakurako",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-133286104",
+      "title": "ブルーアーカイブ ナギサ(水着) 桐藤ナギサ card",
+      "sourceLink": "https://www.pixiv.net/artworks/133286104",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132939223",
+      "title": "仲正イチカ 水着 FREE",
+      "sourceLink": "https://www.pixiv.net/artworks/132939223",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Nakamasa Ichika",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132986021",
+      "title": "Post 23853",
+      "sourceLink": "https://www.pixiv.net/artworks/132986021",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-133596132",
+      "title": "なぎさ　hairmod＆card配布",
+      "sourceLink": "https://www.pixiv.net/artworks/133596132",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-133253826",
+      "title": "Post 24368",
+      "sourceLink": "https://www.pixiv.net/artworks/133253826",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132675094",
+      "title": "美游",
+      "sourceLink": "https://www.pixiv.net/artworks/132675094",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-134840179",
+      "title": "秤アツコ　水着",
+      "sourceLink": "https://www.pixiv.net/artworks/134840179",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hakari Atsuko",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-134666046",
+      "title": "ブルーアーカイブ ミサキ(水着) 戒野ミサキ card",
+      "sourceLink": "https://www.pixiv.net/artworks/134666046",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-132188487",
+      "title": "ブルーアーカイブ　キキョウ(水着)桐生キキョウ card",
+      "sourceLink": "https://www.pixiv.net/artworks/132188487",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-131959233",
+      "title": "ブルーアーカイブ　レンゲ(水着)不破レンゲ card",
+      "sourceLink": "https://www.pixiv.net/artworks/131959233",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-133097015",
+      "title": "キャラ配布 仲正 イチカ",
+      "sourceLink": "https://www.pixiv.net/artworks/133097015",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Nakamasa Ichika",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-134990125",
+      "title": "調月リオ(戦闘服)",
+      "sourceLink": "https://www.pixiv.net/artworks/134990125",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Tsukatsuki Rio",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-133359653",
+      "title": "ブルーアーカイブ ミカ(水着) 聖園ミカ card",
+      "sourceLink": "https://www.pixiv.net/artworks/133359653",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Misono Mika",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-135099551",
+      "title": "8月② 渚/ナギサ/Nagisa",
+      "sourceLink": "https://www.pixiv.net/artworks/135099551",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-135484404",
+      "title": "ブルーアーカイブ ミヨ　桜井ミヨ card",
+      "sourceLink": "https://www.pixiv.net/artworks/135484404",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-119633641",
+      "title": "黒見セリカ(水着)",
+      "sourceLink": "https://www.pixiv.net/artworks/119633641",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Kuromi Serika",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-128132850",
+      "title": "ニヤニヤ教授",
+      "sourceLink": "https://www.pixiv.net/artworks/128132850",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-109988925",
+      "title": "秤アツコ  Hakari  Atsuko",
+      "sourceLink": "https://www.pixiv.net/artworks/109988925",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": "Hakari Atsuko",
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-136188547",
+      "title": "9月② 美代/ミヨ/Miyo",
+      "sourceLink": "https://www.pixiv.net/artworks/136188547",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    },
+    {
+      "slug": "pixiv-131170702",
+      "title": "ブルーアーカイブ ナツ(バンド) 柚鳥ナツ card",
+      "sourceLink": "https://www.pixiv.net/artworks/131170702",
+      "workApplied": false,
+      "characterApplied": false,
+      "characterName": null,
+      "reason": "already-up-to-date"
+    }
+  ]
+}

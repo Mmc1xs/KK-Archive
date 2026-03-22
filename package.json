@@ -35,6 +35,8 @@
     "clean:sync-all": "tsx scripts/sync-all-clean-content.ts",
     "clean:move-unuploaded:later": "tsx scripts/move-unuploaded-clean-to-later.ts",
     "clean:move-unuploaded:later:apply": "tsx scripts/move-unuploaded-clean-to-later.ts --apply",
+    "clean:work-report": "tsx scripts/report-pixiv-work-candidates.ts",
+    "clean:work-apply": "tsx scripts/apply-pixiv-work-tags.ts",
     "clean:work-report:blue-archive": "tsx scripts/report-blue-archive-work-candidates.ts",
     "clean:work-apply:blue-archive": "tsx scripts/apply-blue-archive-work-tags.ts",
     "sync:new": "npm run clean:sync-new",
