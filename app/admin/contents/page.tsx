@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ReviewStatus } from "@prisma/client";
 import { deleteContentAction } from "@/app/actions";
 import { requireStaff } from "@/lib/auth/session";
+import { buildContentHref } from "@/lib/content-href";
 import { getAdminContentReviewCounts, getAdminContentsPage } from "@/lib/content";
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
@@ -186,7 +187,7 @@ export default async function AdminContentsPage({
             return (
               <tr key={content.id}>
                 <td>
-                  <Link href={`/contents/${content.slug}`} className="table-title-link">
+                  <Link href={buildContentHref(content.slug)} className="table-title-link">
                     {content.title}
                   </Link>
                 </td>

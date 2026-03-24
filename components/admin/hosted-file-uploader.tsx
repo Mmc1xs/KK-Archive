@@ -290,7 +290,7 @@ export function HostedFileUploader({
         <div>
           <strong>R2 folder</strong>
           <small>
-            Files for this content will be stored under <code>{`uploadfiles/${storageFolder}/{YYYY:MM:DD}/`}</code>.
+            Files for this content will be stored under <code>{`uploadfiles/${storageFolder}/`}</code>.
           </small>
         </div>
         {canUpload ? (

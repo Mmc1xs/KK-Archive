@@ -2,7 +2,8 @@ import { ReviewStatus, TagType } from "@prisma/client";
 import { z } from "zod";
 
 const contentImageUrlSchema = z.string().url("Invalid image URL");
-const internalDownloadPathPattern = /^\/api\/downloads\/content-file\/\d+$/;
+const internalDownloadPathPattern =
+  /^\/api\/downloads\/content-file\/(?:\d+|token\/[A-Za-z0-9_-]+\.[A-Fa-f0-9]+)$/;
 const RESERVED_USERNAMES = new Set([
   "admin",
   "audit",
@@ -96,7 +97,7 @@ export const contentSchema = z.object({
   slug: z
     .string()
     .min(1, "Slug is required")
-    .regex(/^[a-z0-9-]+$/, "Slug may only contain lowercase letters, numbers, and hyphens"),
+    .regex(/^[A-Za-z0-9-#]+$/, "Slug may only contain letters, numbers, hyphens, and #"),
   description: z.string().min(1, "Description is required"),
   coverImageUrl: contentImageUrlSchema,
   sourceLink: optionalUrlSchema,

@@ -226,35 +226,24 @@ export async function recordContentView(contentId: number) {
   const viewedAt = new Date();
   const dayBucket = getTaipeiDayBucket(viewedAt);
 
-  await db.$transaction([
-    db.content.update({
-      where: { id: contentId },
-      data: {
-        viewCount: {
-          increment: 1
-        },
-        lastViewedAt: viewedAt
-      }
-    }),
-    db.contentViewDaily.upsert({
-      where: {
-        contentId_viewDate: {
-          contentId,
-          viewDate: dayBucket
-        }
-      },
-      update: {
-        viewCount: {
-          increment: 1
-        }
-      },
-      create: {
+  await db.contentViewDaily.upsert({
+    where: {
+      contentId_viewDate: {
         contentId,
-        viewDate: dayBucket,
-        viewCount: 1
+        viewDate: dayBucket
       }
-    })
-  ]);
+    },
+    update: {
+      viewCount: {
+        increment: 1
+      }
+    },
+    create: {
+      contentId,
+      viewDate: dayBucket,
+      viewCount: 1
+    }
+  });
 }
 
 export async function getContentViewAnalytics() {
@@ -264,18 +253,14 @@ export async function getContentViewAnalytics() {
   const monthBucket = getTaipeiMonthBucket(now);
   const nextMonthBucket = getNextTaipeiMonthBucket(now);
 
-  const [totalViews, viewedContents, dayViews, monthViews, topViewedContents] = await Promise.all([
-    db.content.aggregate({
+  const [totalViews, viewedContentGroups, dayViews, monthViews, topViewedGroups] = await Promise.all([
+    db.contentViewDaily.aggregate({
       _sum: {
         viewCount: true
       }
     }),
-    db.content.count({
-      where: {
-        viewCount: {
-          gt: 0
-        }
-      }
+    db.contentViewDaily.groupBy({
+      by: ["contentId"]
     }),
     db.contentViewDaily.aggregate({
       _sum: {
@@ -299,25 +284,56 @@ export async function getContentViewAnalytics() {
         }
       }
     }),
-    db.content.findMany({
-      orderBy: [{ viewCount: "desc" }, { lastViewedAt: "desc" }],
+    db.contentViewDaily.groupBy({
+      by: ["contentId"],
+      _sum: {
+        viewCount: true
+      },
+      _max: {
+        updatedAt: true
+      },
+      orderBy: [{ _sum: { viewCount: "desc" } }, { _max: { updatedAt: "desc" } }],
       take: 6,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        publishStatus: true,
-        viewCount: true,
-        lastViewedAt: true
-      }
     })
   ]);
+
+  const topContentIds = topViewedGroups.map((item) => item.contentId);
+  const topContentRecords = topContentIds.length
+    ? await db.content.findMany({
+        where: {
+          id: {
+            in: topContentIds
+          }
+        },
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          publishStatus: true
+        }
+      })
+    : [];
+  const topContentMap = new Map(topContentRecords.map((item) => [item.id, item]));
+  const topViewedContents = topViewedGroups
+    .map((item) => {
+      const content = topContentMap.get(item.contentId);
+      if (!content) {
+        return null;
+      }
+
+      return {
+        ...content,
+        viewCount: item._sum.viewCount ?? 0,
+        lastViewedAt: item._max.updatedAt ?? null
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   return {
     totalViews: totalViews._sum.viewCount ?? 0,
     perDayViews: dayViews._sum.viewCount ?? 0,
     perMonthViews: monthViews._sum.viewCount ?? 0,
-    viewedContents,
+    viewedContents: viewedContentGroups.length,
     topViewedContents
   };
 }
@@ -1116,11 +1132,12 @@ export async function saveContent(
 
     if (hostedFiles.length) {
       const hostedDownloadLinks = hostedFiles.map((file) => buildContentFileDownloadPath(file.id));
-      const legacyHostedDownloadLinks = new Set([
+      const allHostedDownloadLinks = new Set([
+        ...hostedDownloadLinks,
         ...hostedFiles.map((file) => buildR2PublicUrl(file.objectKey)),
         ...hostedFiles.map((file) => buildLegacyContentFileDownloadPath(file.id))
       ]);
-      const manualLinks = normalizedManualDownloadLinks.filter((url) => !legacyHostedDownloadLinks.has(url));
+      const manualLinks = normalizedManualDownloadLinks.filter((url) => !allHostedDownloadLinks.has(url));
       mergedDownloadLinks = [...new Set([...manualLinks, ...hostedDownloadLinks])];
     }
   }
@@ -1189,68 +1206,84 @@ export async function saveContent(
         };
 
   try {
-    const content = await db.content.upsert({
-      where: { id: contentId ?? -1 },
-      update: {
-        title: data.title,
-        slug: data.slug,
-        description: data.description,
-        coverImageUrl: data.coverImageUrl,
-        sourceLink: data.sourceLink ?? null,
-        isVerified: nextReviewStatus === ReviewStatus.PASSED,
-        reviewStatus: nextReviewStatus,
-        ...editedTrackingUpdate,
-        publishStatus: data.publishStatus,
-        contentTags: {
-          deleteMany: {},
-          create: tagIds.map((tagId) => ({
+    const sharedMutationData = {
+      title: data.title,
+      slug: data.slug,
+      description: data.description,
+      coverImageUrl: data.coverImageUrl,
+      sourceLink: data.sourceLink ?? null,
+      isVerified: nextReviewStatus === ReviewStatus.PASSED,
+      reviewStatus: nextReviewStatus,
+      publishStatus: data.publishStatus
+    } satisfies Omit<Prisma.ContentUncheckedCreateInput, "contentTags" | "images" | "downloadLinks">;
+
+    const relationUpdateData = {
+      contentTags: {
+        deleteMany: {},
+        createMany: {
+          data: tagIds.map((tagId) => ({
             tagId
           }))
-        },
-        images: {
-          deleteMany: {},
-          create: data.imageUrls.map((imageUrl, index) => ({
+        }
+      },
+      images: {
+        deleteMany: {},
+        createMany: {
+          data: data.imageUrls.map((imageUrl, index) => ({
             imageUrl,
-            sortOrder: index
-          }))
-        },
-        downloadLinks: {
-          deleteMany: {},
-          create: mergedDownloadLinks.map((url, index) => ({
-            url,
             sortOrder: index
           }))
         }
       },
-      create: {
-        title: data.title,
-        slug: data.slug,
-        description: data.description,
-        coverImageUrl: data.coverImageUrl,
-        sourceLink: data.sourceLink ?? null,
-        isVerified: nextReviewStatus === ReviewStatus.PASSED,
-        reviewStatus: nextReviewStatus,
-        ...editedTrackingCreate,
-        publishStatus: data.publishStatus,
-        contentTags: {
-          create: tagIds.map((tagId) => ({
-            tagId
-          }))
-        },
-        images: {
-          create: data.imageUrls.map((imageUrl, index) => ({
-            imageUrl,
-            sortOrder: index
-          }))
-        },
-        downloadLinks: {
-          create: mergedDownloadLinks.map((url, index) => ({
+      downloadLinks: {
+        deleteMany: {},
+        createMany: {
+          data: mergedDownloadLinks.map((url, index) => ({
             url,
             sortOrder: index
           }))
         }
       }
-    });
+    };
+
+    const content = contentId
+      ? await db.content.update({
+          where: { id: contentId },
+          data: {
+            ...sharedMutationData,
+            ...editedTrackingUpdate,
+            ...relationUpdateData
+          }
+        })
+      : await db.content.create({
+          data: {
+            ...sharedMutationData,
+            ...editedTrackingCreate,
+            contentTags: {
+              createMany: {
+                data: tagIds.map((tagId) => ({
+                  tagId
+                }))
+              }
+            },
+            images: {
+              createMany: {
+                data: data.imageUrls.map((imageUrl, index) => ({
+                  imageUrl,
+                  sortOrder: index
+                }))
+              }
+            },
+            downloadLinks: {
+              createMany: {
+                data: mergedDownloadLinks.map((url, index) => ({
+                  url,
+                  sortOrder: index
+                }))
+              }
+            }
+          }
+        });
 
     const authorCount = await db.contentTag.count({
       where: {

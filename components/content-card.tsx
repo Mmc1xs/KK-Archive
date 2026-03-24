@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buildContentHref } from "@/lib/content-href";
 
 type ContentCardProps = {
   content: {
@@ -31,7 +32,7 @@ export function ContentCard({ content }: ContentCardProps) {
       <div className="card-body">
         <div className="eyebrow">{eyebrowLabel}</div>
         <h3>
-          <Link href={`/contents/${content.slug}`} prefetch={false}>
+          <Link href={buildContentHref(content.slug)} prefetch={false}>
             {content.title}
           </Link>
         </h3>

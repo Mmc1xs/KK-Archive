@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { PublishStatus } from "@prisma/client";
+import { buildContentHref } from "@/lib/content-href";
 import { db } from "@/lib/db";
 import { getSiteOrigin } from "@/lib/site-origin";
 
@@ -43,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   const contentRoutes: MetadataRoute.Sitemap = publicContents.map((content) => ({
-    url: `${siteOrigin}/contents/${content.slug}`,
+    url: `${siteOrigin}${buildContentHref(content.slug)}`,
     lastModified: content.updatedAt,
     changeFrequency: "weekly",
     priority: 0.7
@@ -51,4 +52,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [...staticRoutes, ...contentRoutes];
 }
-

@@ -241,7 +241,7 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
               <div>
                 <span>Hosted Files</span>
                 <small>
-                  Staff-managed shared files will live under <code>{`uploadfiles/${storageFolder}/{YYYY:MM:DD}/`}</code> in R2.
+                  Staff-managed shared files will live under <code>{`uploadfiles/${storageFolder}/`}</code> in R2.
                 </small>
               </div>
               <div className="status status-passed">{content.hostedFiles.length} file(s)</div>
@@ -269,14 +269,19 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
               ) : null}
             </div>
             {role === "ADMIN" && content && content.reviewStatus !== "UNVERIFIED" ? (
-              <form action={transitionContentReviewStatusAction}>
+              <>
                 <input type="hidden" name="contentId" value={content.id} />
                 <input type="hidden" name="nextStatus" value="UNVERIFIED" />
                 <input type="hidden" name="redirectTo" value={`/admin/contents/${content.id}/edit`} />
-                <button type="submit" className="link-pill">
+                <button
+                  type="submit"
+                  formAction={transitionContentReviewStatusAction}
+                  formNoValidate
+                  className="link-pill"
+                >
                   Reset to Unverified
                 </button>
-              </form>
+              </>
             ) : null}
           </div>
         )}
