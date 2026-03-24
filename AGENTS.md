@@ -28,6 +28,37 @@ Build a maintainable image browsing website with structured tag-based search.
 - Set explicit cache policies for static storage assets (such as images) when object names are immutable.
 - Track route-level latency (TTFB/total time) and optimize bottlenecks before adding new heavy features.
 
+## Pre-commit / Pre-push verification
+- Never commit or push only on the basis of `tsc`, build success, or local reasoning when the change affects a user flow.
+- Before commit/push, re-test every changed flow end-to-end in the real UI or route it affects, and confirm there is no visible bug, stuck state, hydration warning, invalid validation message, or silent partial failure.
+- If a change touches content editing, always verify all of these on a real content record:
+  - open `/admin/contents/[id]/edit`
+  - edit and save ordinary fields successfully
+  - if Hosted Files / R2 upload is involved, upload a file successfully
+  - confirm `Website (R2)` is generated or updated correctly
+  - confirm `Update Content` / `Update and Pass` does not hang or fail
+  - confirm the saved result is visible after reload
+- If a change touches hosted file upload or download links, always verify:
+  - R2 object key/path is the expected format
+  - Hosted Files UI reflects the upload result correctly
+  - auto-linked website download links are valid and pass validation
+  - the edit page can still save after upload
+- If a change touches search, always verify:
+  - the search page loads
+  - every modified filter appears in the UI
+  - filter selection actually affects results
+  - no related API route returns 500
+- If a change touches auth/session/role checks, always verify:
+  - intended roles can see and use the entry point/button
+  - unintended roles cannot access the page or action
+  - login/session state does not break public pages
+- If a change touches analytics/view tracking/background writes, always verify:
+  - content detail page still loads normally
+  - edit/save flows are not blocked by analytics writes
+  - admin analytics pages still render expected numbers
+- Before commit/push, check logs for the exercised flow and make sure there are no unresolved server errors, Prisma errors, statement timeouts, nested form warnings, or hydration mismatches related to the change.
+- If a bug is discovered during verification, fix the root cause first and re-run the affected flow before commit/push.
+
 ## Before coding
 - Propose folder structure.
 - Propose database schema.
