@@ -65,6 +65,25 @@ function addUtcDays(date: Date, days: number) {
   return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 }
 
+export const HOMEPAGE_HOT_TOPIC_SLOT_COUNT = 8;
+
+const HOMEPAGE_CONTENT_INCLUDE = {
+  contentTags: {
+    include: {
+      tag: true
+    }
+  }
+} satisfies Prisma.ContentInclude;
+
+type HomepageContent = Prisma.ContentGetPayload<{
+  include: typeof HOMEPAGE_CONTENT_INCLUDE;
+}>;
+
+type HomepageHotTopicSlotWithContent = {
+  slot: number;
+  content: HomepageContent | null;
+};
+
 async function resolveTagIds(type: TagType, existingIds: number[], newNames: string[]) {
   const ids = [...existingIds];
   const normalizedNewNames = [...new Set(newNames.map((name) => name.trim()).filter(Boolean))];
@@ -164,21 +183,148 @@ const getCachedHomepageContents = unstable_cache(
         publishStatus: PublishStatus.PUBLISHED
       },
       orderBy: { createdAt: "desc" },
-      take: 8,
-      include: {
-        contentTags: {
-          include: {
-            tag: true
-          }
-        }
-      }
+      take: 16,
+      include: HOMEPAGE_CONTENT_INCLUDE
     }),
   ["homepage-contents"],
   { revalidate: 600 }
 );
 
+const getCachedHomepageHotTopicSlots = unstable_cache(
+  async () =>
+    db.homepageHotTopicSlot.findMany({
+      orderBy: { slot: "asc" },
+      include: {
+        content: {
+          include: HOMEPAGE_CONTENT_INCLUDE
+        }
+      }
+    }),
+  ["homepage-hot-topic-slots"],
+  { revalidate: 300 }
+);
+
+function buildHomepageSlotState(
+  rows: Array<{
+    slot: number;
+    content: HomepageContent | null;
+  }>,
+  options?: { publishedOnly?: boolean }
+) {
+  const publishedOnly = options?.publishedOnly ?? false;
+  const slotMap = new Map(rows.map((row) => [row.slot, row.content]));
+
+  return Array.from({ length: HOMEPAGE_HOT_TOPIC_SLOT_COUNT }, (_, index) => {
+    const slot = index + 1;
+    const content = slotMap.get(slot) ?? null;
+
+    return {
+      slot,
+      content:
+        publishedOnly && content?.publishStatus !== PublishStatus.PUBLISHED
+          ? null
+          : content
+    };
+  });
+}
+
 export async function getHomepageContents() {
   return getCachedHomepageContents();
+}
+
+export async function getHomepageHotTopicSlots(): Promise<HomepageHotTopicSlotWithContent[]> {
+  const rows = await getCachedHomepageHotTopicSlots();
+  return buildHomepageSlotState(rows, { publishedOnly: true });
+}
+
+export async function getAdminHomepageHotTopicSlots(): Promise<HomepageHotTopicSlotWithContent[]> {
+  const rows = await db.homepageHotTopicSlot.findMany({
+    orderBy: { slot: "asc" },
+    include: {
+      content: {
+        include: HOMEPAGE_CONTENT_INCLUDE
+      }
+    }
+  });
+
+  return buildHomepageSlotState(rows);
+}
+
+export async function getHomepageLatestPublishedContents() {
+  const [slots, fallbackContents] = await Promise.all([
+    getHomepageHotTopicSlots(),
+    getCachedHomepageContents()
+  ]);
+  const selectedContentIds = slots
+    .map((slot) => slot.content?.id ?? null)
+    .filter((id): id is number => Number.isInteger(id));
+
+  const latest = await db.content.findMany({
+    where: {
+      publishStatus: PublishStatus.PUBLISHED,
+      ...(selectedContentIds.length
+        ? {
+            id: {
+              notIn: selectedContentIds
+            }
+          }
+        : {})
+    },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+    include: HOMEPAGE_CONTENT_INCLUDE
+  });
+
+  return latest.length ? latest : fallbackContents.slice(0, 8);
+}
+
+export async function getHomepageHotTopicContents() {
+  const slots = await getHomepageHotTopicSlots();
+  return slots
+    .map((slot) => slot.content)
+    .filter((content): content is HomepageContent => Boolean(content));
+}
+
+export async function getHomepageHotTopicPickerPage(page: number, pageSize: number) {
+  const safePage = Number.isInteger(page) && page > 0 ? page : 1;
+  const safePageSize = Number.isInteger(pageSize) && pageSize > 0 ? pageSize : 12;
+  const assignedRows = await db.homepageHotTopicSlot.findMany({
+    select: {
+      contentId: true
+    }
+  });
+  const assignedContentIds = assignedRows
+    .map((row) => row.contentId)
+    .filter((id): id is number => Number.isInteger(id));
+  const where = {
+    publishStatus: PublishStatus.PUBLISHED,
+    ...(assignedContentIds.length
+      ? {
+          id: {
+            notIn: assignedContentIds
+          }
+        }
+      : {})
+  } satisfies Prisma.ContentWhereInput;
+
+  const [totalCount, items] = await Promise.all([
+    db.content.count({ where }),
+    db.content.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (safePage - 1) * safePageSize,
+      take: safePageSize,
+      include: HOMEPAGE_CONTENT_INCLUDE
+    })
+  ]);
+
+  return {
+    items,
+    totalCount,
+    page: safePage,
+    pageSize: safePageSize,
+    totalPages: Math.max(1, Math.ceil(totalCount / safePageSize))
+  };
 }
 
 const getCachedHomepageOverviewStats = unstable_cache(

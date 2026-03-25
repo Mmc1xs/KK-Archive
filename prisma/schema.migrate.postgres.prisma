@@ -101,6 +101,7 @@ model Content {
   downloadLinks ContentDownloadLink[]
   contentTags   ContentTag[]
   dailyViews    ContentViewDaily[]
+  hotTopicSlots HomepageHotTopicSlot[]
 
   @@index([publishStatus, createdAt])
   @@index([reviewStatus, updatedAt])
@@ -119,6 +120,16 @@ model ContentViewDaily {
   @@index([viewDate])
   @@index([viewDate, viewCount])
   @@map("content_view_daily")
+}
+
+model HomepageHotTopicSlot {
+  slot      Int      @id
+  contentId Int?     @unique @map("content_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  content   Content? @relation(fields: [contentId], references: [id], onDelete: SetNull)
+
+  @@map("homepage_hot_topic_slots")
 }
 
 model ContentImage {

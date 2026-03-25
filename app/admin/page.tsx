@@ -20,6 +20,9 @@ export default async function AdminPage() {
           </Link>
           {isAdmin ? (
             <>
+              <Link href="/admin/homepage" className="button secondary">
+                Homepage
+              </Link>
               <Link href="/admin/activity" className="button secondary">
                 Account Activity
               </Link>
@@ -46,6 +49,9 @@ export default async function AdminPage() {
               </Link>
               <Link href="/admin/activity" className="link-pill">
                 Open Activity Details
+              </Link>
+              <Link href="/admin/homepage" className="link-pill">
+                Manage Hot Topic
               </Link>
               <Link href="/admin/views" className="link-pill">
                 Open View Reports

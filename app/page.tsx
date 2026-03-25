@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
-import { getHomepageContents, getHomepageOverviewStats } from "@/lib/content";
+import {
+  getHomepageHotTopicContents,
+  getHomepageLatestPublishedContents,
+  getHomepageOverviewStats
+} from "@/lib/content";
 
 export const revalidate = 300;
 export const preferredRegion = "hkg1";
@@ -13,8 +17,12 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [contents, overviewStats] = await Promise.all([getHomepageContents(), getHomepageOverviewStats()]);
-  const featuredContent = contents[0];
+  const [hotTopicContents, latestPublishedContents, overviewStats] = await Promise.all([
+    getHomepageHotTopicContents(),
+    getHomepageLatestPublishedContents(),
+    getHomepageOverviewStats()
+  ]);
+  const featuredContent = hotTopicContents[0] ?? latestPublishedContents[0];
 
   return (
     <div className="page-section grid">
@@ -109,6 +117,24 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {hotTopicContents.length ? (
+        <section className="panel">
+          <div className="split">
+            <div>
+              <div className="eyebrow">Hot Topic</div>
+              <h2 className="title-lg">Hot Topic</h2>
+            </div>
+          </div>
+          <div className="grid content-grid">
+            {hotTopicContents.map((content) => (
+              <article key={`hot-topic-${content.slug}`} className="hot-topic-demo-card">
+                <ContentCard content={content} />
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
       <section className="panel">
         <div className="split">
           <div>
@@ -120,7 +146,7 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="grid content-grid">
-          {contents.map((content) => (
+          {latestPublishedContents.map((content) => (
             <ContentCard key={content.slug} content={content} />
           ))}
         </div>

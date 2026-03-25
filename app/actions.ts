@@ -1,10 +1,11 @@
 "use server";
 
 import { ReviewStatus, UserRole } from "@prisma/client";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, requireStaff, requireUserWithoutTouch } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { saveContent } from "@/lib/content";
+import { HOMEPAGE_HOT_TOPIC_SLOT_COUNT, saveContent } from "@/lib/content";
 import { deleteTag, saveTag, updateTag } from "@/lib/tag";
 import { usernameSchema } from "@/lib/validation";
 
@@ -122,6 +123,83 @@ export async function updateContentAction(contentId: number, formData: FormData)
   }
 
   redirect("/admin/contents?success=Content updated");
+}
+
+function getHomepageSlotRedirectPath(slot: number, type: "error" | "success", message: string) {
+  return `/admin/homepage?slot=${slot}&${new URLSearchParams({ [type]: message }).toString()}`;
+}
+
+function parseHomepageSlot(formData: FormData) {
+  const slot = Number(formData.get("slot"));
+  if (!Number.isInteger(slot) || slot < 1 || slot > HOMEPAGE_HOT_TOPIC_SLOT_COUNT) {
+    return null;
+  }
+  return slot;
+}
+
+export async function replaceHomepageHotTopicSlotAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const slot = parseHomepageSlot(formData);
+  if (!slot) {
+    redirectWithMessage("/admin/homepage", "error", "Invalid homepage slot");
+  }
+
+  const contentId = Number(formData.get("contentId"));
+  if (!Number.isInteger(contentId) || contentId <= 0) {
+    redirectWithMessage(`/admin/homepage?slot=${slot}`, "error", "Invalid content id");
+  }
+
+  const content = await db.content.findUnique({
+    where: { id: contentId },
+    select: {
+      id: true,
+      publishStatus: true
+    }
+  });
+
+  if (!content || content.publishStatus !== "PUBLISHED") {
+    redirectWithMessage(`/admin/homepage?slot=${slot}`, "error", "Only published content can be featured");
+  }
+
+  await db.$transaction([
+    db.homepageHotTopicSlot.deleteMany({
+      where: {
+        contentId
+      }
+    }),
+    db.homepageHotTopicSlot.upsert({
+      where: { slot },
+      update: {
+        contentId
+      },
+      create: {
+        slot,
+        contentId
+      }
+    })
+  ]);
+
+  revalidatePath("/");
+  revalidatePath("/admin/homepage");
+  redirect(getHomepageSlotRedirectPath(slot, "success", "Hot Topic slot updated"));
+}
+
+export async function clearHomepageHotTopicSlotAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const slot = parseHomepageSlot(formData);
+  if (!slot) {
+    redirectWithMessage("/admin/homepage", "error", "Invalid homepage slot");
+  }
+
+  await db.homepageHotTopicSlot.delete({
+    where: { slot }
+  }).catch(() => null);
+
+  revalidatePath("/");
+  revalidatePath("/admin/homepage");
+  redirect(getHomepageSlotRedirectPath(slot, "success", "Hot Topic slot cleared"));
 }
 
 export async function createTagAction(formData: FormData) {
