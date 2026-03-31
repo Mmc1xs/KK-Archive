@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, requireStaff, requireUserWithoutTouch } from "@/lib/auth/session";
 import { db } from "@/lib/db";
+import { completeSiteDownloadDemo, getSiteDownloadDemoContent, markSiteDownloadDemoIgnored } from "@/lib/demo/site-download";
 import { HOMEPAGE_HOT_TOPIC_SLOT_COUNT, saveContent } from "@/lib/content";
+import { buildContentHref } from "@/lib/content-href";
 import { deleteTag, saveTag, updateTag } from "@/lib/tag";
 import { usernameSchema } from "@/lib/validation";
 
@@ -504,4 +506,58 @@ export async function updateProfileUsernameAction(formData: FormData) {
   });
 
   redirectWithMessage(redirectTo, "success", "Username updated");
+}
+
+export async function ignoreSiteDownloadDemoAction(formData: FormData) {
+  const admin = await requireAdmin({ touchActivity: false });
+  const contentId = Number(formData.get("contentId"));
+  const redirectTo = String(formData.get("redirectTo") || "/admin/site-download-demo");
+
+  if (!Number.isInteger(contentId) || contentId <= 0) {
+    redirectWithMessage("/admin/site-download-demo", "error", "Invalid content id");
+  }
+
+  const content = await getSiteDownloadDemoContent(contentId);
+  if (!content || !content.telegramSourceUrl) {
+    redirectWithMessage(redirectTo, "error", "Telegram source link not found for this content");
+  }
+
+  await markSiteDownloadDemoIgnored({
+    contentId,
+    actorUserId: admin.id,
+    telegramSourceUrl: content.telegramSourceUrl
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/site-download-demo");
+  revalidatePath(`/admin/site-download-demo/${contentId}`);
+  redirectWithMessage("/admin/site-download-demo", "success", "Content ignored for the site download demo");
+}
+
+export async function completeSiteDownloadDemoAction(formData: FormData) {
+  const admin = await requireAdmin({ touchActivity: false });
+  const contentId = Number(formData.get("contentId"));
+  const redirectTo = String(formData.get("redirectTo") || `/admin/site-download-demo/${contentId}`);
+
+  if (!Number.isInteger(contentId) || contentId <= 0) {
+    redirectWithMessage("/admin/site-download-demo", "error", "Invalid content id");
+  }
+
+  const content = await getSiteDownloadDemoContent(contentId);
+  if (!content) {
+    redirectWithMessage("/admin/site-download-demo", "error", "Content not found");
+  }
+
+  await completeSiteDownloadDemo({
+    contentId,
+    actorUserId: admin.id
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/contents");
+  revalidatePath(`/admin/contents/${contentId}/edit`);
+  revalidatePath("/admin/site-download-demo");
+  revalidatePath(`/admin/site-download-demo/${contentId}`);
+  revalidatePath(buildContentHref(content.slug));
+  redirectWithMessage(redirectTo, "success", "Demo marked complete");
 }

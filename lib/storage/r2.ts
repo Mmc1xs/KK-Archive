@@ -3,9 +3,11 @@ import {
   CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
   GetObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
-  UploadPartCommand
+  UploadPartCommand,
+  type PutObjectCommandInput
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -100,6 +102,29 @@ export async function createR2SingleUploadUrl(params: {
   );
 }
 
+export async function uploadR2Object(params: {
+  key: string;
+  body: PutObjectCommandInput["Body"];
+  contentType: string;
+  contentLength?: number;
+}) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+
+  await client.send(
+    new PutObjectCommand({
+      Bucket: bucketName,
+      Key: params.key,
+      Body: params.body,
+      ContentType: params.contentType,
+      ...(typeof params.contentLength === "number" && params.contentLength > 0
+        ? { ContentLength: params.contentLength }
+        : {}),
+      CacheControl: "public, max-age=31536000, immutable"
+    })
+  );
+}
+
 export async function createR2MultipartPartUploadUrl(params: {
   key: string;
   uploadId: string;
@@ -182,4 +207,37 @@ export async function createR2DownloadUrl(params: {
     }),
     { expiresIn }
   );
+}
+
+export async function listR2ObjectsByPrefix(prefix: string) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+  const objects: Array<{ key: string; size: number; lastModified: Date | null }> = [];
+  let continuationToken: string | undefined;
+
+  do {
+    const result = await client.send(
+      new ListObjectsV2Command({
+        Bucket: bucketName,
+        Prefix: prefix,
+        ContinuationToken: continuationToken
+      })
+    );
+
+    for (const item of result.Contents ?? []) {
+      if (!item.Key) {
+        continue;
+      }
+
+      objects.push({
+        key: item.Key,
+        size: Number(item.Size ?? 0),
+        lastModified: item.LastModified ?? null
+      });
+    }
+
+    continuationToken = result.IsTruncated ? result.NextContinuationToken : undefined;
+  } while (continuationToken);
+
+  return objects;
 }

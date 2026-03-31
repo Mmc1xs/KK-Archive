@@ -20,6 +20,9 @@ export default async function AdminPage() {
           </Link>
           {isAdmin ? (
             <>
+              <Link href="/admin/site-download-demo" className="button secondary">
+                Site Download Demo
+              </Link>
               <Link href="/admin/homepage" className="button secondary">
                 Homepage
               </Link>
@@ -46,6 +49,9 @@ export default async function AdminPage() {
             <div className="inline-actions">
               <Link href="/admin/contents?review=unverified" className="button secondary">
                 Review Unverified
+              </Link>
+              <Link href="/admin/site-download-demo" className="link-pill">
+                Open Site Download Demo
               </Link>
               <Link href="/admin/activity" className="link-pill">
                 Open Activity Details
