@@ -117,18 +117,49 @@ export default async function ContentDetailPage({
   const galleryImages = content.images.slice(1);
   const isStaff = user?.role === "ADMIN" || user?.role === "AUDIT";
   const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus);
-  const hostedInternalLinkByPublicUrl = new Map(
-    content.hostedFiles.map((file) => [buildR2PublicUrl(file.objectKey), buildContentFileDownloadPath(file.id)])
+  const hostedFileByPublicUrl = new Map(content.hostedFiles.map((file) => [buildR2PublicUrl(file.objectKey), file]));
+  const hostedFileByLegacyPath = new Map(
+    content.hostedFiles.map((file) => [buildLegacyContentFileDownloadPath(file.id), file])
   );
-  const hostedInternalLinkByLegacyPath = new Map(
-    content.hostedFiles.map((file) => [buildLegacyContentFileDownloadPath(file.id), buildContentFileDownloadPath(file.id)])
+  const hostedFileByTokenPath = new Map(
+    content.hostedFiles.map((file) => [buildContentFileDownloadPath(file.id), file])
   );
-  const hostedInternalLinkSet = new Set(content.hostedFiles.map((file) => buildContentFileDownloadPath(file.id)));
-  const normalizedDownloadLinks = content.downloadLinks.map(
-    (link) => hostedInternalLinkByPublicUrl.get(link.url) ?? hostedInternalLinkByLegacyPath.get(link.url) ?? link.url
-  );
-  const tgDownloadLink = normalizedDownloadLinks.find((url) => isTelegramUrl(url));
-  const siteDownloadLink = normalizedDownloadLinks.find((url) => hostedInternalLinkSet.has(url));
+  const normalizedDownloadEntries = content.downloadLinks.map((link) => {
+    const hostedFile =
+      hostedFileByPublicUrl.get(link.url) ?? hostedFileByLegacyPath.get(link.url) ?? hostedFileByTokenPath.get(link.url);
+
+    if (hostedFile) {
+      return {
+        kind: "website" as const,
+        url: buildContentFileDownloadPath(hostedFile.id),
+        label: hostedFile.fileName
+      };
+    }
+
+    return {
+      kind: isTelegramUrl(link.url) ? ("telegram" as const) : ("other" as const),
+      url: link.url,
+      label: link.url
+    };
+  });
+  const tgDownloadLink = normalizedDownloadEntries.find((entry) => entry.kind === "telegram")?.url;
+  const siteDownloadEntries = [
+    ...new Map(
+      normalizedDownloadEntries
+        .filter((entry) => entry.kind === "website")
+        .map((entry) => [entry.url, entry] as const)
+    ).values()
+  ];
+
+  if (!siteDownloadEntries.length && content.hostedFiles.length) {
+    siteDownloadEntries.push(
+      ...content.hostedFiles.map((file) => ({
+        kind: "website" as const,
+        url: buildContentFileDownloadPath(file.id),
+        label: file.fileName
+      }))
+    );
+  }
 
   return (
     <div className="page-section grid">
@@ -181,19 +212,39 @@ export default async function ContentDetailPage({
               </div>
             </section>
           ) : null}
-          {tgDownloadLink || siteDownloadLink ? (
+          {tgDownloadLink || siteDownloadEntries.length ? (
             <section className="tag-section">
               <strong>Download Links</strong>
-              <div className="tag-group">
+              <div className="tag-group download-link-group">
                 {tgDownloadLink ? (
                   <a href={tgDownloadLink} target="_blank" rel="noreferrer" className="link-pill">
                     Telegram Download
                   </a>
                 ) : null}
-                {siteDownloadLink ? (
-                  <a href={siteDownloadLink} target="_blank" rel="noreferrer" className="link-pill">
+                {siteDownloadEntries.length === 1 ? (
+                  <a href={siteDownloadEntries[0].url} target="_blank" rel="noreferrer" className="link-pill">
                     Website Download
                   </a>
+                ) : null}
+                {siteDownloadEntries.length > 1 ? (
+                  <details className="download-menu">
+                    <summary className="link-pill download-menu-trigger">
+                      {`Website Download (${siteDownloadEntries.length})`}
+                    </summary>
+                    <div className="download-menu-panel">
+                      {siteDownloadEntries.map((entry) => (
+                        <a
+                          key={entry.url}
+                          href={entry.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="download-menu-item"
+                        >
+                          {entry.label}
+                        </a>
+                      ))}
+                    </div>
+                  </details>
                 ) : null}
               </div>
             </section>

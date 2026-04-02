@@ -61,6 +61,11 @@ function getNextTaipeiMonthBucket(date = new Date()) {
   return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth() + 1, 1) - TAIPEI_OFFSET_MS);
 }
 
+function getPreviousTaipeiMonthBucket(date = new Date()) {
+  const shifted = new Date(date.getTime() + TAIPEI_OFFSET_MS);
+  return new Date(Date.UTC(shifted.getUTCFullYear(), shifted.getUTCMonth() - 1, 1) - TAIPEI_OFFSET_MS);
+}
+
 function addUtcDays(date: Date, days: number) {
   return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 }
@@ -392,14 +397,40 @@ export async function recordContentView(contentId: number) {
   });
 }
 
+export async function recordContentDownload(contentId: number) {
+  const downloadedAt = new Date();
+  const dayBucket = getTaipeiDayBucket(downloadedAt);
+
+  await db.contentDownloadDaily.upsert({
+    where: {
+      contentId_downloadDate: {
+        contentId,
+        downloadDate: dayBucket
+      }
+    },
+    update: {
+      downloadCount: {
+        increment: 1
+      }
+    },
+    create: {
+      contentId,
+      downloadDate: dayBucket,
+      downloadCount: 1
+    }
+  });
+}
+
 export async function getContentViewAnalytics() {
   const now = new Date();
   const dayBucket = getTaipeiDayBucket(now);
   const nextDayBucket = addUtcDays(dayBucket, 1);
+  const previousDayBucket = addUtcDays(dayBucket, -1);
   const monthBucket = getTaipeiMonthBucket(now);
   const nextMonthBucket = getNextTaipeiMonthBucket(now);
+  const previousMonthBucket = getPreviousTaipeiMonthBucket(now);
 
-  const [totalViews, viewedContentGroups, dayViews, monthViews, topViewedGroups] = await Promise.all([
+  const [totalViews, viewedContentGroups, dayViews, previousDayViews, monthViews, previousMonthViews, topViewedGroups] = await Promise.all([
     db.contentViewDaily.aggregate({
       _sum: {
         viewCount: true
@@ -407,6 +438,17 @@ export async function getContentViewAnalytics() {
     }),
     db.contentViewDaily.groupBy({
       by: ["contentId"]
+    }),
+    db.contentViewDaily.aggregate({
+      _sum: {
+        viewCount: true
+      },
+      where: {
+        viewDate: {
+          gte: previousDayBucket,
+          lt: dayBucket
+        }
+      }
     }),
     db.contentViewDaily.aggregate({
       _sum: {
@@ -427,6 +469,17 @@ export async function getContentViewAnalytics() {
         viewDate: {
           gte: monthBucket,
           lt: nextMonthBucket
+        }
+      }
+    }),
+    db.contentViewDaily.aggregate({
+      _sum: {
+        viewCount: true
+      },
+      where: {
+        viewDate: {
+          gte: previousMonthBucket,
+          lt: monthBucket
         }
       }
     }),
@@ -478,9 +531,41 @@ export async function getContentViewAnalytics() {
   return {
     totalViews: totalViews._sum.viewCount ?? 0,
     perDayViews: dayViews._sum.viewCount ?? 0,
+    previousDayViews: previousDayViews._sum.viewCount ?? 0,
     perMonthViews: monthViews._sum.viewCount ?? 0,
+    previousMonthViews: previousMonthViews._sum.viewCount ?? 0,
     viewedContents: viewedContentGroups.length,
     topViewedContents
+  };
+}
+
+export async function getContentDownloadAnalytics() {
+  const now = new Date();
+  const dayBucket = getTaipeiDayBucket(now);
+  const nextDayBucket = addUtcDays(dayBucket, 1);
+
+  const [totalDownloads, dayDownloads] = await Promise.all([
+    db.contentDownloadDaily.aggregate({
+      _sum: {
+        downloadCount: true
+      }
+    }),
+    db.contentDownloadDaily.aggregate({
+      _sum: {
+        downloadCount: true
+      },
+      where: {
+        downloadDate: {
+          gte: dayBucket,
+          lt: nextDayBucket
+        }
+      }
+    })
+  ]);
+
+  return {
+    totalDownloads: totalDownloads._sum.downloadCount ?? 0,
+    perDayDownloads: dayDownloads._sum.downloadCount ?? 0
   };
 }
 

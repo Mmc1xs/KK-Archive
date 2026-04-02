@@ -1,6 +1,7 @@
 import { PublishStatus, UserRole } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { getCurrentSession } from "@/lib/auth/session";
+import { recordContentDownload } from "@/lib/content";
 import { parseContentFileToken } from "@/lib/downloads/content-file-token";
 import { db } from "@/lib/db";
 import { createR2DownloadUrl } from "@/lib/storage/r2";
@@ -29,6 +30,7 @@ export async function GET(
       fileName: true,
       content: {
         select: {
+          id: true,
           publishStatus: true
         }
       }
@@ -52,6 +54,16 @@ export async function GET(
     key: file.objectKey,
     fileName: file.fileName
   });
+
+  try {
+    await recordContentDownload(file.content.id);
+  } catch (error) {
+    console.error("Failed to record content download", {
+      fileId: file.id,
+      contentId: file.content.id,
+      error
+    });
+  }
 
   return NextResponse.redirect(signedDownloadUrl);
 }

@@ -100,6 +100,7 @@ model Content {
   downloadLinks ContentDownloadLink[]
   contentTags   ContentTag[]
   dailyViews    ContentViewDaily[]
+  dailyDownloads ContentDownloadDaily[]
   hotTopicSlots HomepageHotTopicSlot[]
 
   @@index([publishStatus, createdAt])
@@ -119,6 +120,20 @@ model ContentViewDaily {
   @@index([viewDate])
   @@index([viewDate, viewCount])
   @@map("content_view_daily")
+}
+
+model ContentDownloadDaily {
+  contentId     Int      @map("content_id")
+  downloadDate  DateTime @map("download_date")
+  downloadCount Int      @default(0) @map("download_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  content       Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, downloadDate])
+  @@index([downloadDate])
+  @@index([downloadDate, downloadCount])
+  @@map("content_download_daily")
 }
 
 model HomepageHotTopicSlot {

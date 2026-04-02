@@ -59,6 +59,8 @@ model User {
   passedContents      Content[] @relation("ContentPassedBy")
   staffUploads        StaffUpload[] @relation("StaffUploadUploader")
   uploadedHostedFiles ContentFile[] @relation("ContentFileUploadedBy")
+  ignoredSiteDownloadDemos ContentSiteDownloadDemo[] @relation("ContentSiteDownloadDemoIgnoredBy")
+  completedSiteDownloadDemos ContentSiteDownloadDemo[] @relation("ContentSiteDownloadDemoCompletedBy")
 
   @@map("users")
 }
@@ -103,8 +105,10 @@ model Content {
   downloadLinks ContentDownloadLink[]
   hostedFiles   ContentFile[]
   staffUploads  StaffUpload[]
+  siteDownloadDemo ContentSiteDownloadDemo?
   contentTags   ContentTag[]
   dailyViews    ContentViewDaily[]
+  dailyDownloads ContentDownloadDaily[]
   hotTopicSlots HomepageHotTopicSlot[]
 
   @@index([publishStatus, createdAt])
@@ -124,6 +128,20 @@ model ContentViewDaily {
   @@index([viewDate])
   @@index([viewDate, viewCount])
   @@map("content_view_daily")
+}
+
+model ContentDownloadDaily {
+  contentId     Int      @map("content_id")
+  downloadDate  DateTime @map("download_date")
+  downloadCount Int      @default(0) @map("download_count")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  content       Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, downloadDate])
+  @@index([downloadDate])
+  @@index([downloadDate, downloadCount])
+  @@map("content_download_daily")
 }
 
 model HomepageHotTopicSlot {
@@ -173,6 +191,13 @@ enum StaffUploadMethod {
   MULTIPART
 }
 
+enum SiteDownloadDemoStatus {
+  PENDING
+  IGNORED
+  UPLOADED
+  FAILED
+}
+
 model StaffUpload {
   id               Int               @id @default(autoincrement())
   contentId        Int               @map("content_id")
@@ -215,6 +240,30 @@ model ContentFile {
   @@index([contentId, sortOrder])
   @@index([uploadedByUserId, createdAt])
   @@map("content_files")
+}
+
+model ContentSiteDownloadDemo {
+  id                 Int                    @id @default(autoincrement())
+  contentId          Int                    @unique @map("content_id")
+  status             SiteDownloadDemoStatus @default(PENDING)
+  telegramSourceUrl  String?                @map("telegram_source_url")
+  resolvedTargetUrls String?                @map("resolved_target_urls")
+  selectedFilesJson  String?                @map("selected_files_json")
+  errorMessage       String?                @map("error_message")
+  ignoredByUserId    Int?                   @map("ignored_by_user_id")
+  ignoredAt          DateTime?              @map("ignored_at")
+  completedByUserId  Int?                   @map("completed_by_user_id")
+  completedAt        DateTime?              @map("completed_at")
+  createdAt          DateTime               @default(now()) @map("created_at")
+  updatedAt          DateTime               @updatedAt @map("updated_at")
+  content            Content                @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  ignoredBy          User?                  @relation("ContentSiteDownloadDemoIgnoredBy", fields: [ignoredByUserId], references: [id], onDelete: SetNull)
+  completedBy        User?                  @relation("ContentSiteDownloadDemoCompletedBy", fields: [completedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([status, updatedAt])
+  @@index([ignoredByUserId, updatedAt])
+  @@index([completedByUserId, updatedAt])
+  @@map("content_site_download_demos")
 }
 
 model Tag {

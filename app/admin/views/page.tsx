@@ -1,11 +1,14 @@
 import Link from "next/link";
-import { getContentViewAnalytics } from "@/lib/content";
+import { getContentDownloadAnalytics, getContentViewAnalytics } from "@/lib/content";
 import { requireStaff } from "@/lib/auth/session";
 import { formatDateTime } from "@/lib/utils";
 
 export default async function AdminViewsPage() {
   await requireStaff({ touchActivity: false });
-  const contentViews = await getContentViewAnalytics();
+  const [contentViews, contentDownloads] = await Promise.all([
+    getContentViewAnalytics(),
+    getContentDownloadAnalytics()
+  ]);
 
   return (
     <div className="page-section grid admin-dashboard-grid">
@@ -37,9 +40,29 @@ export default async function AdminViewsPage() {
             <small>Total content detail page opens recorded for today</small>
           </article>
           <article className="admin-stat-card">
+            <span className="eyebrow">Yesterday Views</span>
+            <strong>{contentViews.previousDayViews}</strong>
+            <small>Total content detail page opens recorded for yesterday</small>
+          </article>
+          <article className="admin-stat-card">
             <span className="eyebrow">Per-month Views</span>
             <strong>{contentViews.perMonthViews}</strong>
             <small>Total content detail page opens recorded for this month</small>
+          </article>
+          <article className="admin-stat-card">
+            <span className="eyebrow">Previous Month</span>
+            <strong>{contentViews.previousMonthViews}</strong>
+            <small>Total content detail page opens recorded for the previous calendar month</small>
+          </article>
+          <article className="admin-stat-card">
+            <span className="eyebrow">Total Downloads</span>
+            <strong>{contentDownloads.totalDownloads}</strong>
+            <small>Total website download opens recorded so far, excluding Telegram links</small>
+          </article>
+          <article className="admin-stat-card">
+            <span className="eyebrow">Per-day Downloads</span>
+            <strong>{contentDownloads.perDayDownloads}</strong>
+            <small>Total website download opens recorded for today, excluding Telegram links</small>
           </article>
           <article className="admin-stat-card">
             <span className="eyebrow">Viewed Posts</span>
