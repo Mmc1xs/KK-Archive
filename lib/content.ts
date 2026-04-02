@@ -445,8 +445,8 @@ export async function getContentViewAnalytics() {
       },
       where: {
         viewDate: {
-          gte: previousDayBucket,
-          lt: dayBucket
+          gte: dayBucket,
+          lt: nextDayBucket
         }
       }
     }),
@@ -456,8 +456,8 @@ export async function getContentViewAnalytics() {
       },
       where: {
         viewDate: {
-          gte: dayBucket,
-          lt: nextDayBucket
+          gte: previousDayBucket,
+          lt: dayBucket
         }
       }
     }),

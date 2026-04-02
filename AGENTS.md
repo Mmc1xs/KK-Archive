@@ -28,6 +28,12 @@ Build a maintainable image browsing website with structured tag-based search.
 - Set explicit cache policies for static storage assets (such as images) when object names are immutable.
 - Track route-level latency (TTFB/total time) and optimize bottlenecks before adding new heavy features.
 
+## Local environment safety
+- Do not run `prisma generate --no-engine` in the main workspace.
+- Do not repoint, symlink, or junction the main workspace `node_modules` or Prisma client to another worktree.
+- If a temporary worktree or verification flow needs isolated dependencies, keep it fully isolated from the main workspace.
+- If Prisma client initialization breaks locally, restore it in the main workspace with `npm install` and `npx prisma generate` before doing anything else.
+
 ## Pre-commit / Pre-push verification
 - Never commit or push only on the basis of `tsc`, build success, or local reasoning when the change affects a user flow.
 - Before commit/push, re-test every changed flow end-to-end in the real UI or route it affects, and confirm there is no visible bug, stuck state, hydration warning, invalid validation message, or silent partial failure.
@@ -60,6 +66,7 @@ Build a maintainable image browsing website with structured tag-based search.
 - If a bug is discovered during verification, fix the root cause first and re-run the affected flow before commit/push.
 
 ## Before coding
+- In fresh sessions, read `docs/codex-quick-start.md` and `docs/codex-handoff.md` if present before making assumptions.
 - Propose folder structure.
 - Propose database schema.
 - Propose route list.

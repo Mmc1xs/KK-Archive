@@ -35,7 +35,7 @@ export default async function AdminViewsPage() {
             <small>Total content detail page opens recorded so far</small>
           </article>
           <article className="admin-stat-card">
-            <span className="eyebrow">Per-day Views</span>
+            <span className="eyebrow">Today Views</span>
             <strong>{contentViews.perDayViews}</strong>
             <small>Total content detail page opens recorded for today</small>
           </article>
@@ -45,7 +45,7 @@ export default async function AdminViewsPage() {
             <small>Total content detail page opens recorded for yesterday</small>
           </article>
           <article className="admin-stat-card">
-            <span className="eyebrow">Per-month Views</span>
+            <span className="eyebrow">This Month Views</span>
             <strong>{contentViews.perMonthViews}</strong>
             <small>Total content detail page opens recorded for this month</small>
           </article>
@@ -60,7 +60,7 @@ export default async function AdminViewsPage() {
             <small>Total website download opens recorded so far, excluding Telegram links</small>
           </article>
           <article className="admin-stat-card">
-            <span className="eyebrow">Per-day Downloads</span>
+            <span className="eyebrow">Today Downloads</span>
             <strong>{contentDownloads.perDayDownloads}</strong>
             <small>Total website download opens recorded for today, excluding Telegram links</small>
           </article>
