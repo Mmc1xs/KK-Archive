@@ -48,9 +48,10 @@ function withSupabasePoolerCompatibility(url?: string) {
 function getRuntimeDatabaseUrl() {
   if (isBuildTimeExecution()) {
     return (
-      process.env.POSTGRES_SESSION_URL ||
+      withSupabasePoolerCompatibility(process.env.POSTGRES_POOLED_URL) ||
       process.env.POSTGRES_DIRECT_URL ||
-      withSupabasePoolerCompatibility(process.env.POSTGRES_POOLED_URL)
+      process.env.POSTGRES_SESSION_URL ||
+      undefined
     );
   }
 
