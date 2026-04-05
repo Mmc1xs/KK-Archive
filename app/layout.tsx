@@ -5,6 +5,7 @@ import { SiteNavClient } from "@/components/site-nav-client";
 import { getSiteOrigin } from "@/lib/site-origin";
 
 const siteOrigin = getSiteOrigin();
+const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID?.trim();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
@@ -25,6 +26,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-Hant">
+      <head>
+        {adsenseClientId ? (
+          <script
+            async
+            crossOrigin="anonymous"
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
+          />
+        ) : null}
+      </head>
       <body>
         <header className="site-header">
           <div className="shell">

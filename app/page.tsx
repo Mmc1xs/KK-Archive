@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
+import { GoogleAdSenseSlot } from "@/components/google-adsense-slot";
 import {
   getHomepageHotTopicContents,
   getHomepageLatestPublishedContents,
@@ -33,7 +34,9 @@ export default async function HomePage() {
               <div className="eyebrow">KK File Index</div>
               <h1 className="sr-only">Find KK-related files through clean tag browsing.</h1>
             </div>
-            <div className="hero-copy-reserved" aria-hidden="true" />
+            <div className="hero-copy-reserved">
+              <GoogleAdSenseSlot slot={process.env.NEXT_PUBLIC_ADSENSE_HOME_SLOT_ID} label="Homepage sponsor" />
+            </div>
             <div className="hero-copy-bottom">
               <div className="hero-feature-pills">
                 <span className="hero-feature-pill">Character cards</span>
