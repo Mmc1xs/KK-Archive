@@ -1,0 +1,168 @@
+.contentCardLink {
+  cursor: pointer;
+}
+
+.pending {
+  transform: translateY(-3px) scale(0.99);
+  border-color: rgba(59, 158, 232, 0.98);
+  box-shadow:
+    0 20px 38px rgba(83, 140, 196, 0.16),
+    0 0 0 2px rgba(224, 247, 255, 0.95) inset,
+    0 0 0 8px rgba(93, 192, 255, 0.18);
+}
+
+.pending :global(.card-image),
+.pending :global(.card-body) {
+  opacity: 0.68;
+}
+
+.pendingIndicator {
+  position: absolute;
+  inset: auto 18px 18px auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(23, 53, 92, 0.9);
+  color: #ffffff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 2;
+}
+
+.pendingIndicatorVisible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.34);
+  border-top-color: #ffffff;
+  animation: spin 0.7s linear infinite;
+}
+
+.loadingShell {
+  display: grid;
+  gap: 20px;
+}
+
+.loadingBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(227, 244, 255, 0.9);
+  border: 1px solid rgba(137, 213, 255, 0.6);
+  color: var(--accent-strong);
+  font-weight: 700;
+  width: fit-content;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 420px);
+  gap: 22px;
+}
+
+.panel {
+  display: grid;
+  gap: 18px;
+}
+
+.media,
+.thumb,
+.line,
+.pill,
+.tagCard {
+  background: linear-gradient(90deg, rgba(228, 243, 255, 0.9), rgba(244, 250, 255, 1), rgba(228, 243, 255, 0.9));
+  background-size: 220% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+.media {
+  aspect-ratio: 4 / 3;
+  border-radius: 24px;
+}
+
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.thumb {
+  aspect-ratio: 4 / 3;
+  border-radius: 20px;
+}
+
+.line {
+  height: 16px;
+  border-radius: 999px;
+}
+
+.eyebrow {
+  width: 120px;
+  height: 12px;
+}
+
+.title {
+  width: 88%;
+  height: 24px;
+}
+
+.short {
+  width: 62%;
+}
+
+.statusRow {
+  display: flex;
+  gap: 12px;
+}
+
+.pill {
+  width: 110px;
+  height: 36px;
+  border-radius: 999px;
+}
+
+.tagGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.tagCard {
+  height: 110px;
+  border-radius: 24px;
+}
+
+@media (max-width: 860px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { buildContentHref } from "@/lib/content-href";
+import { ContentCardLink } from "@/components/content-card-link";
 import { type UiLocale } from "@/lib/ui-locale";
 
 type ContentCardProps = {
@@ -46,7 +46,7 @@ export function ContentCard({ content, locale = "en" }: ContentCardProps) {
   const contentHref = buildContentHref(content.slug, locale);
 
   return (
-    <Link href={contentHref} prefetch={false} className="card" style={{ display: "block", height: "100%" }}>
+    <ContentCardLink href={contentHref} locale={locale}>
       <img className="card-image" src={content.coverImageUrl} alt={content.title} />
       <div className="card-body">
         <div className="eyebrow">{eyebrowLabel}</div>
@@ -54,6 +54,6 @@ export function ContentCard({ content, locale = "en" }: ContentCardProps) {
         {content.reviewStatus === "UNVERIFIED" ? <div className="card-warning-chip">{labels.unverified}</div> : null}
         <p className="muted">{author}</p>
       </div>
-    </Link>
+    </ContentCardLink>
   );
 }
