@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { SiteFooterClient } from "@/components/site-footer-client";
 import { SiteNavClient } from "@/components/site-nav-client";
 import { getSiteOrigin } from "@/lib/site-origin";
 
 const siteOrigin = getSiteOrigin();
 const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID?.trim();
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID?.trim();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteOrigin),
@@ -36,6 +39,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         ) : null}
       </head>
       <body>
+        {gaMeasurementId ? (
+          <Suspense fallback={null}>
+            <GoogleAnalytics measurementId={gaMeasurementId} />
+          </Suspense>
+        ) : null}
         <header className="site-header">
           <div className="shell">
             <nav className="site-nav" style={{ position: "relative", zIndex: 60, overflow: "visible" }}>
