@@ -17,7 +17,7 @@ export async function generateMetadata({
 
   if (!content) {
     return {
-      title: "Content Not Found | Koikatsu Card Archive"
+      title: "内容不存在 | KK Archive"
     };
   }
 
@@ -29,21 +29,16 @@ export async function generateMetadata({
   const useCharacter =
     normalizedCharacter && normalizedCharacter !== "unknown character" && normalizedCharacter !== "unknown";
 
-  const titleParts = [
-    useCharacter ? character : content.title,
-    work,
-    `Koikatsu ${type}`
-  ].filter(Boolean);
-
-  const descriptionSource = work ?? author ?? "the Koikatsu archive";
+  const titleParts = [useCharacter ? character : content.title, work, `Koikatsu ${type}`].filter(Boolean);
+  const descriptionSource = work ?? author ?? "KK Archive";
 
   return {
     title: titleParts.join(" | "),
-    description: `View ${content.title} from ${descriptionSource} in the Koikatsu archive, with preview images, structured tags, original source details, and available download options.`
+    description: `在 KK Archive 查看 ${content.title}，包含预览图、结构化标签、原始来源与可用下载方式。来源参考：${descriptionSource}。`
   };
 }
 
-export default async function ContentDetailPage({
+export default async function ContentDetailPageZhCn({
   params
 }: {
   params: Promise<{ slug: string }>;
@@ -68,27 +63,27 @@ export default async function ContentDetailPage({
       user={user}
       tgDownloadLink={tgDownloadLink}
       siteDownloadEntries={siteDownloadEntries}
-      locale="en"
+      locale="zh-CN"
       copy={{
-        unverifiedTitle: "Unverified Content",
-        unverifiedBody: "This post has not been fully reviewed yet. Tags and metadata may still be incomplete or inaccurate.",
-        visibleContentEyebrow: "Visible Content",
-        edit: "Edit",
-        originalSource: "Original Source",
-        downloadLinks: "Download Links",
-        telegramDownload: "Telegram Download",
-        websiteDownload: "Website Download",
-        websiteDownloads: (count) => `Website Download (${count})`,
-        type: "Type",
-        author: "Author",
-        work: "Work",
-        character: "Character",
-        style: "Style",
-        usage: "Usage",
+        unverifiedTitle: "未校验内容",
+        unverifiedBody: "这篇帖子尚未完成校对，标签与元数据可能仍不完整或不准确。",
+        visibleContentEyebrow: "公开内容",
+        edit: "编辑",
+        originalSource: "原始来源",
+        downloadLinks: "下载链接",
+        telegramDownload: "Telegram 下载",
+        websiteDownload: "网站下载",
+        websiteDownloads: (count) => `网站下载 (${count})`,
+        type: "类型",
+        author: "作者",
+        work: "作品",
+        character: "角色",
+        style: "风格",
+        usage: "用途",
         reviewStatus: {
-          edited: "Edited",
-          passed: "Passed",
-          unverified: "Unverified"
+          edited: "已编辑",
+          passed: "已通过",
+          unverified: "未校验"
         }
       }}
     />

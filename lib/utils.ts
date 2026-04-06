@@ -7,12 +7,19 @@ export function formatTagTypeLabel(type: string) {
 }
 
 export function formatDateTime(value: Date | string | null | undefined) {
+  return formatDateTimeForLocale(value, "zh-TW");
+}
+
+export function formatDateTimeForLocale(
+  value: Date | string | null | undefined,
+  locale: "en-US" | "zh-CN" | "ja-JP" | "zh-TW" = "zh-TW"
+) {
   if (!value) {
-    return "Never";
+    return locale === "zh-CN" ? "从未" : locale === "ja-JP" ? "なし" : "Never";
   }
 
   const date = value instanceof Date ? value : new Date(value);
-  return new Intl.DateTimeFormat("zh-TW", {
+  return new Intl.DateTimeFormat(locale, {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",

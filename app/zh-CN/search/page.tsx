@@ -7,9 +7,8 @@ const PAGE_SIZE = 12;
 export const preferredRegion = "hkg1";
 
 export const metadata: Metadata = {
-  title: "Search Koikatsu Cards by Tags | Koikatsu Card Archive",
-  description:
-    "Search Koikatsu cards, presets, scenes, textures, overlays, and shared files by author, work, character, style, usage, and type."
+  title: "标签搜索 | KK Archive",
+  description: "按作者、作品、角色、风格、用途与类型筛选 KK 内容。"
 };
 
 function readValues(value: string | string[] | undefined) {
@@ -19,7 +18,7 @@ function readValues(value: string | string[] | undefined) {
   return Array.isArray(value) ? value : [value];
 }
 
-export default async function SearchPage({
+export default async function SearchPageZhCn({
   searchParams
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -52,7 +51,7 @@ export default async function SearchPage({
 
   return (
     <SearchPageView
-      locale="en"
+      locale="zh-CN"
       types={searchFilterBootstrap.types}
       initialAuthor={searchFilterBootstrap.selectedAuthor}
       initialWork={searchFilterBootstrap.selectedWork}
@@ -63,46 +62,46 @@ export default async function SearchPage({
       resultsPage={resultsPage}
       filters={{ author, work, character, styles, usages, types }}
       copy={{
-        filtersEyebrow: "Search Filters",
-        filtersTitle: "Tag Search",
-        resultsEyebrow: "Visible Results",
-        resultsTitle: "Search Results",
-        status: (page, shownCount) => `Page ${page} - ${shownCount} shown`,
-        previous: "Previous",
-        next: "Next",
-        pageCurrent: (page) => `Page ${page}`,
-        pageSummary: (pageSize) => `${pageSize} / page`,
-        paginationLabel: "Search pagination",
+        filtersEyebrow: "搜索筛选",
+        filtersTitle: "标签搜索",
+        resultsEyebrow: "可见结果",
+        resultsTitle: "搜索结果",
+        status: (page, shownCount) => `第 ${page} 页 · 显示 ${shownCount} 项`,
+        previous: "上一页",
+        next: "下一页",
+        pageCurrent: (page) => `第 ${page} 页`,
+        pageSummary: (pageSize) => `${pageSize} / 页`,
+        paginationLabel: "搜索分页",
         filterLabels: {
-          author: "Author",
-          work: "Work",
-          character: "Character",
-          type: "Type",
-          style: "Style",
-          usage: "Usage",
-          searchAuthorPlaceholder: "Search author",
-          searchWorkPlaceholder: "Search work",
-          searchCharacterPlaceholder: "Search character",
-          selectWorkFirstPlaceholder: "Select work first",
-          clear: "Clear",
-          searching: "Searching...",
-          noMatchingAuthors: "No matching authors.",
-          noMatchingWorks: "No matching works.",
-          selectWorkFirst: "Select a work first.",
-          noMatchingCharacters: "No matching characters.",
-          styleLabelTemplate: "Style ({count}/{max})",
-          noStyleSelected: "No style selected.",
-          searchStylePlaceholder: "Search style",
-          maximumStyleTags: "Maximum {count} style tags",
-          noMatchingStyles: "No matching styles.",
-          noUsageSelected: "No usage selected.",
-          searchUsagePlaceholder: "Search usage",
-          noMatchingUsages: "No matching usages.",
-          applyFilters: "Apply Filters",
-          clearFilters: "Clear",
-          unknownAuthor: "Unknown author",
-          unknownWork: "Unknown work",
-          unknownCharacter: "Unknown character"
+          author: "作者",
+          work: "作品",
+          character: "角色",
+          type: "类型",
+          style: "风格",
+          usage: "用途",
+          searchAuthorPlaceholder: "搜索作者",
+          searchWorkPlaceholder: "搜索作品",
+          searchCharacterPlaceholder: "搜索角色",
+          selectWorkFirstPlaceholder: "请先选择作品",
+          clear: "清除",
+          searching: "搜索中...",
+          noMatchingAuthors: "没有匹配的作者。",
+          noMatchingWorks: "没有匹配的作品。",
+          selectWorkFirst: "请先选择作品。",
+          noMatchingCharacters: "没有匹配的角色。",
+          styleLabelTemplate: "风格 ({count}/{max})",
+          noStyleSelected: "尚未选择风格。",
+          searchStylePlaceholder: "搜索风格",
+          maximumStyleTags: "最多可选 {count} 个风格标签",
+          noMatchingStyles: "没有匹配的风格。",
+          noUsageSelected: "尚未选择用途。",
+          searchUsagePlaceholder: "搜索用途",
+          noMatchingUsages: "没有匹配的用途。",
+          applyFilters: "应用筛选",
+          clearFilters: "清空",
+          unknownAuthor: "未知作者",
+          unknownWork: "未知作品",
+          unknownCharacter: "未知角色"
         }
       }}
     />

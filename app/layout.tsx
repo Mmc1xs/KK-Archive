@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import "./globals.css";
+import { SiteFooterClient } from "@/components/site-footer-client";
 import { SiteNavClient } from "@/components/site-nav-client";
 import { getSiteOrigin } from "@/lib/site-origin";
 
@@ -18,14 +18,14 @@ export const metadata: Metadata = {
       "A searchable archive for Koikatsu-related files, including cards, presets, scenes, textures, overlays, and other shared resources organized with structured tags.",
     url: siteOrigin,
     siteName: "KK Archive",
-    locale: "zh_TW",
+    locale: "en_US",
     type: "website"
   }
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="zh-Hant">
+    <html lang="en">
       <head>
         {adsenseClientId ? (
           <script
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         <header className="site-header">
           <div className="shell">
-            <nav className="site-nav">
+            <nav className="site-nav" style={{ position: "relative", zIndex: 60, overflow: "visible" }}>
               <SiteNavClient />
             </nav>
           </div>
@@ -46,21 +46,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <main className="shell">{children}</main>
         <footer className="site-footer">
           <div className="shell">
-            <div className="site-footer-inner">
-              <span className="muted">KK Archive</span>
-              <div className="site-footer-links">
-                <span className="site-footer-link muted">Made By Mmc1xs</span>
-                <a href="mailto:mmc1xs@koikatsucards.com" className="site-footer-link">
-                  Business Inquiries
-                </a>
-                <Link href="/support" className="site-footer-link">
-                  Support Me
-                </Link>
-                <Link href="/privacy" className="site-footer-link">
-                  Privacy
-                </Link>
-              </div>
-            </div>
+            <SiteFooterClient />
           </div>
         </footer>
       </body>

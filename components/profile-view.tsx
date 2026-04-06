@@ -20,9 +20,42 @@ type ProfileViewProps = {
   identity: Array<{ label: string; value: string; actionLabel?: string; actionHref?: string }>;
   metrics?: ProfileMetric[];
   slots: ProfileSlot[];
+  labels?: {
+    profileIdentity: string;
+    profileIdentityHelp: string;
+    accountDetails: string;
+    accountDetailsHelp: string;
+    staffMetrics: string;
+    staffMetricsHelp: string;
+    extensionSlots: string;
+    extensionSlotsHelp: string;
+    reserved: string;
+    scalabilityNotes: string;
+    scalabilityNotesHelp: string;
+    noteItems: [string, string, string];
+  };
 };
 
-export function ProfileView({ eyebrow, title, role, status, identity, metrics, slots }: ProfileViewProps) {
+const defaultLabels: NonNullable<ProfileViewProps["labels"]> = {
+  profileIdentity: "Profile Identity",
+  profileIdentityHelp: "Keep the account record clear first. Avatar and social modules can come later.",
+  accountDetails: "Account Details",
+  accountDetailsHelp: "Stable identity data that every signed-in account can see.",
+  staffMetrics: "Staff Metrics",
+  staffMetricsHelp: "Role-based work numbers. Members do not see this area.",
+  extensionSlots: "Extension Slots",
+  extensionSlotsHelp: "Reserved modules for settlement, creator tools, billing, or future internal panels.",
+  reserved: "Reserved",
+  scalabilityNotes: "Scalability Notes",
+  scalabilityNotesHelp: "This structure keeps future expansion cheap.",
+  noteItems: [
+    "Identity, staff metrics, and extension slots are separated, so new features do not force a full page redesign.",
+    "Settlement Quantity is independent from Passed Count and can be adjusted by admin without touching moderation history.",
+    "Future creator tools can plug into reserved slots instead of crowding the account core."
+  ]
+};
+
+export function ProfileView({ eyebrow, title, role, status, identity, metrics, slots, labels = defaultLabels }: ProfileViewProps) {
   const isMember = role === "MEMBER";
 
   return (
@@ -38,8 +71,8 @@ export function ProfileView({ eyebrow, title, role, status, identity, metrics, s
         </div>
         <div className={styles.identityCard}>
           <div className={styles.identityTop}>
-            <strong>Profile Identity</strong>
-            {isMember ? null : <small>Keep the account record clear first. Avatar and social modules can come later.</small>}
+            <strong>{labels.profileIdentity}</strong>
+            {isMember ? null : <small>{labels.profileIdentityHelp}</small>}
           </div>
           <dl className={styles.identityList}>
             {identity.map((item) => (
@@ -56,8 +89,8 @@ export function ProfileView({ eyebrow, title, role, status, identity, metrics, s
         <div className={styles.bodyColumn}>
           <div className={styles.block}>
             <div className={styles.blockHeader}>
-              <strong>Account Details</strong>
-              {isMember ? null : <small>Stable identity data that every signed-in account can see.</small>}
+              <strong>{labels.accountDetails}</strong>
+              {isMember ? null : <small>{labels.accountDetailsHelp}</small>}
             </div>
             <div className={styles.accountGrid}>
               {identity.map((item) => (
@@ -79,8 +112,8 @@ export function ProfileView({ eyebrow, title, role, status, identity, metrics, s
           {metrics ? (
             <div className={styles.block}>
               <div className={styles.blockHeader}>
-                <strong>Staff Metrics</strong>
-                <small>Role-based work numbers. Members do not see this area.</small>
+                <strong>{labels.staffMetrics}</strong>
+                <small>{labels.staffMetricsHelp}</small>
               </div>
               <div className={styles.metricGrid}>
                 {metrics.map((metric) => (
@@ -102,13 +135,13 @@ export function ProfileView({ eyebrow, title, role, status, identity, metrics, s
           <div className={styles.bodyColumn}>
             <div className={styles.block}>
               <div className={styles.blockHeader}>
-                <strong>Extension Slots</strong>
-                <small>Reserved modules for settlement, creator tools, billing, or future internal panels.</small>
+                <strong>{labels.extensionSlots}</strong>
+                <small>{labels.extensionSlotsHelp}</small>
               </div>
               <div className={styles.slotGrid}>
                 {slots.map((slot) => (
                   <article key={slot.title} className={styles.slotCard}>
-                    <span className={styles.slotBadge}>Reserved</span>
+                    <span className={styles.slotBadge}>{labels.reserved}</span>
                     <strong>{slot.title}</strong>
                     <p>{slot.description}</p>
                   </article>
@@ -118,13 +151,13 @@ export function ProfileView({ eyebrow, title, role, status, identity, metrics, s
 
             <div className={styles.block}>
               <div className={styles.blockHeader}>
-                <strong>Scalability Notes</strong>
-                <small>This structure keeps future expansion cheap.</small>
+                <strong>{labels.scalabilityNotes}</strong>
+                <small>{labels.scalabilityNotesHelp}</small>
               </div>
               <ul className={styles.noteList}>
-                <li>Identity, staff metrics, and extension slots are separated, so new features do not force a full page redesign.</li>
-                <li>Settlement Quantity is independent from Passed Count and can be adjusted by admin without touching moderation history.</li>
-                <li>Future creator tools can plug into reserved slots instead of crowding the account core.</li>
+                {labels.noteItems.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
               </ul>
             </div>
           </div>

@@ -16,6 +16,40 @@ type SearchFiltersProps = {
   initialStyles: SearchTagOption[];
   initialUsages: SearchTagOption[];
   initialTypes: string[];
+  labels?: SearchFiltersLabels;
+  clearHref?: string;
+};
+
+export type SearchFiltersLabels = {
+  author: string;
+  work: string;
+  character: string;
+  type: string;
+  style: string;
+  usage: string;
+  searchAuthorPlaceholder: string;
+  searchWorkPlaceholder: string;
+  searchCharacterPlaceholder: string;
+  selectWorkFirstPlaceholder: string;
+  clear: string;
+  searching: string;
+  noMatchingAuthors: string;
+  noMatchingWorks: string;
+  selectWorkFirst: string;
+  noMatchingCharacters: string;
+  styleLabelTemplate: string;
+  noStyleSelected: string;
+  searchStylePlaceholder: string;
+  maximumStyleTags: string;
+  noMatchingStyles: string;
+  noUsageSelected: string;
+  searchUsagePlaceholder: string;
+  noMatchingUsages: string;
+  applyFilters: string;
+  clearFilters: string;
+  unknownAuthor: string;
+  unknownWork: string;
+  unknownCharacter: string;
 };
 
 type SearchableTagType = "AUTHOR" | "WORK" | "CHARACTER" | "STYLE" | "USAGE";
@@ -23,6 +57,38 @@ type SearchableTagType = "AUTHOR" | "WORK" | "CHARACTER" | "STYLE" | "USAGE";
 const MAX_SELECTED_STYLES = 8;
 const SUGGESTION_LIMIT = 12;
 const SEARCH_DEBOUNCE_MS = 180;
+
+const defaultLabels: SearchFiltersLabels = {
+  author: "Author",
+  work: "Work",
+  character: "Character",
+  type: "Type",
+  style: "Style",
+  usage: "Usage",
+  searchAuthorPlaceholder: "Search author",
+  searchWorkPlaceholder: "Search work",
+  searchCharacterPlaceholder: "Search character",
+  selectWorkFirstPlaceholder: "Select work first",
+  clear: "Clear",
+  searching: "Searching...",
+  noMatchingAuthors: "No matching authors.",
+  noMatchingWorks: "No matching works.",
+  selectWorkFirst: "Select a work first.",
+  noMatchingCharacters: "No matching characters.",
+  styleLabelTemplate: "Style ({count}/{max})",
+  noStyleSelected: "No style selected.",
+  searchStylePlaceholder: "Search style",
+  maximumStyleTags: "Maximum {count} style tags",
+  noMatchingStyles: "No matching styles.",
+  noUsageSelected: "No usage selected.",
+  searchUsagePlaceholder: "Search usage",
+  noMatchingUsages: "No matching usages.",
+  applyFilters: "Apply Filters",
+  clearFilters: "Clear",
+  unknownAuthor: "Unknown author",
+  unknownWork: "Unknown work",
+  unknownCharacter: "Unknown character"
+};
 
 async function fetchTagSuggestions(options: {
   type: SearchableTagType;
@@ -101,7 +167,9 @@ export function SearchFilters({
   initialCharacter = null,
   initialStyles,
   initialUsages,
-  initialTypes
+  initialTypes,
+  labels = defaultLabels,
+  clearHref = "/search"
 }: SearchFiltersProps) {
   const [selectedAuthor, setSelectedAuthor] = useState<SearchTagOption | null>(initialAuthor);
   const [authorQuery, setAuthorQuery] = useState(initialAuthor?.name ?? "");
@@ -599,10 +667,14 @@ export function SearchFilters({
     }
   }
 
+  const styleLabel = labels.styleLabelTemplate
+    .replace("{count}", String(selectedStyles.length))
+    .replace("{max}", String(MAX_SELECTED_STYLES));
+
   return (
     <form method="get" className="grid">
       <div className="field">
-        <label htmlFor="author-search">Author</label>
+        <label htmlFor="author-search">{labels.author}</label>
         <div className="search-author-picker" ref={authorRef}>
           <div className="search-author-input-wrap">
             <input
@@ -619,12 +691,12 @@ export function SearchFilters({
               }}
               onFocus={() => setAuthorOpen(true)}
               onKeyDown={handleAuthorKeyDown}
-              placeholder="Search author"
+              placeholder={labels.searchAuthorPlaceholder}
               autoComplete="off"
             />
             {selectedAuthor ? (
               <button type="button" className="search-inline-clear" onClick={clearAuthor}>
-                Clear
+                {labels.clear}
               </button>
             ) : null}
           </div>
@@ -634,7 +706,7 @@ export function SearchFilters({
           {authorOpen ? (
             <div className="search-author-panel">
               {authorLoading ? (
-                <div className="search-author-empty">Searching...</div>
+                <div className="search-author-empty">{labels.searching}</div>
               ) : authorOptions.length ? (
                 authorOptions.map((author, index) => (
                   <button
@@ -644,11 +716,11 @@ export function SearchFilters({
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => selectAuthor(author)}
                   >
-                    <span className="search-author-label">{author.name || "Unknown author"}</span>
+                    <span className="search-author-label">{author.name || labels.unknownAuthor}</span>
                   </button>
                 ))
               ) : (
-                <div className="search-author-empty">No matching authors.</div>
+                <div className="search-author-empty">{labels.noMatchingAuthors}</div>
               )}
             </div>
           ) : null}
@@ -656,7 +728,7 @@ export function SearchFilters({
       </div>
 
       <div className="field">
-        <label htmlFor="work-search">Work</label>
+        <label htmlFor="work-search">{labels.work}</label>
         <div className="search-author-picker" ref={workRef}>
           <div className="search-author-input-wrap">
             <input
@@ -675,12 +747,12 @@ export function SearchFilters({
               }}
               onFocus={() => setWorkOpen(true)}
               onKeyDown={handleWorkKeyDown}
-              placeholder="Search work"
+              placeholder={labels.searchWorkPlaceholder}
               autoComplete="off"
             />
             {selectedWork ? (
               <button type="button" className="search-inline-clear" onClick={clearWork}>
-                Clear
+                {labels.clear}
               </button>
             ) : null}
           </div>
@@ -690,7 +762,7 @@ export function SearchFilters({
           {workOpen ? (
             <div className="search-author-panel">
               {workLoading ? (
-                <div className="search-author-empty">Searching...</div>
+                <div className="search-author-empty">{labels.searching}</div>
               ) : workOptions.length ? (
                 workOptions.map((work, index) => (
                   <button
@@ -700,11 +772,11 @@ export function SearchFilters({
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => selectWork(work)}
                   >
-                    <span className="search-author-label">{work.name || "Unknown work"}</span>
+                    <span className="search-author-label">{work.name || labels.unknownWork}</span>
                   </button>
                 ))
               ) : (
-                <div className="search-author-empty">No matching works.</div>
+                <div className="search-author-empty">{labels.noMatchingWorks}</div>
               )}
             </div>
           ) : null}
@@ -712,7 +784,7 @@ export function SearchFilters({
       </div>
 
       <div className="field">
-        <label htmlFor="character-search">Character</label>
+        <label htmlFor="character-search">{labels.character}</label>
         <div className="search-author-picker" ref={characterRef}>
           <div className="search-author-input-wrap">
             <input
@@ -729,13 +801,13 @@ export function SearchFilters({
               }}
               onFocus={() => setCharacterOpen(true)}
               onKeyDown={handleCharacterKeyDown}
-              placeholder={selectedWork ? "Search character" : "Select work first"}
+              placeholder={selectedWork ? labels.searchCharacterPlaceholder : labels.selectWorkFirstPlaceholder}
               autoComplete="off"
               disabled={!selectedWork}
             />
             {selectedCharacter ? (
               <button type="button" className="search-inline-clear" onClick={clearCharacter}>
-                Clear
+                {labels.clear}
               </button>
             ) : null}
           </div>
@@ -745,9 +817,9 @@ export function SearchFilters({
           {characterOpen ? (
             <div className="search-author-panel">
               {!selectedWork ? (
-                <div className="search-author-empty">Select a work first.</div>
+                <div className="search-author-empty">{labels.selectWorkFirst}</div>
               ) : characterLoading ? (
-                <div className="search-author-empty">Searching...</div>
+                <div className="search-author-empty">{labels.searching}</div>
               ) : characterOptions.length ? (
                 characterOptions.map((character, index) => (
                   <button
@@ -759,11 +831,11 @@ export function SearchFilters({
                     onMouseDown={(event) => event.preventDefault()}
                     onClick={() => selectCharacter(character)}
                   >
-                    <span className="search-author-label">{character.name || "Unknown character"}</span>
+                    <span className="search-author-label">{character.name || labels.unknownCharacter}</span>
                   </button>
                 ))
               ) : (
-                <div className="search-author-empty">No matching characters.</div>
+                <div className="search-author-empty">{labels.noMatchingCharacters}</div>
               )}
             </div>
           ) : null}
@@ -771,7 +843,7 @@ export function SearchFilters({
       </div>
 
       <SearchToggleGroup
-        label="Type"
+        label={labels.type}
         name="types"
         options={types}
         selected={selectedTypes}
@@ -779,7 +851,7 @@ export function SearchFilters({
       />
 
       <div className="field">
-        <label htmlFor="style-search">{`Style (${selectedStyles.length}/${MAX_SELECTED_STYLES})`}</label>
+        <label htmlFor="style-search">{styleLabel}</label>
         {selectedStyles.length ? (
           <div className="filter-pill-group search-style-selected">
             {selectedStyles.map((option) => (
@@ -795,7 +867,7 @@ export function SearchFilters({
             ))}
           </div>
         ) : (
-          <small className="filter-helper-text">No style selected.</small>
+          <small className="filter-helper-text">{labels.noStyleSelected}</small>
         )}
 
         <div className="search-author-picker" ref={styleRef}>
@@ -810,7 +882,7 @@ export function SearchFilters({
               }}
               onFocus={() => setStyleOpen(true)}
               onKeyDown={handleStyleKeyDown}
-              placeholder="Search style"
+              placeholder={labels.searchStylePlaceholder}
               autoComplete="off"
             />
           </div>
@@ -818,7 +890,7 @@ export function SearchFilters({
           {styleOpen ? (
             <div className="search-author-panel">
               {styleLoading ? (
-                <div className="search-author-empty">Searching...</div>
+                <div className="search-author-empty">{labels.searching}</div>
               ) : styleOptions.length ? (
                 styleOptions.map((option, index) => (
                   <button
@@ -830,7 +902,7 @@ export function SearchFilters({
                     disabled={selectedStyles.length >= MAX_SELECTED_STYLES}
                     title={
                       selectedStyles.length >= MAX_SELECTED_STYLES
-                        ? `Maximum ${MAX_SELECTED_STYLES} style tags`
+                        ? labels.maximumStyleTags.replace("{count}", String(MAX_SELECTED_STYLES))
                         : undefined
                     }
                   >
@@ -838,7 +910,7 @@ export function SearchFilters({
                   </button>
                 ))
               ) : (
-                <div className="search-author-empty">No matching styles.</div>
+                <div className="search-author-empty">{labels.noMatchingStyles}</div>
               )}
             </div>
           ) : null}
@@ -850,7 +922,7 @@ export function SearchFilters({
       </div>
 
       <div className="field">
-        <label htmlFor="usage-search">Usage</label>
+        <label htmlFor="usage-search">{labels.usage}</label>
         {selectedUsages.length ? (
           <div className="filter-pill-group search-style-selected">
             {selectedUsages.map((option) => (
@@ -866,7 +938,7 @@ export function SearchFilters({
             ))}
           </div>
         ) : (
-          <small className="filter-helper-text">No usage selected.</small>
+          <small className="filter-helper-text">{labels.noUsageSelected}</small>
         )}
 
         <div className="search-author-picker" ref={usageRef}>
@@ -881,7 +953,7 @@ export function SearchFilters({
               }}
               onFocus={() => setUsageOpen(true)}
               onKeyDown={handleUsageKeyDown}
-              placeholder="Search usage"
+              placeholder={labels.searchUsagePlaceholder}
               autoComplete="off"
             />
           </div>
@@ -889,7 +961,7 @@ export function SearchFilters({
           {usageOpen ? (
             <div className="search-author-panel">
               {usageLoading ? (
-                <div className="search-author-empty">Searching...</div>
+                <div className="search-author-empty">{labels.searching}</div>
               ) : usageOptions.length ? (
                 usageOptions.map((option, index) => (
                   <button
@@ -903,7 +975,7 @@ export function SearchFilters({
                   </button>
                 ))
               ) : (
-                <div className="search-author-empty">No matching usages.</div>
+                <div className="search-author-empty">{labels.noMatchingUsages}</div>
               )}
             </div>
           ) : null}
@@ -915,9 +987,9 @@ export function SearchFilters({
       </div>
 
       <div className="inline-actions">
-        <button type="submit">Apply Filters</button>
-        <a href="/search" className="link-pill">
-          Clear
+        <button type="submit">{labels.applyFilters}</button>
+        <a href={clearHref} className="link-pill">
+          {labels.clearFilters}
         </a>
       </div>
     </form>

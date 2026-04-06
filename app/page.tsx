@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ContentCard } from "@/components/content-card";
-import { GoogleAdSenseSlot } from "@/components/google-adsense-slot";
+import { HomePageView } from "@/components/home-page-view";
 import {
   getHomepageHotTopicContents,
   getHomepageLatestPublishedContents,
@@ -17,143 +15,56 @@ export const metadata: Metadata = {
     "Browse a structured Koikatsu archive for character cards, presets, scenes, textures, overlays, and shared files with tag-based filtering."
 };
 
+const copy = {
+  heroEyebrow: "KK File Index",
+  heroScreenReaderTitle: "Find KK-related files through clean tag browsing.",
+  featurePills: ["Character cards", "Scene presets", "Textures & overlays"] as [string, string, string],
+  searchArchiveLabel: "Search Archive",
+  browseFilesLabel: "Browse Files",
+  briefingEyebrow: "Academy Briefing",
+  archiveOverviewLabel: "Archive Overview",
+  onlineLabel: "Online",
+  totalPostsEyebrow: "Total Posts",
+  totalPostsDescription: "Published entries currently available in the archive",
+  indexedAuthorsEyebrow: "Indexed Authors",
+  indexedAuthorsDescription: "Author tags currently available for structured browsing",
+  spotlightEyebrow: "Spotlight Entry",
+  spotlightFallbackTitle: "Latest archive entry",
+  spotlightFallbackAuthor: "KK Archive",
+  roadmapEyebrow: "Future Roadmap",
+  roadmapItems: [
+    {
+      title: "Mod Library",
+      description: "Add a dedicated mod library to support and extend the core card library workflow."
+    },
+    {
+      title: "Post Likes",
+      description: "Add post likes so members can quickly signal useful content."
+    }
+  ],
+  reservedEyebrow: "Reserved Panel",
+  reservedLabel: "Future Slot",
+  hotTopicEyebrow: "Hot Topic",
+  hotTopicTitle: "Hot Topic",
+  latestPublishedEyebrow: "Latest Published",
+  latestPublishedTitle: "Latest Published Content",
+  viewMoreLabel: "View More"
+};
+
 export default async function HomePage() {
   const [hotTopicContents, latestPublishedContents, overviewStats] = await Promise.all([
     getHomepageHotTopicContents(),
     getHomepageLatestPublishedContents(),
     getHomepageOverviewStats()
   ]);
-  const featuredContent = hotTopicContents[0] ?? latestPublishedContents[0];
 
   return (
-    <div className="page-section grid">
-      <section className="hero">
-        <div className="hero-layout">
-          <div className="hero-copy">
-            <div className="hero-copy-top">
-              <div className="eyebrow">KK File Index</div>
-              <h1 className="sr-only">Find KK-related files through clean tag browsing.</h1>
-            </div>
-            <div className="hero-copy-reserved">
-              <GoogleAdSenseSlot slot={process.env.NEXT_PUBLIC_ADSENSE_HOME_SLOT_ID} label="Homepage sponsor" />
-            </div>
-            <div className="hero-copy-bottom">
-              <div className="hero-feature-pills">
-                <span className="hero-feature-pill">Character cards</span>
-                <span className="hero-feature-pill">Scene presets</span>
-                <span className="hero-feature-pill">Textures & overlays</span>
-              </div>
-              <div className="inline-actions">
-                <Link href="/search" className="button">
-                  Search Archive
-                </Link>
-                <Link href="/contents" className="link-pill">
-                  Browse Files
-                </Link>
-              </div>
-            </div>
-          </div>
-
-          <div className="hero-intel-panel">
-            <div className="hero-intel-header">
-              <div>
-                <div className="eyebrow">Academy Briefing</div>
-                <strong>Archive Overview</strong>
-              </div>
-              <span className="hero-intel-status">Online</span>
-            </div>
-
-            <div className="hero-intel-grid">
-              <article className="hero-intel-card">
-                <span className="eyebrow">Total Posts</span>
-                <strong>{overviewStats.totalPosts}</strong>
-                <small>Published entries currently available in the archive</small>
-              </article>
-              <article className="hero-intel-card">
-                <span className="eyebrow">Indexed Authors</span>
-                <strong>{overviewStats.indexedAuthors}</strong>
-                <small>Author tags currently available for structured browsing</small>
-              </article>
-            </div>
-
-            <article className="hero-spotlight-card">
-              <div className="hero-spotlight-copy">
-                <div className="eyebrow">Spotlight Entry</div>
-                <strong>{featuredContent?.title ?? "Latest archive entry"}</strong>
-                <p className="muted">
-                  {featuredContent?.contentTags.find((item) => item.tag.type === "AUTHOR")?.tag.name ?? "KK Archive"}
-                </p>
-              </div>
-              {featuredContent ? (
-                <img src={featuredContent.coverImageUrl} alt={featuredContent.title} className="hero-spotlight-image" />
-              ) : null}
-            </article>
-
-            <article className="hero-intel-card hero-intel-list">
-              <div className="hero-intel-list-header">
-                <div className="eyebrow">Future Roadmap</div>
-              </div>
-              <div className="hero-intel-list-items">
-                <article className="hero-intel-list-item">
-                  <span className="hero-intel-dot" aria-hidden="true" />
-                  <div>
-                    <strong>Mod Library</strong>
-                    <small>Add a dedicated mod library to support and extend the core card library workflow.</small>
-                  </div>
-                </article>
-                <article className="hero-intel-list-item">
-                  <span className="hero-intel-dot" aria-hidden="true" />
-                  <div>
-                    <strong>Post Likes</strong>
-                    <small>Add post likes so members can quickly signal useful content.</small>
-                  </div>
-                </article>
-              </div>
-            </article>
-
-            <article className="hero-intel-card">
-              <div className="eyebrow">Reserved Panel</div>
-              <span className="hero-intel-mini">Future Slot</span>
-              <div className="hero-placeholder hero-placeholder-compact" aria-hidden="true" />
-            </article>
-          </div>
-        </div>
-      </section>
-
-      {hotTopicContents.length ? (
-        <section className="panel">
-          <div className="split">
-            <div>
-              <div className="eyebrow">Hot Topic</div>
-              <h2 className="title-lg">Hot Topic</h2>
-            </div>
-          </div>
-          <div className="grid content-grid">
-            {hotTopicContents.map((content) => (
-              <article key={`hot-topic-${content.slug}`} className="hot-topic-demo-card">
-                <ContentCard content={content} />
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
-
-      <section className="panel">
-        <div className="split">
-          <div>
-            <div className="eyebrow">Latest Published</div>
-            <h2 className="title-lg">Latest Published Content</h2>
-          </div>
-          <Link href="/contents" className="link-pill">
-            View More
-          </Link>
-        </div>
-        <div className="grid content-grid">
-          {latestPublishedContents.map((content) => (
-            <ContentCard key={content.slug} content={content} />
-          ))}
-        </div>
-      </section>
-    </div>
+    <HomePageView
+      hotTopicContents={hotTopicContents}
+      latestPublishedContents={latestPublishedContents}
+      overviewStats={overviewStats}
+      copy={copy}
+      locale="en"
+    />
   );
 }

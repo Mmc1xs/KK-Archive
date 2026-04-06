@@ -17,7 +17,7 @@ export async function generateMetadata({
 
   if (!content) {
     return {
-      title: "Content Not Found | Koikatsu Card Archive"
+      title: "コンテンツが見つかりません | KK Archive"
     };
   }
 
@@ -29,21 +29,16 @@ export async function generateMetadata({
   const useCharacter =
     normalizedCharacter && normalizedCharacter !== "unknown character" && normalizedCharacter !== "unknown";
 
-  const titleParts = [
-    useCharacter ? character : content.title,
-    work,
-    `Koikatsu ${type}`
-  ].filter(Boolean);
-
-  const descriptionSource = work ?? author ?? "the Koikatsu archive";
+  const titleParts = [useCharacter ? character : content.title, work, `Koikatsu ${type}`].filter(Boolean);
+  const descriptionSource = work ?? author ?? "KK Archive";
 
   return {
     title: titleParts.join(" | "),
-    description: `View ${content.title} from ${descriptionSource} in the Koikatsu archive, with preview images, structured tags, original source details, and available download options.`
+    description: `KK Archive で ${content.title} を表示します。プレビュー画像、構造化タグ、元ソース情報、利用可能なダウンロードを確認できます。参考元: ${descriptionSource}。`
   };
 }
 
-export default async function ContentDetailPage({
+export default async function ContentDetailPageJa({
   params
 }: {
   params: Promise<{ slug: string }>;
@@ -68,27 +63,27 @@ export default async function ContentDetailPage({
       user={user}
       tgDownloadLink={tgDownloadLink}
       siteDownloadEntries={siteDownloadEntries}
-      locale="en"
+      locale="ja"
       copy={{
-        unverifiedTitle: "Unverified Content",
-        unverifiedBody: "This post has not been fully reviewed yet. Tags and metadata may still be incomplete or inaccurate.",
-        visibleContentEyebrow: "Visible Content",
-        edit: "Edit",
-        originalSource: "Original Source",
-        downloadLinks: "Download Links",
-        telegramDownload: "Telegram Download",
-        websiteDownload: "Website Download",
-        websiteDownloads: (count) => `Website Download (${count})`,
-        type: "Type",
-        author: "Author",
-        work: "Work",
-        character: "Character",
-        style: "Style",
-        usage: "Usage",
+        unverifiedTitle: "未確認コンテンツ",
+        unverifiedBody: "この投稿はまだ完全に確認されていません。タグやメタデータが不完全または不正確な場合があります。",
+        visibleContentEyebrow: "公開コンテンツ",
+        edit: "編集",
+        originalSource: "元ソース",
+        downloadLinks: "ダウンロードリンク",
+        telegramDownload: "Telegram ダウンロード",
+        websiteDownload: "サイトダウンロード",
+        websiteDownloads: (count) => `サイトダウンロード (${count})`,
+        type: "種類",
+        author: "作者",
+        work: "作品",
+        character: "キャラクター",
+        style: "スタイル",
+        usage: "用途",
         reviewStatus: {
-          edited: "Edited",
-          passed: "Passed",
-          unverified: "Unverified"
+          edited: "編集済み",
+          passed: "確認済み",
+          unverified: "未確認"
         }
       }}
     />

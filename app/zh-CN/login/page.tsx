@@ -4,7 +4,7 @@ import { GoogleAuthCard } from "@/components/google-auth-card";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getLocaleHomeHref, getLocaleRegisterHref } from "@/lib/ui-locale";
 
-export default async function LoginPage({
+export default async function LoginPageZhCn({
   searchParams
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -12,7 +12,7 @@ export default async function LoginPage({
   const user = await getCurrentSession({ touchActivity: false });
 
   if (user) {
-    redirect(user.role === "ADMIN" || user.role === "AUDIT" ? "/admin" : getLocaleHomeHref("en"));
+    redirect(user.role === "ADMIN" || user.role === "AUDIT" ? "/admin" : getLocaleHomeHref("zh-CN"));
   }
 
   const params = await searchParams;
@@ -21,14 +21,15 @@ export default async function LoginPage({
   return (
     <>
       <GoogleAuthCard
-        eyebrow="Member Access"
-        title="Member Login"
-        description="Members now sign in with Google only. Public browsing still focuses on published content."
-        actionLabel="Continue with Google"
+        eyebrow="会员入口"
+        title="会员登录"
+        description="会员目前仅支持使用 Google 登录，公开浏览仍以已发布内容为主。"
+        actionLabel="使用 Google 继续"
+        helperText="只有通过 Google 验证的账号可以登录。首次成功登录时，系统会自动创建或关联你的会员账号。"
         error={error}
       />
       <p className="muted" style={{ textAlign: "center", marginTop: -24 }}>
-        Need access? <Link href={getLocaleRegisterHref("en")}>Register with Google</Link>
+        还没有权限？ <Link href={getLocaleRegisterHref("zh-CN")}>使用 Google 注册</Link>
       </p>
     </>
   );

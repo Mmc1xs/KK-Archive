@@ -3,7 +3,7 @@ import { UserRole } from "@prisma/client";
 import { ProfileMetric, ProfileSlot, ProfileView } from "@/components/profile-view";
 import { requireUserWithoutTouch } from "@/lib/auth/session";
 import { getProfileData } from "@/lib/profile";
-import { formatDateTime } from "@/lib/utils";
+import { formatDateTimeForLocale } from "@/lib/utils";
 
 function buildProfileMetrics(role: UserRole, metrics: { editedCount: number; passedCount: number; settlementQuantity: number }) {
   if (role === UserRole.MEMBER) {
@@ -107,11 +107,29 @@ export default async function ProfilePage({
             actionHref: "/profile/username"
           },
           { label: "Email", value: profile.user.email },
-          { label: "Joined At", value: formatDateTime(profile.user.createdAt) },
+          { label: "Joined At", value: formatDateTimeForLocale(profile.user.createdAt, "en-US") },
           { label: "Account Status", value: profile.user.isSuspended ? "Suspended" : "Normal" }
         ]}
         metrics={buildProfileMetrics(profile.user.role, profile.metrics)}
         slots={buildProfileSlots(profile.user.role)}
+        labels={{
+          profileIdentity: "Profile Identity",
+          profileIdentityHelp: "Keep the account record clear first. Avatar and social modules can come later.",
+          accountDetails: "Account Details",
+          accountDetailsHelp: "Stable identity data that every signed-in account can see.",
+          staffMetrics: "Staff Metrics",
+          staffMetricsHelp: "Role-based work numbers. Members do not see this area.",
+          extensionSlots: "Extension Slots",
+          extensionSlotsHelp: "Reserved modules for settlement, creator tools, billing, or future internal panels.",
+          reserved: "Reserved",
+          scalabilityNotes: "Scalability Notes",
+          scalabilityNotesHelp: "This structure keeps future expansion cheap.",
+          noteItems: [
+            "Identity, staff metrics, and extension slots are separated, so new features do not force a full page redesign.",
+            "Settlement Quantity is independent from Passed Count and can be adjusted by admin without touching moderation history.",
+            "Future creator tools can plug into reserved slots instead of crowding the account core."
+          ]
+        }}
       />
     </div>
   );
