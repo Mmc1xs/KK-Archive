@@ -1800,3 +1800,19 @@ button {
     gap: 18px;
   }
 }
+.hosted-files-toolbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hosted-file-card-header {
+  align-items: start;
+}
+
+.hosted-file-delete-button {
+  min-width: 96px;
+  justify-content: center;
+}
+

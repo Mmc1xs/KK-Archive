@@ -2,6 +2,7 @@ import {
   AbortMultipartUploadCommand,
   CompleteMultipartUploadCommand,
   CreateMultipartUploadCommand,
+  DeleteObjectCommand,
   GetObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
@@ -121,6 +122,18 @@ export async function uploadR2Object(params: {
         ? { ContentLength: params.contentLength }
         : {}),
       CacheControl: "public, max-age=31536000, immutable"
+    })
+  );
+}
+
+export async function deleteR2Object(key: string) {
+  const client = createR2Client();
+  const { bucketName } = getR2Config();
+
+  await client.send(
+    new DeleteObjectCommand({
+      Bucket: bucketName,
+      Key: key
     })
   );
 }

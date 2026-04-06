@@ -42,9 +42,21 @@ export function DownloadLinksEditor({
       setHostedLinks((current) => (current.includes(next) ? current : [...current, next]));
     }
 
+    function handleRemovedLink(event: Event) {
+      const customEvent = event as CustomEvent<{ url?: string }>;
+      const removed = customEvent.detail?.url?.trim();
+      if (!removed) {
+        return;
+      }
+
+      setHostedLinks((current) => current.filter((item) => item !== removed));
+    }
+
     window.addEventListener("kkd:add-download-link", handleExternalLink as EventListener);
+    window.addEventListener("kkd:remove-download-link", handleRemovedLink as EventListener);
     return () => {
       window.removeEventListener("kkd:add-download-link", handleExternalLink as EventListener);
+      window.removeEventListener("kkd:remove-download-link", handleRemovedLink as EventListener);
     };
   }, []);
 
@@ -91,4 +103,3 @@ export function DownloadLinksEditor({
     </div>
   );
 }
-

@@ -244,7 +244,6 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
                   Staff-managed shared files will live under <code>{`uploadfiles/${storageFolder}/`}</code> in R2.
                 </small>
               </div>
-              <div className="status status-passed">{content.hostedFiles.length} file(s)</div>
             </div>
             <HostedFileUploader
               contentId={content.id}
