@@ -25,20 +25,17 @@ export function ContentCard({ content }: ContentCardProps) {
   const shouldFallbackToAuthor =
     !normalizedCharacter || normalizedCharacter === "unknown character" || normalizedCharacter === "unknown";
   const eyebrowLabel = shouldFallbackToAuthor ? author : (character as string);
+  const contentHref = buildContentHref(content.slug);
 
   return (
-    <article className="card">
+    <Link href={contentHref} prefetch={false} className="card" style={{ display: "block", height: "100%" }}>
       <img className="card-image" src={content.coverImageUrl} alt={content.title} />
       <div className="card-body">
         <div className="eyebrow">{eyebrowLabel}</div>
-        <h3>
-          <Link href={buildContentHref(content.slug)} prefetch={false}>
-            {content.title}
-          </Link>
-        </h3>
+        <h3>{content.title}</h3>
         {content.reviewStatus === "UNVERIFIED" ? <div className="card-warning-chip">Unverified</div> : null}
         <p className="muted">{author}</p>
       </div>
-    </article>
+    </Link>
   );
 }
