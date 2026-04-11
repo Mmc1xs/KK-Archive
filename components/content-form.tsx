@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { UserRole } from "@prisma/client";
 import { createContentAction, transitionContentReviewStatusAction, updateContentAction } from "@/app/actions";
 import { DownloadLinksEditor } from "@/components/admin/download-links-editor";
+import { DescriptionFieldToggle } from "@/components/description-field-toggle";
 import { HostedFileUploader } from "@/components/admin/hosted-file-uploader";
 import { TagAutocomplete } from "@/components/tag-autocomplete";
 import { WorkCharacterFields } from "@/components/work-character-fields";
+import { buildContentHref } from "@/lib/content-href";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 import { resolveContentStorageFolderValue } from "@/lib/uploads";
@@ -89,6 +92,8 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
       ? createContentAction
       : updateContentAction.bind(null, content!.id);
   const reviewStatusMeta = content ? getReviewStatusMeta(content.reviewStatus) : null;
+  const canViewOriginalPost =
+    content?.publishStatus === "PUBLISHED" || content?.publishStatus === "SUMMIT";
 
   const typeIds = new Set(content?.contentTags.filter((item) => item.tag.type === "TYPE").map((item) => item.tag.id) ?? []);
   const hostedLegacyIdDownloadLinks = new Set(content?.hostedFiles.map((item) => buildLegacyContentFileDownloadPath(item.id)) ?? []);
@@ -113,7 +118,14 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
   return (
     <section className="panel">
       <div className="eyebrow">Admin Content Editor</div>
-      <h1 className="title-lg">{mode === "create" ? "Create Content" : "Edit Content"}</h1>
+      <div className="split">
+        <h1 className="title-lg">{mode === "create" ? "Create Content" : "Edit Content"}</h1>
+        {mode === "edit" && content && canViewOriginalPost ? (
+          <Link href={buildContentHref(content.slug)} className="link-pill">
+            Back to Post
+          </Link>
+        ) : null}
+      </div>
       {error ? <div className="notice">{error}</div> : null}
       <form action={action} className="grid">
         <div className="field">
@@ -124,10 +136,7 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
           <label htmlFor="slug">Slug</label>
           <input id="slug" name="slug" defaultValue={content?.slug ?? ""} required />
         </div>
-        <div className="field">
-          <label htmlFor="description">Description</label>
-          <textarea id="description" name="description" defaultValue={content?.description ?? ""} required />
-        </div>
+        <DescriptionFieldToggle initialValue={content?.description ?? ""} />
         <div className="field">
           <label htmlFor="coverImageUrl">Cover Image URL</label>
           <input id="coverImageUrl" name="coverImageUrl" defaultValue={content?.coverImageUrl ?? ""} required />

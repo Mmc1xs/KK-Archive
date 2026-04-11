@@ -61,6 +61,35 @@ export function buildR2PublicUrl(key: string) {
   return `${publicBaseUrl}/${key}`;
 }
 
+export function extractR2ObjectKeyFromPublicUrl(url?: string | null) {
+  if (!url) {
+    return null;
+  }
+
+  try {
+    const { publicBaseUrl } = getR2Config();
+    const baseUrl = new URL(publicBaseUrl);
+    const candidateUrl = new URL(url);
+
+    if (baseUrl.origin !== candidateUrl.origin) {
+      return null;
+    }
+
+    const normalizedBasePath = baseUrl.pathname.replace(/\/+$/, "");
+    const candidatePath = candidateUrl.pathname;
+    const requiredPrefix = normalizedBasePath ? `${normalizedBasePath}/` : "/";
+
+    if (!candidatePath.startsWith(requiredPrefix)) {
+      return null;
+    }
+
+    const rawKey = candidatePath.slice(requiredPrefix.length).replace(/^\/+/, "");
+    return rawKey ? decodeURIComponent(rawKey) : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function createR2MultipartUpload(params: {
   key: string;
   contentType: string;

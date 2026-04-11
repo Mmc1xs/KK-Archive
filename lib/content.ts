@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { Prisma, PublishStatus, ReviewStatus, TagType } from "@prisma/client";
+import { Prisma, PublishStatus, ReviewStatus, TagType, UserRole } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
@@ -1094,79 +1094,131 @@ export async function searchPublishedContents(filters: {
 }
 
 export async function getAdminContents(filter?: { reviewStatus?: "all" | "unverified" | "edited" | "passed" }) {
-  return db.content.findMany({
-    where: {
-      ...(filter?.reviewStatus === "unverified"
-        ? { reviewStatus: ReviewStatus.UNVERIFIED }
-        : filter?.reviewStatus === "edited"
-          ? { reviewStatus: ReviewStatus.EDITED }
-          : filter?.reviewStatus === "passed"
-            ? { reviewStatus: ReviewStatus.PASSED }
-            : {})
-    },
-    orderBy: { updatedAt: "desc" },
-    include: {
-      contentTags: {
-        include: { tag: true }
-      }
+  const reviewStatus = filter?.reviewStatus ?? "all";
+  const orderedStatuses = getAdminReviewStatusOrder(reviewStatus, UserRole.ADMIN);
+  const results = await Promise.all(
+    orderedStatuses.map((status) =>
+      db.content.findMany({
+        where: buildAdminContentWhere(status),
+        orderBy: ADMIN_CONTENT_ORDER_BY,
+        include: {
+          contentTags: {
+            include: { tag: true }
+          }
+        }
+      })
+    )
+  );
+
+  return results.flat();
+}
+
+type AdminContentReviewFilter = "all" | "unverified" | "edited" | "passed";
+
+const ADMIN_REVIEW_STATUS_PRIORITY = [ReviewStatus.EDITED, ReviewStatus.UNVERIFIED, ReviewStatus.PASSED] as const;
+const AUDIT_REVIEW_STATUS_PRIORITY = [ReviewStatus.UNVERIFIED, ReviewStatus.EDITED, ReviewStatus.PASSED] as const;
+const ADMIN_CONTENT_ORDER_BY: Prisma.ContentOrderByWithRelationInput[] = [{ createdAt: "desc" }, { id: "desc" }];
+const ADMIN_CONTENT_PAGE_SELECT = {
+  id: true,
+  title: true,
+  slug: true,
+  publishStatus: true,
+  reviewStatus: true,
+  firstEditedAt: true,
+  editedAt: true,
+  firstEditedBy: {
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true
     }
-  });
+  },
+  editedBy: {
+    select: {
+      id: true,
+      username: true,
+      email: true,
+      role: true
+    }
+  }
+} satisfies Prisma.ContentSelect;
+
+function getReviewStatusFilterValue(reviewStatus: AdminContentReviewFilter) {
+  switch (reviewStatus) {
+    case "unverified":
+      return ReviewStatus.UNVERIFIED;
+    case "edited":
+      return ReviewStatus.EDITED;
+    case "passed":
+      return ReviewStatus.PASSED;
+    default:
+      return null;
+  }
+}
+
+function getAdminReviewStatusOrder(reviewStatus: AdminContentReviewFilter, viewerRole: UserRole) {
+  const explicitStatus = getReviewStatusFilterValue(reviewStatus);
+  if (explicitStatus) {
+    return [explicitStatus];
+  }
+
+  return viewerRole === UserRole.AUDIT ? [...AUDIT_REVIEW_STATUS_PRIORITY] : [...ADMIN_REVIEW_STATUS_PRIORITY];
+}
+
+function buildAdminContentWhere(reviewStatus?: ReviewStatus): Prisma.ContentWhereInput {
+  return reviewStatus ? { reviewStatus } : {};
 }
 
 export async function getAdminContentsPage(options?: {
-  reviewStatus?: "all" | "unverified" | "edited" | "passed";
+  reviewStatus?: AdminContentReviewFilter;
   page?: number;
   pageSize?: number;
+  viewerRole?: UserRole;
 }) {
   const reviewStatus = options?.reviewStatus ?? "all";
   const page = Number.isInteger(options?.page) && (options?.page ?? 0) > 0 ? (options?.page as number) : 1;
   const pageSize =
     Number.isInteger(options?.pageSize) && (options?.pageSize ?? 0) > 0 ? (options?.pageSize as number) : 20;
+  const viewerRole = options?.viewerRole === UserRole.AUDIT ? UserRole.AUDIT : UserRole.ADMIN;
+  const orderedStatuses = getAdminReviewStatusOrder(reviewStatus, viewerRole);
+  const statusCounts = await Promise.all(
+    orderedStatuses.map(async (status) => ({
+      status,
+      count: await db.content.count({
+        where: buildAdminContentWhere(status)
+      })
+    }))
+  );
+  const totalCount = statusCounts.reduce((sum, item) => sum + item.count, 0);
+  const itemOffset = (page - 1) * pageSize;
+  let remainingSkip = itemOffset;
+  let remainingTake = pageSize;
+  const items: Array<Prisma.ContentGetPayload<{ select: typeof ADMIN_CONTENT_PAGE_SELECT }>> = [];
 
-  const where = {
-    ...(reviewStatus === "unverified"
-      ? { reviewStatus: ReviewStatus.UNVERIFIED }
-      : reviewStatus === "edited"
-        ? { reviewStatus: ReviewStatus.EDITED }
-        : reviewStatus === "passed"
-          ? { reviewStatus: ReviewStatus.PASSED }
-          : {})
-  };
+  for (const { status, count } of statusCounts) {
+    if (remainingTake <= 0) {
+      break;
+    }
 
-  const [totalCount, items] = await Promise.all([
-    db.content.count({ where }),
-    db.content.findMany({
-      where,
-      orderBy: { updatedAt: "desc" },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        publishStatus: true,
-        reviewStatus: true,
-        firstEditedAt: true,
-        editedAt: true,
-        firstEditedBy: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-            role: true
-          }
-        },
-        editedBy: {
-          select: {
-            id: true,
-            username: true,
-            email: true,
-            role: true
-          }
-        }
-      }
-    })
-  ]);
+    if (remainingSkip >= count) {
+      remainingSkip -= count;
+      continue;
+    }
+
+    const take = Math.min(remainingTake, count - remainingSkip);
+    const rows = await db.content.findMany({
+      where: buildAdminContentWhere(status),
+      orderBy: ADMIN_CONTENT_ORDER_BY,
+      skip: remainingSkip,
+      take,
+      select: ADMIN_CONTENT_PAGE_SELECT
+    });
+
+    items.push(...rows);
+    remainingTake -= rows.length;
+    remainingSkip = 0;
+  }
 
   return {
     items,
@@ -1341,6 +1393,9 @@ export async function saveContent(
   if (data.typeTagIds.length !== 1) {
     return { ok: false as const, error: "Exactly one type is required" };
   }
+  if (authorTagIds.length !== 1 || workTagIds.length !== 1 || characterTagIds.length !== 1) {
+    return { ok: false as const, error: "Each content item must have exactly one author, one work, and one character tag." };
+  }
 
   const tagIds = [...authorTagIds, ...workTagIds, ...characterTagIds, ...styleTagIds, ...usageTagIds, ...data.typeTagIds];
   const normalizedManualDownloadLinks = [...new Set(data.downloadLinks.map((url) => url.trim()).filter(Boolean))];
@@ -1447,103 +1502,67 @@ export async function saveContent(
       reviewStatus: nextReviewStatus,
       publishStatus: data.publishStatus
     } satisfies Omit<Prisma.ContentUncheckedCreateInput, "contentTags" | "images" | "downloadLinks">;
+    const content = await db.$transaction(async (tx) => {
+      const savedContent = contentId
+        ? await tx.content.update({
+            where: { id: contentId },
+            data: {
+              ...sharedMutationData,
+              ...editedTrackingUpdate
+            }
+          })
+        : await tx.content.create({
+            data: {
+              ...sharedMutationData,
+              ...editedTrackingCreate
+            }
+          });
 
-    const relationUpdateData = {
-      contentTags: {
-        deleteMany: {},
-        createMany: {
+      const nextContentId = savedContent.id;
+
+      if (contentId) {
+        await tx.contentTag.deleteMany({
+          where: { contentId: nextContentId }
+        });
+        await tx.contentImage.deleteMany({
+          where: { contentId: nextContentId }
+        });
+        await tx.contentDownloadLink.deleteMany({
+          where: { contentId: nextContentId }
+        });
+      }
+
+      if (tagIds.length) {
+        await tx.contentTag.createMany({
           data: tagIds.map((tagId) => ({
+            contentId: nextContentId,
             tagId
           }))
-        }
-      },
-      images: {
-        deleteMany: {},
-        createMany: {
+        });
+      }
+
+      if (data.imageUrls.length) {
+        await tx.contentImage.createMany({
           data: data.imageUrls.map((imageUrl, index) => ({
+            contentId: nextContentId,
             imageUrl,
             sortOrder: index
           }))
-        }
-      },
-      downloadLinks: {
-        deleteMany: {},
-        createMany: {
+        });
+      }
+
+      if (mergedDownloadLinks.length) {
+        await tx.contentDownloadLink.createMany({
           data: mergedDownloadLinks.map((url, index) => ({
+            contentId: nextContentId,
             url,
             sortOrder: index
           }))
-        }
-      }
-    };
-
-    const content = contentId
-      ? await db.content.update({
-          where: { id: contentId },
-          data: {
-            ...sharedMutationData,
-            ...editedTrackingUpdate,
-            ...relationUpdateData
-          }
-        })
-      : await db.content.create({
-          data: {
-            ...sharedMutationData,
-            ...editedTrackingCreate,
-            contentTags: {
-              createMany: {
-                data: tagIds.map((tagId) => ({
-                  tagId
-                }))
-              }
-            },
-            images: {
-              createMany: {
-                data: data.imageUrls.map((imageUrl, index) => ({
-                  imageUrl,
-                  sortOrder: index
-                }))
-              }
-            },
-            downloadLinks: {
-              createMany: {
-                data: mergedDownloadLinks.map((url, index) => ({
-                  url,
-                  sortOrder: index
-                }))
-              }
-            }
-          }
         });
+      }
 
-    const authorCount = await db.contentTag.count({
-      where: {
-        contentId: content.id,
-        tag: {
-          type: TagType.AUTHOR
-        }
-      }
+      return savedContent;
     });
-    const workCount = await db.contentTag.count({
-      where: {
-        contentId: content.id,
-        tag: {
-          type: TagType.WORK
-        }
-      }
-    });
-    const characterCount = await db.contentTag.count({
-      where: {
-        contentId: content.id,
-        tag: {
-          type: TagType.CHARACTER
-        }
-      }
-    });
-
-    if (authorCount !== 1 || workCount !== 1 || characterCount !== 1) {
-      throw new Error("Each content item must have exactly one author, one work, and one character tag.");
-    }
 
     revalidateTag("tags", "max");
 

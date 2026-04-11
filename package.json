@@ -35,6 +35,8 @@
     "clean:sync-all": "tsx scripts/sync-all-clean-content.ts",
     "clean:move-unuploaded:later": "tsx scripts/move-unuploaded-clean-to-later.ts",
     "clean:move-unuploaded:later:apply": "tsx scripts/move-unuploaded-clean-to-later.ts --apply",
+    "tag:export-review": "tsx scripts/export-tag-review-json.ts",
+    "tag:import-review": "tsx scripts/import-tag-review-json.ts",
     "clean:work-report": "tsx scripts/report-pixiv-work-candidates.ts",
     "clean:work-apply": "tsx scripts/apply-pixiv-work-tags.ts",
     "clean:work-report:blue-archive": "tsx scripts/report-blue-archive-work-candidates.ts",
@@ -42,7 +44,8 @@
     "sync:new": "npm run clean:sync-new",
     "sync:all": "npm run clean:sync-all",
     "r2:upload-clean": "tsx scripts/upload-clean-to-r2.ts",
-    "r2:upload-clean:new": "tsx scripts/upload-new-clean-to-r2.ts"
+    "r2:upload-clean:new": "tsx scripts/upload-new-clean-to-r2.ts",
+    "codex:handoff": "tsx scripts/generate-codex-handoff.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1012.0",

@@ -38,18 +38,14 @@ const localeLabels: Record<UiLocale, { unknown: string; unverified: string }> = 
 export function ContentCard({ content, locale = "en" }: ContentCardProps) {
   const labels = localeLabels[locale];
   const author = content.contentTags.find((item) => item.tag.type === "AUTHOR")?.tag.name ?? labels.unknown;
-  const character = content.contentTags.find((item) => item.tag.type === "CHARACTER")?.tag.name;
-  const normalizedCharacter = character?.trim().toLowerCase();
-  const shouldFallbackToAuthor =
-    !normalizedCharacter || normalizedCharacter === "unknown character" || normalizedCharacter === "unknown";
-  const eyebrowLabel = shouldFallbackToAuthor ? author : (character as string);
+  const work = content.contentTags.find((item) => item.tag.type === "WORK")?.tag.name ?? labels.unknown;
   const contentHref = buildContentHref(content.slug, locale);
 
   return (
     <ContentCardLink href={contentHref} locale={locale}>
       <img className="card-image" src={content.coverImageUrl} alt={content.title} />
       <div className="card-body">
-        <div className="eyebrow">{eyebrowLabel}</div>
+        <div className="eyebrow">{work}</div>
         <h3>{content.title}</h3>
         {content.reviewStatus === "UNVERIFIED" ? <div className="card-warning-chip">{labels.unverified}</div> : null}
         <p className="muted">{author}</p>

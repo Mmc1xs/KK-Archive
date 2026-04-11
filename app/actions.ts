@@ -5,9 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, requireStaff, requireUserWithoutTouch } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { completeSiteDownloadDemo, getSiteDownloadDemoContent, markSiteDownloadDemoIgnored } from "@/lib/demo/site-download";
 import { HOMEPAGE_HOT_TOPIC_SLOT_COUNT, saveContent } from "@/lib/content";
-import { buildContentHref } from "@/lib/content-href";
+import { deleteR2Object, extractR2ObjectKeyFromPublicUrl } from "@/lib/storage/r2";
 import { deleteTag, saveTag, updateTag } from "@/lib/tag";
 import { usernameSchema } from "@/lib/validation";
 
@@ -263,14 +262,99 @@ export async function deleteContentAction(formData: FormData) {
 
   const contentId = Number(formData.get("contentId"));
   if (!Number.isInteger(contentId) || contentId <= 0) {
-    redirect("/admin/contents?success=Invalid content id");
+    redirect("/admin/contents?error=Invalid content id");
+  }
+
+  const content = await db.content.findUnique({
+    where: { id: contentId },
+    select: {
+      id: true,
+      slug: true,
+      coverImageUrl: true,
+      images: {
+        select: {
+          imageUrl: true
+        }
+      },
+      downloadLinks: {
+        select: {
+          url: true
+        }
+      },
+      hostedFiles: {
+        select: {
+          objectKey: true
+        }
+      }
+    }
+  });
+
+  if (!content) {
+    redirectWithMessage("/admin/contents", "error", "Content not found");
+  }
+
+  const r2ObjectKeys = new Set<string>();
+  const addManagedR2Key = (key?: string | null) => {
+    if (!key) {
+      return;
+    }
+
+    if (!key.startsWith("contents/") && !key.startsWith("uploadfiles/")) {
+      return;
+    }
+
+    r2ObjectKeys.add(key);
+  };
+
+  addManagedR2Key(extractR2ObjectKeyFromPublicUrl(content.coverImageUrl));
+
+  for (const image of content.images) {
+    addManagedR2Key(extractR2ObjectKeyFromPublicUrl(image.imageUrl));
+  }
+
+  for (const downloadLink of content.downloadLinks) {
+    addManagedR2Key(extractR2ObjectKeyFromPublicUrl(downloadLink.url));
+  }
+
+  for (const hostedFile of content.hostedFiles) {
+    addManagedR2Key(hostedFile.objectKey);
   }
 
   await db.content.delete({
     where: { id: contentId }
   });
 
-  redirect("/admin/contents?success=Content deleted");
+  const cleanupResults = await Promise.allSettled([...r2ObjectKeys].map((key) => deleteR2Object(key)));
+  const failedCleanupCount = cleanupResults.filter((result) => result.status === "rejected").length;
+
+  if (failedCleanupCount > 0) {
+    console.error("Failed to delete one or more R2 objects for removed content", {
+      contentId,
+      slug: content.slug,
+      attemptedKeys: [...r2ObjectKeys],
+      failedCleanupCount
+    });
+  }
+
+  revalidatePath("/admin/contents");
+  revalidatePath("/admin/homepage");
+  revalidatePath("/contents");
+  revalidatePath("/zh-CN/contents");
+  revalidatePath("/ja/contents");
+  revalidatePath("/en");
+  revalidatePath("/zh-CN");
+  revalidatePath("/ja");
+  revalidatePath(`/contents/${content.slug}`);
+  revalidatePath(`/zh-CN/contents/${content.slug}`);
+  revalidatePath(`/ja/contents/${content.slug}`);
+
+  redirectWithMessage(
+    "/admin/contents",
+    "success",
+    failedCleanupCount > 0
+      ? `Content deleted, but ${failedCleanupCount} R2 file(s) could not be removed.`
+      : "Content deleted"
+  );
 }
 
 export async function transitionContentReviewStatusAction(formData: FormData) {
@@ -506,58 +590,4 @@ export async function updateProfileUsernameAction(formData: FormData) {
   });
 
   redirectWithMessage(redirectTo, "success", "Username updated");
-}
-
-export async function ignoreSiteDownloadDemoAction(formData: FormData) {
-  const admin = await requireAdmin({ touchActivity: false });
-  const contentId = Number(formData.get("contentId"));
-  const redirectTo = String(formData.get("redirectTo") || "/admin/site-download-demo");
-
-  if (!Number.isInteger(contentId) || contentId <= 0) {
-    redirectWithMessage("/admin/site-download-demo", "error", "Invalid content id");
-  }
-
-  const content = await getSiteDownloadDemoContent(contentId);
-  if (!content || !content.telegramSourceUrl) {
-    redirectWithMessage(redirectTo, "error", "Telegram source link not found for this content");
-  }
-
-  await markSiteDownloadDemoIgnored({
-    contentId,
-    actorUserId: admin.id,
-    telegramSourceUrl: content.telegramSourceUrl
-  });
-
-  revalidatePath("/admin");
-  revalidatePath("/admin/site-download-demo");
-  revalidatePath(`/admin/site-download-demo/${contentId}`);
-  redirectWithMessage("/admin/site-download-demo", "success", "Content ignored for the site download demo");
-}
-
-export async function completeSiteDownloadDemoAction(formData: FormData) {
-  const admin = await requireAdmin({ touchActivity: false });
-  const contentId = Number(formData.get("contentId"));
-  const redirectTo = String(formData.get("redirectTo") || `/admin/site-download-demo/${contentId}`);
-
-  if (!Number.isInteger(contentId) || contentId <= 0) {
-    redirectWithMessage("/admin/site-download-demo", "error", "Invalid content id");
-  }
-
-  const content = await getSiteDownloadDemoContent(contentId);
-  if (!content) {
-    redirectWithMessage("/admin/site-download-demo", "error", "Content not found");
-  }
-
-  await completeSiteDownloadDemo({
-    contentId,
-    actorUserId: admin.id
-  });
-
-  revalidatePath("/admin");
-  revalidatePath("/admin/contents");
-  revalidatePath(`/admin/contents/${contentId}/edit`);
-  revalidatePath("/admin/site-download-demo");
-  revalidatePath(`/admin/site-download-demo/${contentId}`);
-  revalidatePath(buildContentHref(content.slug));
-  redirectWithMessage(redirectTo, "success", "Demo marked complete");
 }

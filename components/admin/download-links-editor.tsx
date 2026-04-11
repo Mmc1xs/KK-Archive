@@ -68,7 +68,7 @@ export function DownloadLinksEditor({
       <span>Download Links</span>
 
       <div className="download-link-row">
-        <label htmlFor="telegramDownloadLink">Telegram (TG)</label>
+        <label htmlFor="telegramDownloadLink">TG</label>
         <input
           id="telegramDownloadLink"
           type="url"
@@ -80,7 +80,7 @@ export function DownloadLinksEditor({
             if (!next.trim() || isValidUrl(next.trim())) {
               setError("");
             } else {
-              setError("Please enter a valid Telegram link");
+              setError("Please enter a valid TG link");
             }
           }}
         />

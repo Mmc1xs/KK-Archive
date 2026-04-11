@@ -1,74 +1,32 @@
 {
   "version": 1,
-  "updatedAt": "2026-03-22",
+  "updatedAt": "2026-04-11",
   "entries": [
     {
-      "canonicalName": "Blue Archive",
-      "canonicalSlug": "blue-archive",
+      "canonicalName": "Aether Gazer",
+      "canonicalSlug": "aether-gazer",
       "aliases": [
-        "blue archive",
-        "ブルーアーカイブ",
-        "ブルアカ",
-        "碧蓝档案",
-        "蔚藍檔案",
-        "BA"
+        "aether gazer",
+        "深空之眼"
       ]
     },
     {
-      "canonicalName": "Girls' Frontline",
-      "canonicalSlug": "girls-frontline",
+      "canonicalName": "Arknights",
+      "canonicalSlug": "arknights",
       "aliases": [
-        "girls frontline",
-        "girls' frontline",
-        "ドールズフロントライン",
-        "ドルフロ",
-        "少女前线",
-        "少女前線",
-        "GF"
+        "Arknights: Endfield",
+        "Arknights Endfield",
+        "Endfield"
       ]
     },
     {
-      "canonicalName": "Wuthering Waves",
-      "canonicalSlug": "wuthering-waves",
+      "canonicalName": "Atelier",
+      "canonicalSlug": "atelier",
       "aliases": [
-        "wuthering waves",
-        "鸣潮",
-        "鳴潮",
-        "Wuwa"
-      ]
-    },
-    {
-      "canonicalName": "Punishing: Gray Raven",
-      "canonicalSlug": "punishing-gray-raven",
-      "aliases": [
-        "punishing gray raven",
-        "punishing: gray raven",
-        "パニシング：グレイレイヴン",
-        "战双",
-        "戰雙"
-      ]
-    },
-    {
-      "canonicalName": "Honkai: Star Rail",
-      "canonicalSlug": "honkai-star-rail",
-      "aliases": [
-        "honkai star rail",
-        "honkai: star rail",
-        "崩坏：星穹铁道",
-        "崩壊：スターレイル",
-        "崩铁",
-        "崩鐵"
-      ]
-    },
-    {
-      "canonicalName": "Zenless Zone Zero",
-      "canonicalSlug": "zenless-zone-zero",
-      "aliases": [
-        "zenless zone zero",
-        "ゼンレスゾーンゼロ",
-        "绝区零",
-        "絕區零",
-        "ZZZ"
+        "atelier",
+        "アトリエ",
+        "炼金工房",
+        "鍊金工房"
       ]
     },
     {
@@ -82,15 +40,43 @@
       ]
     },
     {
-      "canonicalName": "Uma Musume: Pretty Derby",
-      "canonicalSlug": "uma-musume-pretty-derby",
+      "canonicalName": "Blue Archive",
+      "canonicalSlug": "blue-archive",
       "aliases": [
-        "uma musume",
-        "uma musume pretty derby",
-        "uma musume: pretty derby",
-        "ウマ娘",
-        "赛马娘",
-        "賽馬娘"
+        "blue archive",
+        "ブルーアーカイブ",
+        "ブルアカ",
+        "碧蓝档案",
+        "蔚藍檔案",
+        "BA"
+      ]
+    },
+    {
+      "canonicalName": "Fate/Grand Order",
+      "canonicalSlug": "fate-grand-order",
+      "aliases": [
+        "Fate/stay night",
+        "Fate stay night",
+        "FSN"
+      ]
+    },
+    {
+      "canonicalName": "Girls' Frontline",
+      "canonicalSlug": "girls-frontline",
+      "aliases": [
+        "girls frontline",
+        "girls' frontline",
+        "ドールズフロントライン",
+        "ドルフロ",
+        "少女前线",
+        "少女前線",
+        "GF",
+        "Girls' Frontline 2: Exilium",
+        "Girls' Frontline: Neural Cloud",
+        "Girls Frontline 2 Exilium",
+        "Girls Frontline Neural Cloud",
+        "GFL2",
+        "Neural Cloud"
       ]
     },
     {
@@ -108,21 +94,44 @@
       ]
     },
     {
-      "canonicalName": "Aether Gazer",
-      "canonicalSlug": "aether-gazer",
+      "canonicalName": "Honkai: Star Rail",
+      "canonicalSlug": "honkai-star-rail",
       "aliases": [
-        "aether gazer",
-        "深空之眼"
+        "honkai star rail",
+        "honkai: star rail",
+        "崩坏：星穹铁道",
+        "崩壊：スターレイル",
+        "崩铁",
+        "崩鐵"
       ]
     },
     {
-      "canonicalName": "Atelier",
-      "canonicalSlug": "atelier",
+      "canonicalName": "Love Live!",
+      "canonicalSlug": "love-live",
       "aliases": [
-        "atelier",
-        "アトリエ",
-        "炼金工房",
-        "鍊金工房"
+        "Love Live",
+        "Love Live! Hasu no Sora Girls' High School Idol Club",
+        "Love Live! Nijigasaki High School Idol Club",
+        "Hasu no Sora",
+        "Nijigasaki"
+      ]
+    },
+    {
+      "canonicalName": "Punishing: Gray Raven",
+      "canonicalSlug": "punishing-gray-raven",
+      "aliases": [
+        "punishing gray raven",
+        "punishing: gray raven",
+        "パニシング：グレイレイヴン",
+        "战双",
+        "戰雙"
+      ]
+    },
+    {
+      "canonicalName": "Taimanin",
+      "canonicalSlug": "taimanin",
+      "aliases": [
+        "Taimanin Yukikaze"
       ]
     },
     {
@@ -133,7 +142,47 @@
         "idolmaster",
         "アイドルマスター",
         "偶像大师",
-        "偶像大師"
+        "偶像大師",
+        "The Idolmaster Cinderella Girls",
+        "The Idolmaster Million Live!",
+        "The Idolmaster Shiny Colors",
+        "Cinderella Girls",
+        "Million Live",
+        "Shiny Colors",
+        "Deresute"
+      ]
+    },
+    {
+      "canonicalName": "Uma Musume: Pretty Derby",
+      "canonicalSlug": "uma-musume-pretty-derby",
+      "aliases": [
+        "uma musume",
+        "uma musume pretty derby",
+        "uma musume: pretty derby",
+        "ウマ娘",
+        "赛马娘",
+        "賽馬娘"
+      ]
+    },
+    {
+      "canonicalName": "Wuthering Waves",
+      "canonicalSlug": "wuthering-waves",
+      "aliases": [
+        "wuthering waves",
+        "鸣潮",
+        "鳴潮",
+        "Wuwa"
+      ]
+    },
+    {
+      "canonicalName": "Zenless Zone Zero",
+      "canonicalSlug": "zenless-zone-zero",
+      "aliases": [
+        "zenless zone zero",
+        "ゼンレスゾーンゼロ",
+        "绝区零",
+        "絕區零",
+        "ZZZ"
       ]
     }
   ]

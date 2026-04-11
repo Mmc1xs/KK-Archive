@@ -101,6 +101,7 @@ export function ContentDetailView({
   const galleryImages = content.images.slice(1);
   const isStaff = user?.role === "ADMIN" || user?.role === "AUDIT";
   const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus, copy.reviewStatus);
+  const description = content.description?.trim();
 
   return (
     <div className="page-section grid">
@@ -142,7 +143,7 @@ export function ContentDetailView({
             <div className="status">{content.publishStatus}</div>
             {isStaff ? <div className={reviewStatusMeta.className}>{reviewStatusMeta.label}</div> : null}
           </div>
-          <p className="muted">{content.description}</p>
+          {description ? <p className="muted">{description}</p> : null}
           {content.sourceLink ? (
             <section className="tag-section">
               <strong>{copy.originalSource}</strong>

@@ -98,7 +98,7 @@ export const contentSchema = z.object({
     .string()
     .min(1, "Slug is required")
     .regex(/^[A-Za-z0-9-#]+$/, "Slug may only contain letters, numbers, hyphens, and #"),
-  description: z.string().min(1, "Description is required"),
+  description: z.preprocess((value) => String(value ?? "").trim(), z.string()),
   coverImageUrl: contentImageUrlSchema,
   sourceLink: optionalUrlSchema,
   reviewStatus: z.nativeEnum(ReviewStatus).default(ReviewStatus.UNVERIFIED),

@@ -3,6 +3,10 @@ export type UiLocale = "en" | "zh-CN" | "ja";
 export const UI_LOCALES: UiLocale[] = ["en", "zh-CN", "ja"];
 
 export function getCurrentUiLocale(pathname: string): UiLocale {
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    return "en";
+  }
+
   if (pathname === "/zh-CN" || pathname.startsWith("/zh-CN/")) {
     return "zh-CN";
   }
@@ -27,7 +31,7 @@ export function buildLocalizedHref(locale: UiLocale, path: string) {
 }
 
 export function getLocaleHomeHref(locale: UiLocale) {
-  return locale === "en" ? "/" : `/${locale}`;
+  return locale === "en" ? "/en" : `/${locale}`;
 }
 
 export function getLocaleContentsHref(locale: UiLocale) {
