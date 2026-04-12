@@ -1281,7 +1281,12 @@ export async function getAdminContentById(id: number) {
 export async function saveContent(
   input: unknown,
   contentId?: number,
-  options?: { reviewStatusOverride?: ReviewStatus; reviewHandledByUserId?: number; passHandledByUserId?: number }
+  options?: {
+    reviewStatusOverride?: ReviewStatus;
+    reviewHandledByUserId?: number;
+    passHandledByUserId?: number;
+    preserveReviewStatus?: boolean;
+  }
 ) {
   const parsed = contentSchema.safeParse(input);
   if (!parsed.success) {
@@ -1404,8 +1409,13 @@ export async function saveContent(
     ? await db.content.findUnique({
         where: { id: contentId },
         select: {
+          reviewStatus: true,
+          editedByUserId: true,
+          editedAt: true,
           firstEditedByUserId: true,
-          firstEditedAt: true
+          firstEditedAt: true,
+          passedByUserId: true,
+          passedAt: true
         }
       })
     : null;
@@ -1428,15 +1438,20 @@ export async function saveContent(
     }
   }
 
-  const nextReviewStatus = options?.reviewStatusOverride ?? data.reviewStatus;
+  const nextReviewStatus =
+    options?.preserveReviewStatus && contentId && existingContentForTracking
+      ? existingContentForTracking.reviewStatus
+      : options?.reviewStatusOverride ?? data.reviewStatus;
   const now = new Date();
   const shouldSetFirstEdited =
     nextReviewStatus === ReviewStatus.EDITED &&
     Boolean(options?.reviewHandledByUserId) &&
     !existingContentForTracking?.firstEditedByUserId;
+  const preserveReviewStatus = Boolean(options?.preserveReviewStatus && contentId && existingContentForTracking);
 
-  const editedTrackingUpdate =
-    nextReviewStatus === ReviewStatus.UNVERIFIED
+  const editedTrackingUpdate = preserveReviewStatus
+    ? {}
+    : nextReviewStatus === ReviewStatus.UNVERIFIED
       ? {
           editedByUserId: null,
           editedAt: null,
@@ -1461,7 +1476,7 @@ export async function saveContent(
               passedByUserId: options?.passHandledByUserId ?? null,
               passedAt: now
             }
-        : {};
+          : {};
 
   const editedTrackingCreate =
     nextReviewStatus === ReviewStatus.EDITED

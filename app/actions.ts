@@ -70,7 +70,7 @@ export async function createContentAction(formData: FormData) {
     redirectWithMessage("/admin/contents/new", "error", result.error);
   }
 
-  redirect("/admin/contents?success=Content created");
+  redirectWithMessage(`/admin/contents/${result.contentId}/edit`, "success", "Content created");
 }
 
 export async function updateContentAction(contentId: number, formData: FormData) {
@@ -85,9 +85,11 @@ export async function updateContentAction(contentId: number, formData: FormData)
     redirectWithMessage("/admin/contents", "error", "Content not found");
   }
   const reviewStatusOverride =
-    staff.role === "ADMIN" && reviewAction === "passed"
-      ? ReviewStatus.PASSED
-      : ReviewStatus.EDITED;
+    reviewAction === "saved"
+      ? existing.reviewStatus
+      : staff.role === "ADMIN" && reviewAction === "passed"
+        ? ReviewStatus.PASSED
+        : ReviewStatus.EDITED;
 
   const result = await saveContent(
     {
@@ -114,6 +116,7 @@ export async function updateContentAction(contentId: number, formData: FormData)
     contentId,
     {
       reviewStatusOverride,
+      preserveReviewStatus: reviewAction === "saved",
       reviewHandledByUserId: reviewStatusOverride === ReviewStatus.EDITED ? staff.id : undefined,
       passHandledByUserId: reviewStatusOverride === ReviewStatus.PASSED ? staff.id : undefined
     }
@@ -121,6 +124,10 @@ export async function updateContentAction(contentId: number, formData: FormData)
 
   if (!result.ok) {
     redirectWithMessage(`/admin/contents/${contentId}/edit`, "error", result.error);
+  }
+
+  if (reviewAction === "saved") {
+    redirectWithMessage(`/admin/contents/${contentId}/edit`, "success", "Content saved");
   }
 
   redirect("/admin/contents?success=Content updated");

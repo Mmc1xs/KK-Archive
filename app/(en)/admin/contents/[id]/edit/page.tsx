@@ -25,6 +25,7 @@ export default async function EditContentPage({
   }
 
   const error = typeof query.error === "string" ? query.error : undefined;
+  const success = typeof query.success === "string" ? query.success : undefined;
 
   return (
     <div className="page-section admin-layout">
@@ -32,6 +33,7 @@ export default async function EditContentPage({
         mode="edit"
         error={error}
         tagOptions={{ types }}
+        success={success}
         content={{
           id: content.id,
           title: content.title,

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { UserRole } from "@prisma/client";
 import { createContentAction, transitionContentReviewStatusAction, updateContentAction } from "@/app/actions";
 import { DownloadLinksEditor } from "@/components/admin/download-links-editor";
+import { ContentImageUrlsEditor } from "@/components/admin/content-image-urls-editor";
 import { DescriptionFieldToggle } from "@/components/description-field-toggle";
 import { HostedFileUploader } from "@/components/admin/hosted-file-uploader";
 import { TagAutocomplete } from "@/components/tag-autocomplete";
@@ -21,6 +22,7 @@ type ContentFormProps = {
   mode: "create" | "edit";
   role?: UserRole;
   error?: string;
+  success?: string;
   tagOptions: {
     types: TagOption[];
   };
@@ -86,7 +88,7 @@ function isTelegramUrl(url: string) {
   }
 }
 
-export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }: ContentFormProps) {
+export function ContentForm({ mode, role = "ADMIN", error, success, tagOptions, content }: ContentFormProps) {
   const action =
     mode === "create"
       ? createContentAction
@@ -111,9 +113,6 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
   const telegramDownloadLink = manualDownloadLinks.find(isTelegramUrl) ?? manualDownloadLinks[0] ?? "";
   const imageUrls = content?.images.length ? content.images.map((image) => image.imageUrl) : ["", "", ""];
   const storageFolder = content ? resolveContentStorageFolderValue(content) : "";
-  while (imageUrls.length < 3) {
-    imageUrls.push("");
-  }
 
   return (
     <section className="panel">
@@ -126,6 +125,7 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
           </Link>
         ) : null}
       </div>
+      {success ? <div className="notice success">{success}</div> : null}
       {error ? <div className="notice">{error}</div> : null}
       <form action={action} className="grid">
         <div className="field">
@@ -161,9 +161,9 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
               <div className={reviewStatusMeta?.className}>{reviewStatusMeta?.label}</div>
             </div>
             {role === "AUDIT" ? (
-              <small>Saving audit edits will move this content into the Edited state automatically.</small>
+              <small>Save Content preserves the current review status. Update Content will move this content into Edited automatically.</small>
             ) : (
-              <small>Update Content moves this post to Edited. Use the admin pass button to approve it directly.</small>
+              <small>Save Content preserves the current review status. Update Content moves this post to Edited. Use the admin pass button to approve it directly.</small>
             )}
           </div>
         ) : null}
@@ -226,20 +226,12 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
             ))}
           </div>
         </div>
-        <div className="field">
-          <span>Image URLs</span>
-          <div className="grid">
-            {imageUrls.map((imageUrl, index) => (
-              <input
-                key={`${imageUrl}-${index}`}
-                name="imageUrls"
-                defaultValue={imageUrl}
-                placeholder={`Image URL ${index + 1}`}
-                required={index === 0}
-              />
-            ))}
-          </div>
-        </div>
+        <ContentImageUrlsEditor
+          contentId={content?.id}
+          role={role}
+          storageFolder={storageFolder}
+          initialImageUrls={imageUrls}
+        />
         <DownloadLinksEditor
           initialTelegramLink={telegramDownloadLink}
           initialHostedLinks={hostedDownloadLinks}
@@ -267,6 +259,9 @@ export function ContentForm({ mode, role = "ADMIN", error, tagOptions, content }
         ) : (
           <div className="content-form-actions">
             <div className="inline-actions">
+              <button type="submit" name="reviewAction" value="saved" className="button secondary">
+                Save Content
+              </button>
               <button type="submit" name="reviewAction" value="edited">
                 Update Content
               </button>

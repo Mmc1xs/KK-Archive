@@ -1,6 +1,7 @@
 import { UserRole } from "@prisma/client";
 import { z } from "zod";
 import { db } from "@/lib/db";
+import { buildR2PublicUrl } from "@/lib/storage/r2";
 
 export const MAX_STAFF_UPLOAD_BYTES = 2 * 1024 * 1024 * 1024;
 export const MULTIPART_THRESHOLD_BYTES = 100 * 1024 * 1024;
@@ -106,6 +107,10 @@ export function buildHostedFileObjectKey(storageFolder: string, fileName: string
   return `uploadfiles/${storageFolder}/${sanitizeUploadFileName(fileName)}`;
 }
 
+export function buildContentImageObjectKey(storageFolder: string, fileName: string) {
+  return `contents/${storageFolder}/${sanitizeUploadFileName(fileName)}`;
+}
+
 function splitBaseNameAndExtension(fileName: string) {
   const extIndex = fileName.lastIndexOf(".");
   if (extIndex <= 0) {
@@ -135,6 +140,68 @@ export async function buildUniqueHostedFileObjectKey(contentId: number, storageF
     })
   ) {
     candidate = buildHostedFileObjectKey(storageFolder, `${baseName}-${counter}${extension}`);
+    counter += 1;
+  }
+
+  return candidate;
+}
+
+export async function buildUniqueContentImageObjectKey(contentId: number, storageFolder: string, fileName: string) {
+  const safeFileName = sanitizeUploadFileName(fileName);
+  const { baseName, extension } = splitBaseNameAndExtension(safeFileName);
+
+  let candidate = buildContentImageObjectKey(storageFolder, safeFileName);
+  let counter = 2;
+
+  while (
+    (await db.staffUpload.findFirst({
+      where: {
+        contentId,
+        objectKey: candidate
+      },
+      select: { id: true }
+    })) ||
+    (await db.content.findFirst({
+      where: {
+        id: contentId,
+        OR: [
+          { coverImageUrl: buildR2PublicUrl(candidate) },
+          {
+            images: {
+              some: {
+                imageUrl: buildR2PublicUrl(candidate)
+              }
+            }
+          }
+        ]
+      },
+      select: { id: true }
+    })) ||
+    (await db.content.findFirst({
+      where: {
+        id: contentId,
+        OR: [
+          { coverImageUrl: buildR2PublicUrl(candidate) },
+          {
+            images: {
+              some: {
+                imageUrl: buildR2PublicUrl(candidate)
+              }
+            }
+          }
+        ]
+      },
+      select: { id: true }
+    })) ||
+    (await db.contentImage.findFirst({
+      where: {
+        contentId,
+        imageUrl: buildR2PublicUrl(candidate)
+      },
+      select: { id: true }
+    }))
+  ) {
+    candidate = buildContentImageObjectKey(storageFolder, `${baseName}-${counter}${extension}`);
     counter += 1;
   }
 
