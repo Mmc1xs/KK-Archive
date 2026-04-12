@@ -45,6 +45,7 @@
     "sync:all": "npm run clean:sync-all",
     "r2:upload-clean": "tsx scripts/upload-clean-to-r2.ts",
     "r2:upload-clean:new": "tsx scripts/upload-new-clean-to-r2.ts",
+    "content:replace-images": "tsx scripts/replace-content-images.ts",
     "codex:handoff": "tsx scripts/generate-codex-handoff.ts"
   },
   "dependencies": {

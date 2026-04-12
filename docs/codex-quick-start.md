@@ -59,6 +59,13 @@ This file is for fresh Codex sessions that need to understand the project quickl
   - `scripts/build-work-tag-json.ts`
   - `scripts/import-tag-review-json.ts`
 
+### Content image replacement
+
+- For local folder-based image swaps on an existing content record:
+  - `npm run content:replace-images -- <contentId> "<imageFolder>"`
+- Reference doc:
+  - `docs/content-image-replacement.md`
+
 ## Current Tag Notes
 
 - Content detail `Work` pills are intended to route into `/search?work=<slug>`

@@ -249,8 +249,8 @@ export function HostedFileUploader({
   }
 
   async function handleFileSelection(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file || !canUpload) {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    if (!selectedFiles.length || !canUpload) {
       return;
     }
 
@@ -258,31 +258,37 @@ export function HostedFileUploader({
     setError("");
 
     try {
-      const initResponse = await fetch(`/api/admin/contents/${contentId}/hosted-files/init`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          fileName: file.name,
-          mimeType: file.type || "application/octet-stream",
-          byteSize: file.size
-        })
-      });
+      for (const file of selectedFiles) {
+        const initResponse = await fetch(`/api/admin/contents/${contentId}/hosted-files/init`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            fileName: file.name,
+            mimeType: file.type || "application/octet-stream",
+            byteSize: file.size
+          })
+        });
 
-      if (!initResponse.ok) {
-        const data = (await initResponse.json().catch(() => null)) as { error?: string } | null;
-        throw new Error(data?.error || "Failed to start upload");
+        if (!initResponse.ok) {
+          const data = (await initResponse.json().catch(() => null)) as { error?: string } | null;
+          throw new Error(data?.error || "Failed to start upload");
+        }
+
+        const init = (await initResponse.json()) as UploadInitResponse;
+        if (init.upload.uploadMethod === "SINGLE") {
+          await uploadSingleFile(file, init);
+        } else {
+          await uploadMultipartFile(file, init);
+        }
       }
 
-      const init = (await initResponse.json()) as UploadInitResponse;
-      if (init.upload.uploadMethod === "SINGLE") {
-        await uploadSingleFile(file, init);
-      } else {
-        await uploadMultipartFile(file, init);
-      }
-
-      setMessage(`Uploaded ${file.name} successfully.`);
+      setMessage(
+        selectedFiles.length === 1
+          ? `Uploaded ${selectedFiles[0].name} successfully.`
+          : `Uploaded ${selectedFiles.length} files successfully.`
+      );
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "Upload failed");
     } finally {
@@ -349,11 +355,12 @@ export function HostedFileUploader({
           <div className="status status-passed">{files.length} file(s)</div>
           {canUpload ? (
             <label className="button hosted-file-upload-button">
-              Upload Shared File
+              Upload Shared Files
               <input
                 ref={fileInputRef}
                 type="file"
                 className="hidden-file-input"
+                multiple
                 onChange={handleFileSelection}
               />
             </label>

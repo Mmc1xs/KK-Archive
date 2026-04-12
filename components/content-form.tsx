@@ -36,7 +36,7 @@ type ContentFormProps = {
     sourceLink: string | null;
     reviewStatus: "UNVERIFIED" | "EDITED" | "PASSED";
     publishStatus: "DRAFT" | "SUMMIT" | "PUBLISHED" | "INVISIBLE";
-    images: Array<{ imageUrl: string }>;
+    images: Array<{ id: number; imageUrl: string; sortOrder?: number }>;
     downloadLinks: Array<{ url: string }>;
     hostedFiles: Array<{
       id: number;
@@ -230,6 +230,8 @@ export function ContentForm({ mode, role = "ADMIN", error, success, tagOptions, 
           contentId={content?.id}
           role={role}
           storageFolder={storageFolder}
+          coverImageUrl={content?.coverImageUrl}
+          initialImages={content?.images}
           initialImageUrls={imageUrls}
         />
         <DownloadLinksEditor

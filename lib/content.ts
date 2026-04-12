@@ -676,7 +676,12 @@ export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolea
         }
       },
       images: {
-        orderBy: { sortOrder: "asc" }
+        orderBy: { sortOrder: "asc" },
+        select: {
+          id: true,
+          imageUrl: true,
+          sortOrder: true
+        }
       },
       downloadLinks: {
         orderBy: { sortOrder: "asc" }
