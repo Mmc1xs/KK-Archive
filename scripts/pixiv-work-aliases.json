@@ -1,19 +1,163 @@
 {
   "version": 1,
-  "updatedAt": "2026-04-11",
+  "updatedAt": "2026-04-12T07:10:48.073Z",
   "entries": [
+    {
+      "canonicalName": "2.5 Dimensional Seduction",
+      "canonicalSlug": "2-5-dimensional-seduction",
+      "aliases": [
+        "2.5 Dimensional Seduction",
+        "2 5 Dimensional Seduction",
+        "25DimensionalSeduction"
+      ]
+    },
+    {
+      "canonicalName": "7th Time Loop: The Villainess Enjoys a Carefree Life Married to Her Worst Enemy!",
+      "canonicalSlug": "7th-time-loop-the-villainess-enjoys-a-carefree-life-married-to-her-worst-enemy",
+      "aliases": [
+        "7th Time Loop: The Villainess Enjoys a Carefree Life Married to Her Worst Enemy!",
+        "7th Time Loop The Villainess Enjoys a Carefree Life Married to Her Worst Enemy",
+        "7thTimeLoopTheVillainessEnjoysaCarefreeLifeMarriedtoHerWorstEnemy"
+      ]
+    },
+    {
+      "canonicalName": "9-nine-",
+      "canonicalSlug": "9-nine",
+      "aliases": [
+        "9-nine-",
+        "9 nine",
+        "9nine"
+      ]
+    },
+    {
+      "canonicalName": "A Certain Magical Index",
+      "canonicalSlug": "a-certain-magical-index",
+      "aliases": [
+        "A Certain Magical Index",
+        "ACertainMagicalIndex",
+        "Toaru Majutsu no Index",
+        "とある魔術の禁書目録",
+        "魔法禁書目錄",
+        "魔法禁书目录"
+      ]
+    },
+    {
+      "canonicalName": "A Certain Scientific Railgun",
+      "canonicalSlug": "a-certain-scientific-railgun",
+      "aliases": [
+        "A Certain Scientific Railgun",
+        "ACertainScientificRailgun",
+        "Toaru Kagaku no Railgun",
+        "とある科学の超電磁砲",
+        "超電磁砲",
+        "超电磁炮"
+      ]
+    },
+    {
+      "canonicalName": "A Salad Bowl of Eccentrics",
+      "canonicalSlug": "a-salad-bowl-of-eccentrics",
+      "aliases": [
+        "A Salad Bowl of Eccentrics",
+        "ASaladBowlofEccentrics"
+      ]
+    },
+    {
+      "canonicalName": "A Wild Last Boss Appeared!",
+      "canonicalSlug": "a-wild-last-boss-appeared",
+      "aliases": [
+        "A Wild Last Boss Appeared!",
+        "A Wild Last Boss Appeared",
+        "AWildLastBossAppeared"
+      ]
+    },
     {
       "canonicalName": "Aether Gazer",
       "canonicalSlug": "aether-gazer",
       "aliases": [
-        "aether gazer",
+        "Aether Gazer",
+        "AetherGazer",
+        "AG",
+        "エーテルゲイザー",
         "深空之眼"
+      ]
+    },
+    {
+      "canonicalName": "Akame ga Kill!",
+      "canonicalSlug": "akame-ga-kill",
+      "aliases": [
+        "Akame ga Kill!",
+        "Akame ga Kill",
+        "AkamegaKill"
+      ]
+    },
+    {
+      "canonicalName": "Alya Sometimes Hides Her Feelings in Russian",
+      "canonicalSlug": "alya-sometimes-hides-her-feelings-in-russian",
+      "aliases": [
+        "Alya Sometimes Hides Her Feelings in Russian",
+        "AlyaSometimesHidesHerFeelingsinRussian",
+        "Alya",
+        "Roshidere",
+        "時々ボソッとロシア語でデレる隣のアーリャさん",
+        "不時輕聲地以俄語遮羞的鄰座艾莉同學",
+        "不时轻声地以俄语遮羞的邻座艾莉同学"
+      ]
+    },
+    {
+      "canonicalName": "Amagi Brilliant Park",
+      "canonicalSlug": "amagi-brilliant-park",
+      "aliases": [
+        "Amagi Brilliant Park",
+        "AmagiBrilliantPark"
+      ]
+    },
+    {
+      "canonicalName": "Anchor Panic",
+      "canonicalSlug": "anchor-panic",
+      "aliases": [
+        "Anchor Panic",
+        "AnchorPanic"
+      ]
+    },
+    {
+      "canonicalName": "Another",
+      "canonicalSlug": "another",
+      "aliases": [
+        "Another"
+      ]
+    },
+    {
+      "canonicalName": "Aoashi",
+      "canonicalSlug": "aoashi",
+      "aliases": [
+        "Aoashi"
+      ]
+    },
+    {
+      "canonicalName": "Apocalypse Bringer Mynoghra",
+      "canonicalSlug": "apocalypse-bringer-mynoghra",
+      "aliases": [
+        "Apocalypse Bringer Mynoghra",
+        "ApocalypseBringerMynoghra"
+      ]
+    },
+    {
+      "canonicalName": "Arcaea",
+      "canonicalSlug": "arcaea",
+      "aliases": [
+        "Arcaea"
       ]
     },
     {
       "canonicalName": "Arknights",
       "canonicalSlug": "arknights",
       "aliases": [
+        "Arknights",
+        "AK",
+        "アークナイツ",
+        "アクナイ",
+        "明日方舟",
+        "方舟",
         "Arknights: Endfield",
         "Arknights Endfield",
         "Endfield"
@@ -23,54 +167,474 @@
       "canonicalName": "Atelier",
       "canonicalSlug": "atelier",
       "aliases": [
-        "atelier",
-        "アトリエ",
-        "炼金工房",
-        "鍊金工房"
+        "Atelier",
+        "Atelier Ryza",
+        "AtelierRyza",
+        "Ryza",
+        "ライザのアトリエ",
+        "萊莎的鍊金工房",
+        "莱莎的炼金工房",
+        "Atelier Yumia",
+        "AtelierYumia",
+        "Yumia",
+        "ユミアのアトリエ",
+        "優米雅的鍊金工房",
+        "优米雅的炼金工房",
+        "Atelier Yumia: The Alchemist of Memories & the Envisioned Land",
+        "Atelier Yumia The Alchemist of Memories the Envisioned Land",
+        "AtelierYumiaTheAlchemistofMemoriestheEnvisionedLand",
+        "アトリエ"
+      ]
+    },
+    {
+      "canonicalName": "ATRI -My Dear Moments-",
+      "canonicalSlug": "atri-my-dear-moments",
+      "aliases": [
+        "ATRI -My Dear Moments-",
+        "ATRI My Dear Moments",
+        "ATRIMyDearMoments"
       ]
     },
     {
       "canonicalName": "Azur Lane",
       "canonicalSlug": "azur-lane",
       "aliases": [
-        "azur lane",
+        "Azur Lane",
+        "AzurLane",
+        "AL",
         "アズールレーン",
+        "碧藍航線",
         "碧蓝航线",
-        "碧藍航線"
+        "艦B",
+        "舰B"
+      ]
+    },
+    {
+      "canonicalName": "Azur Promilia",
+      "canonicalSlug": "azur-promilia",
+      "aliases": [
+        "Azur Promilia",
+        "AzurPromilia"
+      ]
+    },
+    {
+      "canonicalName": "Baku Ane",
+      "canonicalSlug": "baku-ane",
+      "aliases": [
+        "Baku Ane",
+        "BakuAne"
+      ]
+    },
+    {
+      "canonicalName": "BanG Dream!",
+      "canonicalSlug": "bang-dream",
+      "aliases": [
+        "BanG Dream!",
+        "BanG Dream",
+        "BanGDream",
+        "Bandori",
+        "バンドリ",
+        "邦邦",
+        "BanG Dream! Ave Mujica",
+        "BanG Dream! It's MyGO!!!!!",
+        "BanG Dream Ave Mujica",
+        "BanG Dream It's MyGO!!!!!",
+        "Ave Mujica",
+        "MyGO",
+        "MyGO!!!!!"
+      ]
+    },
+    {
+      "canonicalName": "Black Rock Shooter",
+      "canonicalSlug": "black-rock-shooter",
+      "aliases": [
+        "Black Rock Shooter",
+        "BlackRockShooter"
+      ]
+    },
+    {
+      "canonicalName": "Bleach",
+      "canonicalSlug": "bleach",
+      "aliases": [
+        "Bleach"
       ]
     },
     {
       "canonicalName": "Blue Archive",
       "canonicalSlug": "blue-archive",
       "aliases": [
-        "blue archive",
+        "Blue Archive",
+        "BlueArchive",
+        "BA",
         "ブルーアーカイブ",
         "ブルアカ",
-        "碧蓝档案",
         "蔚藍檔案",
-        "BA"
+        "蔚蓝档案",
+        "碧藍檔案",
+        "碧蓝档案"
+      ]
+    },
+    {
+      "canonicalName": "Boarding School Juliet",
+      "canonicalSlug": "boarding-school-juliet",
+      "aliases": [
+        "Boarding School Juliet",
+        "BoardingSchoolJuliet"
+      ]
+    },
+    {
+      "canonicalName": "Bocchi the Rock!",
+      "canonicalSlug": "bocchi-the-rock",
+      "aliases": [
+        "Bocchi the Rock!",
+        "Bocchi the Rock",
+        "BocchitheRock",
+        "BTR",
+        "ぼっち・ざ・ろっく！",
+        "孤獨搖滾",
+        "孤独摇滚"
+      ]
+    },
+    {
+      "canonicalName": "Boku Girl",
+      "canonicalSlug": "boku-girl",
+      "aliases": [
+        "Boku Girl",
+        "BokuGirl"
+      ]
+    },
+    {
+      "canonicalName": "Cardcaptor Sakura",
+      "canonicalSlug": "cardcaptor-sakura",
+      "aliases": [
+        "Cardcaptor Sakura",
+        "CardcaptorSakura"
+      ]
+    },
+    {
+      "canonicalName": "Chained Soldier",
+      "canonicalSlug": "chained-soldier",
+      "aliases": [
+        "Chained Soldier",
+        "ChainedSoldier"
+      ]
+    },
+    {
+      "canonicalName": "Chainsaw Man",
+      "canonicalSlug": "chainsaw-man",
+      "aliases": [
+        "Chainsaw Man",
+        "ChainsawMan",
+        "チェンソーマン",
+        "鏈鋸人",
+        "电锯人"
+      ]
+    },
+    {
+      "canonicalName": "Charlotte",
+      "canonicalSlug": "charlotte",
+      "aliases": [
+        "Charlotte"
+      ]
+    },
+    {
+      "canonicalName": "Chillin' in Another World with Level 2 Super Cheat Powers",
+      "canonicalSlug": "chillin-in-another-world-with-level-2-super-cheat-powers",
+      "aliases": [
+        "Chillin' in Another World with Level 2 Super Cheat Powers",
+        "Chillin in Another World with Level 2 Super Cheat Powers",
+        "ChillininAnotherWorldwithLevel2SuperCheatPowers"
+      ]
+    },
+    {
+      "canonicalName": "Chitose Is in the Ramune Bottle",
+      "canonicalSlug": "chitose-is-in-the-ramune-bottle",
+      "aliases": [
+        "Chitose Is in the Ramune Bottle",
+        "ChitoseIsintheRamuneBottle"
+      ]
+    },
+    {
+      "canonicalName": "Classroom of the Elite",
+      "canonicalSlug": "classroom-of-the-elite",
+      "aliases": [
+        "Classroom of the Elite",
+        "ClassroomoftheElite"
+      ]
+    },
+    {
+      "canonicalName": "Closers",
+      "canonicalSlug": "closers",
+      "aliases": [
+        "Closers"
+      ]
+    },
+    {
+      "canonicalName": "Code Geass",
+      "canonicalSlug": "code-geass",
+      "aliases": [
+        "Code Geass",
+        "CodeGeass"
+      ]
+    },
+    {
+      "canonicalName": "CounterSide",
+      "canonicalSlug": "counterside",
+      "aliases": [
+        "CounterSide"
+      ]
+    },
+    {
+      "canonicalName": "Creative Commons",
+      "canonicalSlug": "creative-commons",
+      "aliases": [
+        "Creative Commons",
+        "CreativeCommons",
+        "CC"
+      ]
+    },
+    {
+      "canonicalName": "Cyberpunk: Edgerunners",
+      "canonicalSlug": "cyberpunk-edgerunners",
+      "aliases": [
+        "Cyberpunk: Edgerunners",
+        "Cyberpunk Edgerunners",
+        "CyberpunkEdgerunners"
+      ]
+    },
+    {
+      "canonicalName": "D4DJ Groovy Mix",
+      "canonicalSlug": "d4dj-groovy-mix",
+      "aliases": [
+        "D4DJ Groovy Mix",
+        "D4DJGroovyMix"
+      ]
+    },
+    {
+      "canonicalName": "Dandadan",
+      "canonicalSlug": "dandadan",
+      "aliases": [
+        "Dandadan",
+        "ダンダダン",
+        "膽大黨",
+        "胆大党"
+      ]
+    },
+    {
+      "canonicalName": "Date A Live",
+      "canonicalSlug": "date-a-live",
+      "aliases": [
+        "Date A Live",
+        "DateALive",
+        "DAL",
+        "デート・ア・ライブ",
+        "約會大作戰",
+        "约会大作战"
+      ]
+    },
+    {
+      "canonicalName": "Delicious in Dungeon",
+      "canonicalSlug": "delicious-in-dungeon",
+      "aliases": [
+        "Delicious in Dungeon",
+        "DeliciousinDungeon",
+        "Dungeon Meshi",
+        "ダンジョン飯",
+        "迷宮飯",
+        "迷宫饭"
+      ]
+    },
+    {
+      "canonicalName": "Demonbane",
+      "canonicalSlug": "demonbane",
+      "aliases": [
+        "Demonbane"
+      ]
+    },
+    {
+      "canonicalName": "Dohna Dohna: Let's Do Bad Things Together",
+      "canonicalSlug": "dohna-dohna-let-s-do-bad-things-together",
+      "aliases": [
+        "Dohna Dohna: Let's Do Bad Things Together",
+        "Dohna Dohna Let s Do Bad Things Together",
+        "DohnaDohnaLetsDoBadThingsTogether"
+      ]
+    },
+    {
+      "canonicalName": "Dokyuu Hentai HxEros",
+      "canonicalSlug": "dokyuu-hentai-hxeros",
+      "aliases": [
+        "Dokyuu Hentai HxEros",
+        "DokyuuHentaiHxEros"
+      ]
+    },
+    {
+      "canonicalName": "Dolphin Wave",
+      "canonicalSlug": "dolphin-wave",
+      "aliases": [
+        "Dolphin Wave",
+        "DolphinWave"
+      ]
+    },
+    {
+      "canonicalName": "Don't Toy with Me, Miss Nagatoro",
+      "canonicalSlug": "don-t-toy-with-me-miss-nagatoro",
+      "aliases": [
+        "Don't Toy with Me, Miss Nagatoro",
+        "Don t Toy with Me Miss Nagatoro",
+        "DontToywithMeMissNagatoro"
+      ]
+    },
+    {
+      "canonicalName": "Echocalypse",
+      "canonicalSlug": "echocalypse",
+      "aliases": [
+        "Echocalypse"
+      ]
+    },
+    {
+      "canonicalName": "Elden Ring",
+      "canonicalSlug": "elden-ring",
+      "aliases": [
+        "Elden Ring",
+        "EldenRing"
+      ]
+    },
+    {
+      "canonicalName": "Engage Kiss",
+      "canonicalSlug": "engage-kiss",
+      "aliases": [
+        "Engage Kiss",
+        "EngageKiss"
+      ]
+    },
+    {
+      "canonicalName": "Eternal Return",
+      "canonicalSlug": "eternal-return",
+      "aliases": [
+        "Eternal Return",
+        "EternalReturn"
+      ]
+    },
+    {
+      "canonicalName": "Fatal Fury",
+      "canonicalSlug": "fatal-fury",
+      "aliases": [
+        "Fatal Fury",
+        "FatalFury"
       ]
     },
     {
       "canonicalName": "Fate/Grand Order",
       "canonicalSlug": "fate-grand-order",
       "aliases": [
+        "Fate/Grand Order",
+        "Fate Grand Order",
+        "FateGrandOrder",
+        "FGO",
+        "フェイト/グランドオーダー",
+        "命運冠位指定",
+        "命运冠位指定",
         "Fate/stay night",
         "Fate stay night",
         "FSN"
       ]
     },
     {
+      "canonicalName": "Final Fantasy VII",
+      "canonicalSlug": "final-fantasy-vii",
+      "aliases": [
+        "Final Fantasy VII",
+        "FinalFantasyVII"
+      ]
+    },
+    {
+      "canonicalName": "Frieren: Beyond Journey's End",
+      "canonicalSlug": "frieren-beyond-journey-s-end",
+      "aliases": [
+        "Frieren: Beyond Journey's End",
+        "Frieren Beyond Journey s End",
+        "FrierenBeyondJourneysEnd",
+        "Frieren",
+        "葬送のフリーレン",
+        "葬送的芙莉蓮",
+        "葬送的芙莉莲"
+      ]
+    },
+    {
+      "canonicalName": "Future Diary",
+      "canonicalSlug": "future-diary",
+      "aliases": [
+        "Future Diary",
+        "FutureDiary"
+      ]
+    },
+    {
+      "canonicalName": "Gakuen Idolmaster",
+      "canonicalSlug": "gakuen-idolmaster",
+      "aliases": [
+        "Gakuen Idolmaster",
+        "GakuenIdolmaster",
+        "Gakumas",
+        "学園アイドルマスター",
+        "學園偶像大師",
+        "学园偶像大师",
+        "學偶",
+        "学偶"
+      ]
+    },
+    {
+      "canonicalName": "Gantz",
+      "canonicalSlug": "gantz",
+      "aliases": [
+        "Gantz"
+      ]
+    },
+    {
+      "canonicalName": "Genshin Impact",
+      "canonicalSlug": "genshin-impact",
+      "aliases": [
+        "Genshin Impact",
+        "GenshinImpact",
+        "GI",
+        "Genshin",
+        "原神"
+      ]
+    },
+    {
+      "canonicalName": "Girlfriend, Girlfriend",
+      "canonicalSlug": "girlfriend-girlfriend",
+      "aliases": [
+        "Girlfriend, Girlfriend",
+        "Girlfriend Girlfriend",
+        "GirlfriendGirlfriend"
+      ]
+    },
+    {
+      "canonicalName": "Girls Band Cry",
+      "canonicalSlug": "girls-band-cry",
+      "aliases": [
+        "Girls Band Cry",
+        "GirlsBandCry",
+        "GBC",
+        "ガールズバンドクライ",
+        "少女樂團 吶喊吧",
+        "少女乐团 呐喊吧"
+      ]
+    },
+    {
       "canonicalName": "Girls' Frontline",
       "canonicalSlug": "girls-frontline",
       "aliases": [
-        "girls frontline",
-        "girls' frontline",
-        "ドールズフロントライン",
+        "Girls' Frontline",
+        "Girls Frontline",
+        "GirlsFrontline",
+        "GFL",
         "ドルフロ",
-        "少女前线",
+        "ドールズフロントライン",
         "少女前線",
-        "GF",
+        "少女前线",
+        "少前",
         "Girls' Frontline 2: Exilium",
         "Girls' Frontline: Neural Cloud",
         "Girls Frontline 2 Exilium",
@@ -80,36 +644,345 @@
       ]
     },
     {
+      "canonicalName": "Goblin Slayer",
+      "canonicalSlug": "goblin-slayer",
+      "aliases": [
+        "Goblin Slayer",
+        "GoblinSlayer"
+      ]
+    },
+    {
+      "canonicalName": "God Eater",
+      "canonicalSlug": "god-eater",
+      "aliases": [
+        "God Eater",
+        "GodEater"
+      ]
+    },
+    {
       "canonicalName": "Goddess of Victory: NIKKE",
       "canonicalSlug": "goddess-of-victory-nikke",
       "aliases": [
-        "nikke",
-        "goddess of victory nikke",
-        "goddess of victory: nikke",
-        "勝利の女神：NIKKE",
-        "胜利女神",
-        "勝利女神",
+        "Goddess of Victory: NIKKE",
+        "Goddess of Victory NIKKE",
+        "GoddessofVictoryNIKKE",
+        "NIKKE",
+        "ニケ",
+        "勝利の女神:NIKKE",
+        "勝利女神：妮姬",
         "胜利女神：妮姬",
-        "勝利女神：妮姬"
+        "妮姬"
+      ]
+    },
+    {
+      "canonicalName": "Granblue Fantasy",
+      "canonicalSlug": "granblue-fantasy",
+      "aliases": [
+        "Granblue Fantasy",
+        "GranblueFantasy",
+        "GBF",
+        "グラブル",
+        "碧藍幻想",
+        "碧蓝幻想"
+      ]
+    },
+    {
+      "canonicalName": "Grim Guardians: Demon Purge",
+      "canonicalSlug": "grim-guardians-demon-purge",
+      "aliases": [
+        "Grim Guardians: Demon Purge",
+        "Grim Guardians Demon Purge",
+        "GrimGuardiansDemonPurge"
+      ]
+    },
+    {
+      "canonicalName": "Guilty Gear",
+      "canonicalSlug": "guilty-gear",
+      "aliases": [
+        "Guilty Gear",
+        "GuiltyGear"
+      ]
+    },
+    {
+      "canonicalName": "Gundam Build Fighters Try",
+      "canonicalSlug": "gundam-build-fighters-try",
+      "aliases": [
+        "Gundam Build Fighters Try",
+        "GundamBuildFightersTry"
+      ]
+    },
+    {
+      "canonicalName": "Gushing Over Magical Girls",
+      "canonicalSlug": "gushing-over-magical-girls",
+      "aliases": [
+        "Gushing Over Magical Girls",
+        "GushingOverMagicalGirls"
+      ]
+    },
+    {
+      "canonicalName": "Haganai: I Don't Have Many Friends",
+      "canonicalSlug": "haganai-i-don-t-have-many-friends",
+      "aliases": [
+        "Haganai: I Don't Have Many Friends",
+        "Haganai I Don t Have Many Friends",
+        "HaganaiIDontHaveManyFriends"
+      ]
+    },
+    {
+      "canonicalName": "Heaven's Memo Pad",
+      "canonicalSlug": "heaven-s-memo-pad",
+      "aliases": [
+        "Heaven's Memo Pad",
+        "Heaven s Memo Pad",
+        "HeavensMemoPad"
+      ]
+    },
+    {
+      "canonicalName": "Hell's Paradise: Jigokuraku",
+      "canonicalSlug": "hell-s-paradise-jigokuraku",
+      "aliases": [
+        "Hell's Paradise: Jigokuraku",
+        "Hell s Paradise Jigokuraku",
+        "HellsParadiseJigokuraku"
+      ]
+    },
+    {
+      "canonicalName": "High School DxD",
+      "canonicalSlug": "high-school-dxd",
+      "aliases": [
+        "High School DxD",
+        "HighSchoolDxD",
+        "ハイスクールD×D",
+        "惡魔高校D×D",
+        "恶魔高校D×D"
+      ]
+    },
+    {
+      "canonicalName": "Highschool of the Dead",
+      "canonicalSlug": "highschool-of-the-dead",
+      "aliases": [
+        "Highschool of the Dead",
+        "HighschooloftheDead"
+      ]
+    },
+    {
+      "canonicalName": "HimeHina",
+      "canonicalSlug": "himehina",
+      "aliases": [
+        "HimeHina"
+      ]
+    },
+    {
+      "canonicalName": "Hokkaido Gals Are Super Adorable!",
+      "canonicalSlug": "hokkaido-gals-are-super-adorable",
+      "aliases": [
+        "Hokkaido Gals Are Super Adorable!",
+        "Hokkaido Gals Are Super Adorable",
+        "HokkaidoGalsAreSuperAdorable"
+      ]
+    },
+    {
+      "canonicalName": "Hololive Production",
+      "canonicalSlug": "hololive-production",
+      "aliases": [
+        "Hololive Production",
+        "HololiveProduction",
+        "Hololive",
+        "Holo",
+        "HoloPro",
+        "ホロライブ",
+        "ホロライブプロダクション",
+        "齁",
+        "木口"
+      ]
+    },
+    {
+      "canonicalName": "Honkai Impact 3rd",
+      "canonicalSlug": "honkai-impact-3rd",
+      "aliases": [
+        "Honkai Impact 3rd",
+        "HonkaiImpact3rd",
+        "HI3",
+        "Honkai 3rd",
+        "崩壞3",
+        "崩坏3",
+        "崩3"
       ]
     },
     {
       "canonicalName": "Honkai: Star Rail",
       "canonicalSlug": "honkai-star-rail",
       "aliases": [
-        "honkai star rail",
-        "honkai: star rail",
-        "崩坏：星穹铁道",
-        "崩壊：スターレイル",
+        "Honkai: Star Rail",
+        "Honkai Star Rail",
+        "HonkaiStarRail",
+        "HSR",
+        "Star Rail",
+        "スターレイル",
+        "崩鐵",
         "崩铁",
-        "崩鐵"
+        "崩壞：星穹鐵道",
+        "崩坏：星穹铁道",
+        "崩壊:スターレイル"
+      ]
+    },
+    {
+      "canonicalName": "Honor of Kings",
+      "canonicalSlug": "honor-of-kings",
+      "aliases": [
+        "Honor of Kings",
+        "HonorofKings"
+      ]
+    },
+    {
+      "canonicalName": "Horizon Walker",
+      "canonicalSlug": "horizon-walker",
+      "aliases": [
+        "Horizon Walker",
+        "HorizonWalker",
+        "HW",
+        "호라이즌 워커",
+        "地平線行者",
+        "地平线行者"
+      ]
+    },
+    {
+      "canonicalName": "I Got Married to the Girl I Hate Most in Class",
+      "canonicalSlug": "i-got-married-to-the-girl-i-hate-most-in-class",
+      "aliases": [
+        "I Got Married to the Girl I Hate Most in Class",
+        "IGotMarriedtotheGirlIHateMostinClass"
+      ]
+    },
+    {
+      "canonicalName": "I Was Reincarnated as the 7th Prince so I Can Take My Time Perfecting My Magical Ability",
+      "canonicalSlug": "i-was-reincarnated-as-the-7th-prince-so-i-can-take-my-time-perfecting-my-magical-ability",
+      "aliases": [
+        "I Was Reincarnated as the 7th Prince so I Can Take My Time Perfecting My Magical Ability",
+        "IWasReincarnatedasthe7thPrincesoICanTakeMyTimePerfectingMyMagicalAbility"
+      ]
+    },
+    {
+      "canonicalName": "Idoly Pride",
+      "canonicalSlug": "idoly-pride",
+      "aliases": [
+        "Idoly Pride",
+        "IdolyPride"
+      ]
+    },
+    {
+      "canonicalName": "Inuyasha",
+      "canonicalSlug": "inuyasha",
+      "aliases": [
+        "Inuyasha"
+      ]
+    },
+    {
+      "canonicalName": "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+      "canonicalSlug": "is-it-wrong-to-try-to-pick-up-girls-in-a-dungeon",
+      "aliases": [
+        "Is It Wrong to Try to Pick Up Girls in a Dungeon?",
+        "Is It Wrong to Try to Pick Up Girls in a Dungeon",
+        "IsItWrongtoTrytoPickUpGirlsinaDungeon"
+      ]
+    },
+    {
+      "canonicalName": "Kaguya-sama: Love Is War",
+      "canonicalSlug": "kaguya-sama-love-is-war",
+      "aliases": [
+        "Kaguya-sama: Love Is War",
+        "Kaguya sama Love Is War",
+        "KaguyasamaLoveIsWar",
+        "かぐや様は告らせたい",
+        "輝夜姬想讓人告白",
+        "辉夜大小姐想让我告白"
+      ]
+    },
+    {
+      "canonicalName": "Kaiju No. 8",
+      "canonicalSlug": "kaiju-no-8",
+      "aliases": [
+        "Kaiju No. 8",
+        "Kaiju No 8",
+        "KaijuNo8"
+      ]
+    },
+    {
+      "canonicalName": "Kantai Collection",
+      "canonicalSlug": "kantai-collection",
+      "aliases": [
+        "Kantai Collection",
+        "KantaiCollection",
+        "KanColle",
+        "艦これ",
+        "舰C"
+      ]
+    },
+    {
+      "canonicalName": "Kegareboshi",
+      "canonicalSlug": "kegareboshi",
+      "aliases": [
+        "Kegareboshi"
+      ]
+    },
+    {
+      "canonicalName": "Kizuna AI",
+      "canonicalSlug": "kizuna-ai",
+      "aliases": [
+        "Kizuna AI",
+        "KizunaAI"
+      ]
+    },
+    {
+      "canonicalName": "Komi Can't Communicate",
+      "canonicalSlug": "komi-can-t-communicate",
+      "aliases": [
+        "Komi Can't Communicate",
+        "Komi Can t Communicate",
+        "KomiCantCommunicate"
+      ]
+    },
+    {
+      "canonicalName": "KonoSuba: God's Blessing on This Wonderful World!",
+      "canonicalSlug": "konosuba-god-s-blessing-on-this-wonderful-world",
+      "aliases": [
+        "KonoSuba: God's Blessing on This Wonderful World!",
+        "KonoSuba God s Blessing on This Wonderful World",
+        "KonoSubaGodsBlessingonThisWonderfulWorld"
+      ]
+    },
+    {
+      "canonicalName": "Kowloon Generic Romance",
+      "canonicalSlug": "kowloon-generic-romance",
+      "aliases": [
+        "Kowloon Generic Romance",
+        "KowloonGenericRomance"
+      ]
+    },
+    {
+      "canonicalName": "Let This Grieving Soul Retire!",
+      "canonicalSlug": "let-this-grieving-soul-retire",
+      "aliases": [
+        "Let This Grieving Soul Retire!",
+        "Let This Grieving Soul Retire",
+        "LetThisGrievingSoulRetire"
+      ]
+    },
+    {
+      "canonicalName": "Limbus Company",
+      "canonicalSlug": "limbus-company",
+      "aliases": [
+        "Limbus Company",
+        "LimbusCompany"
       ]
     },
     {
       "canonicalName": "Love Live!",
       "canonicalSlug": "love-live",
       "aliases": [
+        "Love Live!",
         "Love Live",
+        "LoveLive",
         "Love Live! Hasu no Sora Girls' High School Idol Club",
         "Love Live! Nijigasaki High School Idol Club",
         "Hasu no Sora",
@@ -117,32 +990,869 @@
       ]
     },
     {
+      "canonicalName": "Lycoris Recoil",
+      "canonicalSlug": "lycoris-recoil",
+      "aliases": [
+        "Lycoris Recoil",
+        "LycorisRecoil"
+      ]
+    },
+    {
+      "canonicalName": "Magia Record: Puella Magi Madoka Magica Side Story",
+      "canonicalSlug": "magia-record-puella-magi-madoka-magica-side-story",
+      "aliases": [
+        "Magia Record: Puella Magi Madoka Magica Side Story",
+        "Magia Record Puella Magi Madoka Magica Side Story",
+        "MagiaRecordPuellaMagiMadokaMagicaSideStory"
+      ]
+    },
+    {
+      "canonicalName": "Major 2nd",
+      "canonicalSlug": "major-2nd",
+      "aliases": [
+        "Major 2nd",
+        "Major2nd"
+      ]
+    },
+    {
+      "canonicalName": "Manyuu Hikenchou",
+      "canonicalSlug": "manyuu-hikenchou",
+      "aliases": [
+        "Manyuu Hikenchou",
+        "ManyuuHikenchou"
+      ]
+    },
+    {
+      "canonicalName": "Mario Series",
+      "canonicalSlug": "mario-series",
+      "aliases": [
+        "Mario Series",
+        "MarioSeries"
+      ]
+    },
+    {
+      "canonicalName": "Marvel",
+      "canonicalSlug": "marvel",
+      "aliases": [
+        "Marvel"
+      ]
+    },
+    {
+      "canonicalName": "Masou Gakuen HxH",
+      "canonicalSlug": "masou-gakuen-hxh",
+      "aliases": [
+        "Masou Gakuen HxH",
+        "MasouGakuenHxH"
+      ]
+    },
+    {
+      "canonicalName": "Master of Eternity",
+      "canonicalSlug": "master-of-eternity",
+      "aliases": [
+        "Master of Eternity",
+        "MasterofEternity"
+      ]
+    },
+    {
+      "canonicalName": "Mieruko-chan",
+      "canonicalSlug": "mieruko-chan",
+      "aliases": [
+        "Mieruko-chan",
+        "Mieruko chan",
+        "Mierukochan"
+      ]
+    },
+    {
+      "canonicalName": "Mirror 2: Project X",
+      "canonicalSlug": "mirror-2-project-x",
+      "aliases": [
+        "Mirror 2: Project X",
+        "Mirror 2 Project X",
+        "Mirror2ProjectX"
+      ]
+    },
+    {
+      "canonicalName": "MiSide",
+      "canonicalSlug": "miside",
+      "aliases": [
+        "MiSide"
+      ]
+    },
+    {
+      "canonicalName": "Mobile Suit Gundam 00",
+      "canonicalSlug": "mobile-suit-gundam-00",
+      "aliases": [
+        "Mobile Suit Gundam 00",
+        "MobileSuitGundam00"
+      ]
+    },
+    {
+      "canonicalName": "Mobile Suit Gundam GQuuuuuuX",
+      "canonicalSlug": "mobile-suit-gundam-gquuuuuux",
+      "aliases": [
+        "Mobile Suit Gundam GQuuuuuuX",
+        "MobileSuitGundamGQuuuuuuX",
+        "GQuuuuuuX",
+        "ジークアクス",
+        "機動戦士Gundam GQuuuuuuX",
+        "機動戰士鋼彈 GQuuuuuuX",
+        "机动战士高达 GQuuuuuuX"
+      ]
+    },
+    {
+      "canonicalName": "Mobile Suit Gundam SEED",
+      "canonicalSlug": "mobile-suit-gundam-seed",
+      "aliases": [
+        "Mobile Suit Gundam SEED",
+        "MobileSuitGundamSEED"
+      ]
+    },
+    {
+      "canonicalName": "Mobile Suit Gundam SEED Destiny",
+      "canonicalSlug": "mobile-suit-gundam-seed-destiny",
+      "aliases": [
+        "Mobile Suit Gundam SEED Destiny",
+        "MobileSuitGundamSEEDDestiny"
+      ]
+    },
+    {
+      "canonicalName": "Mobile Suit Gundam: The Witch from Mercury",
+      "canonicalSlug": "mobile-suit-gundam-the-witch-from-mercury",
+      "aliases": [
+        "Mobile Suit Gundam: The Witch from Mercury",
+        "Mobile Suit Gundam The Witch from Mercury",
+        "MobileSuitGundamTheWitchfromMercury"
+      ]
+    },
+    {
+      "canonicalName": "Monogatari",
+      "canonicalSlug": "monogatari",
+      "aliases": [
+        "Monogatari"
+      ]
+    },
+    {
+      "canonicalName": "Mushoku Tensei: Jobless Reincarnation",
+      "canonicalSlug": "mushoku-tensei-jobless-reincarnation",
+      "aliases": [
+        "Mushoku Tensei: Jobless Reincarnation",
+        "Mushoku Tensei Jobless Reincarnation",
+        "MushokuTenseiJoblessReincarnation",
+        "無職轉生",
+        "无职转生",
+        "無職転生"
+      ]
+    },
+    {
+      "canonicalName": "My Deer Friend Nokotan",
+      "canonicalSlug": "my-deer-friend-nokotan",
+      "aliases": [
+        "My Deer Friend Nokotan",
+        "MyDeerFriendNokotan"
+      ]
+    },
+    {
+      "canonicalName": "My Dress-Up Darling",
+      "canonicalSlug": "my-dress-up-darling",
+      "aliases": [
+        "My Dress-Up Darling",
+        "My Dress Up Darling",
+        "MyDressUpDarling",
+        "着せ恋",
+        "更衣人偶墜入愛河",
+        "更衣人偶坠入爱河"
+      ]
+    },
+    {
+      "canonicalName": "My Teen Romantic Comedy SNAFU",
+      "canonicalSlug": "my-teen-romantic-comedy-snafu",
+      "aliases": [
+        "My Teen Romantic Comedy SNAFU",
+        "MyTeenRomanticComedySNAFU"
+      ]
+    },
+    {
+      "canonicalName": "Myriad Colors Phantom World",
+      "canonicalSlug": "myriad-colors-phantom-world",
+      "aliases": [
+        "Myriad Colors Phantom World",
+        "MyriadColorsPhantomWorld"
+      ]
+    },
+    {
+      "canonicalName": "Mysterious Disappearances",
+      "canonicalSlug": "mysterious-disappearances",
+      "aliases": [
+        "Mysterious Disappearances",
+        "MysteriousDisappearances"
+      ]
+    },
+    {
+      "canonicalName": "Naruto",
+      "canonicalSlug": "naruto",
+      "aliases": [
+        "Naruto"
+      ]
+    },
+    {
+      "canonicalName": "Needy Girl Overdose",
+      "canonicalSlug": "needy-girl-overdose",
+      "aliases": [
+        "Needy Girl Overdose",
+        "NeedyGirlOverdose",
+        "NGO",
+        "超てんちゃん",
+        "病嬌天使",
+        "病娇天使"
+      ]
+    },
+    {
+      "canonicalName": "Needy Streamer Overload",
+      "canonicalSlug": "needy-streamer-overload",
+      "aliases": [
+        "Needy Streamer Overload",
+        "NeedyStreamerOverload",
+        "NSO",
+        "超てんちゃん",
+        "主播女孩重度依賴",
+        "主播女孩重度依赖"
+      ]
+    },
+    {
+      "canonicalName": "NieR Replicant",
+      "canonicalSlug": "nier-replicant",
+      "aliases": [
+        "NieR Replicant",
+        "NieRReplicant",
+        "ニーア レプリカント",
+        "尼爾 人工生命",
+        "尼尔 人工生命"
+      ]
+    },
+    {
+      "canonicalName": "NieR: Automata",
+      "canonicalSlug": "nier-automata",
+      "aliases": [
+        "NieR: Automata",
+        "NieR Automata",
+        "NieRAutomata",
+        "NieR:Automata",
+        "ニーア オートマタ",
+        "尼爾：自動人形",
+        "尼尔：机械纪元"
+      ]
+    },
+    {
+      "canonicalName": "NieR:Automata",
+      "canonicalSlug": "nier-automata",
+      "aliases": [
+        "NieR:Automata",
+        "NieR Automata",
+        "NieRAutomata",
+        "NieR: Automata",
+        "ニーア オートマタ",
+        "尼爾：自動人形",
+        "尼尔：机械纪元"
+      ]
+    },
+    {
+      "canonicalName": "Nijisanji",
+      "canonicalSlug": "nijisanji",
+      "aliases": [
+        "Nijisanji",
+        "2434",
+        "にじさんじ",
+        "にじ",
+        "彩虹社"
+      ]
+    },
+    {
+      "canonicalName": "Nukitashi",
+      "canonicalSlug": "nukitashi",
+      "aliases": [
+        "Nukitashi",
+        "ぬきたし",
+        "抜きゲーみたいな島に住んでる貧乳はどうすりゃいいですか？",
+        "拔作島",
+        "拔作岛"
+      ]
+    },
+    {
+      "canonicalName": "Nura: Rise of the Yokai Clan",
+      "canonicalSlug": "nura-rise-of-the-yokai-clan",
+      "aliases": [
+        "Nura: Rise of the Yokai Clan",
+        "Nura Rise of the Yokai Clan",
+        "NuraRiseoftheYokaiClan"
+      ]
+    },
+    {
+      "canonicalName": "One Piece",
+      "canonicalSlug": "one-piece",
+      "aliases": [
+        "One Piece",
+        "OnePiece"
+      ]
+    },
+    {
+      "canonicalName": "One-Punch Man",
+      "canonicalSlug": "one-punch-man",
+      "aliases": [
+        "One-Punch Man",
+        "One Punch Man",
+        "OnePunchMan",
+        "OPM",
+        "ワンパンマン",
+        "一拳超人"
+      ]
+    },
+    {
+      "canonicalName": "Onimai: I'm Now Your Sister!",
+      "canonicalSlug": "onimai-i-m-now-your-sister",
+      "aliases": [
+        "Onimai: I'm Now Your Sister!",
+        "Onimai I m Now Your Sister",
+        "OnimaiImNowYourSister"
+      ]
+    },
+    {
+      "canonicalName": "Original",
+      "canonicalSlug": "original",
+      "aliases": [
+        "Original",
+        "OC",
+        "Original Character",
+        "オリジナル",
+        "原創",
+        "原创"
+      ]
+    },
+    {
+      "canonicalName": "Oshi no Ko",
+      "canonicalSlug": "oshi-no-ko",
+      "aliases": [
+        "Oshi no Ko",
+        "OshinoKo",
+        "【推しの子】",
+        "推しの子",
+        "我推的孩子"
+      ]
+    },
+    {
+      "canonicalName": "Overlord",
+      "canonicalSlug": "overlord",
+      "aliases": [
+        "Overlord"
+      ]
+    },
+    {
+      "canonicalName": "Palworld",
+      "canonicalSlug": "palworld",
+      "aliases": [
+        "Palworld"
+      ]
+    },
+    {
+      "canonicalName": "Peeping Dorm Manager",
+      "canonicalSlug": "peeping-dorm-manager",
+      "aliases": [
+        "Peeping Dorm Manager",
+        "PeepingDormManager"
+      ]
+    },
+    {
+      "canonicalName": "Persona 3",
+      "canonicalSlug": "persona-3",
+      "aliases": [
+        "Persona 3",
+        "Persona3"
+      ]
+    },
+    {
+      "canonicalName": "Persona 5",
+      "canonicalSlug": "persona-5",
+      "aliases": [
+        "Persona 5",
+        "Persona5"
+      ]
+    },
+    {
+      "canonicalName": "Please Go Home, Miss Akutsu!",
+      "canonicalSlug": "please-go-home-miss-akutsu",
+      "aliases": [
+        "Please Go Home, Miss Akutsu!",
+        "Please Go Home Miss Akutsu",
+        "PleaseGoHomeMissAkutsu"
+      ]
+    },
+    {
+      "canonicalName": "Please Put Them On, Takamine-san",
+      "canonicalSlug": "please-put-them-on-takamine-san",
+      "aliases": [
+        "Please Put Them On, Takamine-san",
+        "Please Put Them On Takamine san",
+        "PleasePutThemOnTakaminesan"
+      ]
+    },
+    {
+      "canonicalName": "Pokémon",
+      "canonicalSlug": "pokemon",
+      "aliases": [
+        "Pokémon",
+        "Pokemon",
+        "ポケモン",
+        "寶可夢",
+        "宝可梦",
+        "神奇寶貝",
+        "口袋妖怪"
+      ]
+    },
+    {
+      "canonicalName": "Precure!",
+      "canonicalSlug": "precure",
+      "aliases": [
+        "Precure!",
+        "Precure",
+        "HeartCatch PreCure!",
+        "HeartCatch PreCure",
+        "HeartCatchPreCure",
+        "Soaring Sky! Pretty Cure",
+        "Soaring Sky Pretty Cure",
+        "SoaringSkyPrettyCure"
+      ]
+    },
+    {
+      "canonicalName": "Princess Connect! Re:Dive",
+      "canonicalSlug": "princess-connect-re-dive",
+      "aliases": [
+        "Princess Connect! Re:Dive",
+        "Princess Connect Re Dive",
+        "PrincessConnectReDive",
+        "Priconne",
+        "プリコネ",
+        "公主連結",
+        "公主连结"
+      ]
+    },
+    {
+      "canonicalName": "Project Sekai: Colorful Stage!",
+      "canonicalSlug": "project-sekai-colorful-stage",
+      "aliases": [
+        "Project Sekai: Colorful Stage!",
+        "Project Sekai Colorful Stage",
+        "ProjectSekaiColorfulStage",
+        "Proseka",
+        "プロセカ",
+        "世界計畫",
+        "世界计划"
+      ]
+    },
+    {
       "canonicalName": "Punishing: Gray Raven",
       "canonicalSlug": "punishing-gray-raven",
       "aliases": [
-        "punishing gray raven",
-        "punishing: gray raven",
-        "パニシング：グレイレイヴン",
+        "Punishing: Gray Raven",
+        "Punishing Gray Raven",
+        "PunishingGrayRaven",
+        "PGR",
+        "パニグレ",
+        "戰雙",
         "战双",
-        "戰雙"
+        "戦双帕弥什"
+      ]
+    },
+    {
+      "canonicalName": "Queen's Blade",
+      "canonicalSlug": "queen-s-blade",
+      "aliases": [
+        "Queen's Blade",
+        "Queen s Blade",
+        "QueensBlade"
+      ]
+    },
+    {
+      "canonicalName": "Rance",
+      "canonicalSlug": "rance",
+      "aliases": [
+        "Rance"
+      ]
+    },
+    {
+      "canonicalName": "Ranma 1/2",
+      "canonicalSlug": "ranma-1-2",
+      "aliases": [
+        "Ranma 1/2",
+        "Ranma 1 2",
+        "Ranma12"
+      ]
+    },
+    {
+      "canonicalName": "Rascal Does Not Dream of Bunny Girl Senpai",
+      "canonicalSlug": "rascal-does-not-dream-of-bunny-girl-senpai",
+      "aliases": [
+        "Rascal Does Not Dream of Bunny Girl Senpai",
+        "RascalDoesNotDreamofBunnyGirlSenpai"
+      ]
+    },
+    {
+      "canonicalName": "Re:Creators",
+      "canonicalSlug": "re-creators",
+      "aliases": [
+        "Re:Creators",
+        "Re Creators",
+        "ReCreators"
+      ]
+    },
+    {
+      "canonicalName": "Re:Zero",
+      "canonicalSlug": "re-zero",
+      "aliases": [
+        "Re:Zero",
+        "Re Zero",
+        "ReZero",
+        "リゼロ",
+        "從零開始的異世界生活",
+        "从零开始的异世界生活"
+      ]
+    },
+    {
+      "canonicalName": "Re:Zero - Starting Life in Another World",
+      "canonicalSlug": "re-zero-starting-life-in-another-world",
+      "aliases": [
+        "Re:Zero - Starting Life in Another World",
+        "Re Zero Starting Life in Another World",
+        "ReZeroStartingLifeinAnotherWorld",
+        "Re Zero",
+        "リゼロ",
+        "從零開始的異世界生活",
+        "从零开始的异世界生活"
+      ]
+    },
+    {
+      "canonicalName": "Resident Evil 4",
+      "canonicalSlug": "resident-evil-4",
+      "aliases": [
+        "Resident Evil 4",
+        "ResidentEvil4"
+      ]
+    },
+    {
+      "canonicalName": "Reverse: 1999",
+      "canonicalSlug": "reverse-1999",
+      "aliases": [
+        "Reverse: 1999",
+        "Reverse 1999",
+        "Reverse1999"
+      ]
+    },
+    {
+      "canonicalName": "Romance of the Three Kingdoms",
+      "canonicalSlug": "romance-of-the-three-kingdoms",
+      "aliases": [
+        "Romance of the Three Kingdoms",
+        "RomanceoftheThreeKingdoms"
+      ]
+    },
+    {
+      "canonicalName": "Saekano: How to Raise a Boring Girlfriend",
+      "canonicalSlug": "saekano-how-to-raise-a-boring-girlfriend",
+      "aliases": [
+        "Saekano: How to Raise a Boring Girlfriend",
+        "Saekano How to Raise a Boring Girlfriend",
+        "SaekanoHowtoRaiseaBoringGirlfriend"
+      ]
+    },
+    {
+      "canonicalName": "Sakuna: Of Rice and Ruin",
+      "canonicalSlug": "sakuna-of-rice-and-ruin",
+      "aliases": [
+        "Sakuna: Of Rice and Ruin",
+        "Sakuna Of Rice and Ruin",
+        "SakunaOfRiceandRuin"
+      ]
+    },
+    {
+      "canonicalName": "Sakura no Toki",
+      "canonicalSlug": "sakura-no-toki",
+      "aliases": [
+        "Sakura no Toki",
+        "SakuranoToki"
+      ]
+    },
+    {
+      "canonicalName": "Samurai Maiden",
+      "canonicalSlug": "samurai-maiden",
+      "aliases": [
+        "Samurai Maiden",
+        "SamuraiMaiden"
+      ]
+    },
+    {
+      "canonicalName": "Scissor Seven",
+      "canonicalSlug": "scissor-seven",
+      "aliases": [
+        "Scissor Seven",
+        "ScissorSeven"
+      ]
+    },
+    {
+      "canonicalName": "Seirei Gensouki: Spirit Chronicles",
+      "canonicalSlug": "seirei-gensouki-spirit-chronicles",
+      "aliases": [
+        "Seirei Gensouki: Spirit Chronicles",
+        "Seirei Gensouki Spirit Chronicles",
+        "SeireiGensoukiSpiritChronicles"
+      ]
+    },
+    {
+      "canonicalName": "Senran Kagura",
+      "canonicalSlug": "senran-kagura",
+      "aliases": [
+        "Senran Kagura",
+        "SenranKagura"
+      ]
+    },
+    {
+      "canonicalName": "Shoshimin: How to Become Ordinary",
+      "canonicalSlug": "shoshimin-how-to-become-ordinary",
+      "aliases": [
+        "Shoshimin: How to Become Ordinary",
+        "Shoshimin How to Become Ordinary",
+        "ShoshiminHowtoBecomeOrdinary"
+      ]
+    },
+    {
+      "canonicalName": "SiNiSistar",
+      "canonicalSlug": "sinisistar",
+      "aliases": [
+        "SiNiSistar"
+      ]
+    },
+    {
+      "canonicalName": "Snowbreak: Containment Zone",
+      "canonicalSlug": "snowbreak-containment-zone",
+      "aliases": [
+        "Snowbreak: Containment Zone",
+        "Snowbreak Containment Zone",
+        "SnowbreakContainmentZone",
+        "Snowbreak",
+        "塵白禁區",
+        "尘白禁区"
+      ]
+    },
+    {
+      "canonicalName": "Solo Leveling",
+      "canonicalSlug": "solo-leveling",
+      "aliases": [
+        "Solo Leveling",
+        "SoloLeveling",
+        "俺だけレベルアップな件",
+        "我獨自升級",
+        "我独自升级"
+      ]
+    },
+    {
+      "canonicalName": "Soul Land",
+      "canonicalSlug": "soul-land",
+      "aliases": [
+        "Soul Land",
+        "SoulLand",
+        "斗羅大陸",
+        "斗罗大陆"
+      ]
+    },
+    {
+      "canonicalName": "Sound! Euphonium",
+      "canonicalSlug": "sound-euphonium",
+      "aliases": [
+        "Sound! Euphonium",
+        "Sound Euphonium",
+        "SoundEuphonium"
+      ]
+    },
+    {
+      "canonicalName": "Spice and Wolf",
+      "canonicalSlug": "spice-and-wolf",
+      "aliases": [
+        "Spice and Wolf",
+        "SpiceandWolf"
+      ]
+    },
+    {
+      "canonicalName": "Spy x Family",
+      "canonicalSlug": "spy-x-family",
+      "aliases": [
+        "Spy x Family",
+        "SpyxFamily",
+        "SPY×FAMILY",
+        "スパイファミリー",
+        "間諜家家酒",
+        "间谍过家家"
+      ]
+    },
+    {
+      "canonicalName": "SSSS.GRIDMAN",
+      "canonicalSlug": "ssss-gridman",
+      "aliases": [
+        "SSSS.GRIDMAN",
+        "SSSS GRIDMAN",
+        "SSSSGRIDMAN"
+      ]
+    },
+    {
+      "canonicalName": "Stella Sora",
+      "canonicalSlug": "stella-sora",
+      "aliases": [
+        "Stella Sora",
+        "StellaSora"
+      ]
+    },
+    {
+      "canonicalName": "Stellar Blade",
+      "canonicalSlug": "stellar-blade",
+      "aliases": [
+        "Stellar Blade",
+        "StellarBlade"
+      ]
+    },
+    {
+      "canonicalName": "Strinova",
+      "canonicalSlug": "strinova",
+      "aliases": [
+        "Strinova"
+      ]
+    },
+    {
+      "canonicalName": "Studio Apartment, Good Lighting, Angel Included",
+      "canonicalSlug": "studio-apartment-good-lighting-angel-included",
+      "aliases": [
+        "Studio Apartment, Good Lighting, Angel Included",
+        "Studio Apartment Good Lighting Angel Included",
+        "StudioApartmentGoodLightingAngelIncluded"
+      ]
+    },
+    {
+      "canonicalName": "Summer Pockets",
+      "canonicalSlug": "summer-pockets",
+      "aliases": [
+        "Summer Pockets",
+        "SummerPockets"
+      ]
+    },
+    {
+      "canonicalName": "Sword Art Online",
+      "canonicalSlug": "sword-art-online",
+      "aliases": [
+        "Sword Art Online",
+        "SwordArtOnline",
+        "SAO",
+        "ソードアート・オンライン",
+        "刀劍神域",
+        "刀剑神域"
       ]
     },
     {
       "canonicalName": "Taimanin",
       "canonicalSlug": "taimanin",
       "aliases": [
+        "Taimanin",
+        "対魔忍",
+        "對魔忍",
+        "对魔忍",
         "Taimanin Yukikaze"
+      ]
+    },
+    {
+      "canonicalName": "Teasing Master Takagi-san",
+      "canonicalSlug": "teasing-master-takagi-san",
+      "aliases": [
+        "Teasing Master Takagi-san",
+        "Teasing Master Takagi san",
+        "TeasingMasterTakagisan"
+      ]
+    },
+    {
+      "canonicalName": "Tekken 7",
+      "canonicalSlug": "tekken-7",
+      "aliases": [
+        "Tekken 7",
+        "Tekken7"
+      ]
+    },
+    {
+      "canonicalName": "Tekken 8",
+      "canonicalSlug": "tekken-8",
+      "aliases": [
+        "Tekken 8",
+        "Tekken8"
+      ]
+    },
+    {
+      "canonicalName": "Tenshi Sozo RE-BOOT!",
+      "canonicalSlug": "tenshi-sozo-re-boot",
+      "aliases": [
+        "Tenshi Sozo RE-BOOT!",
+        "Tenshi Sozo RE BOOT",
+        "TenshiSozoREBOOT"
+      ]
+    },
+    {
+      "canonicalName": "That Time I Got Reincarnated as a Slime",
+      "canonicalSlug": "that-time-i-got-reincarnated-as-a-slime",
+      "aliases": [
+        "That Time I Got Reincarnated as a Slime",
+        "ThatTimeIGotReincarnatedasaSlime"
+      ]
+    },
+    {
+      "canonicalName": "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You",
+      "canonicalSlug": "the-100-girlfriends-who-really-really-really-really-really-love-you",
+      "aliases": [
+        "The 100 Girlfriends Who Really, Really, Really, Really, Really Love You",
+        "The 100 Girlfriends Who Really Really Really Really Really Love You",
+        "The100GirlfriendsWhoReallyReallyReallyReallyReallyLoveYou",
+        "100 Girlfriends Who Really, Really, Really, Really, Really Love You",
+        "100 Girlfriends Who Really Really Really Really Really Love You"
+      ]
+    },
+    {
+      "canonicalName": "The Angel Next Door Spoils Me Rotten",
+      "canonicalSlug": "the-angel-next-door-spoils-me-rotten",
+      "aliases": [
+        "The Angel Next Door Spoils Me Rotten",
+        "TheAngelNextDoorSpoilsMeRotten",
+        "Angel Next Door Spoils Me Rotten"
+      ]
+    },
+    {
+      "canonicalName": "The Apothecary Diaries",
+      "canonicalSlug": "the-apothecary-diaries",
+      "aliases": [
+        "The Apothecary Diaries",
+        "TheApothecaryDiaries",
+        "Apothecary Diaries"
+      ]
+    },
+    {
+      "canonicalName": "The Eminence in Shadow",
+      "canonicalSlug": "the-eminence-in-shadow",
+      "aliases": [
+        "The Eminence in Shadow",
+        "TheEminenceinShadow",
+        "Eminence in Shadow"
       ]
     },
     {
       "canonicalName": "The Idolmaster",
       "canonicalSlug": "the-idolmaster",
       "aliases": [
-        "the idolmaster",
-        "idolmaster",
+        "The Idolmaster",
+        "TheIdolmaster",
+        "Idolmaster",
+        "im@s",
         "アイドルマスター",
-        "偶像大师",
         "偶像大師",
+        "偶像大师",
         "The Idolmaster Cinderella Girls",
         "The Idolmaster Million Live!",
         "The Idolmaster Shiny Colors",
@@ -153,36 +1863,294 @@
       ]
     },
     {
+      "canonicalName": "The Legend of Heroes: Trails through Daybreak",
+      "canonicalSlug": "the-legend-of-heroes-trails-through-daybreak",
+      "aliases": [
+        "The Legend of Heroes: Trails through Daybreak",
+        "The Legend of Heroes Trails through Daybreak",
+        "TheLegendofHeroesTrailsthroughDaybreak",
+        "Legend of Heroes: Trails through Daybreak",
+        "Legend of Heroes Trails through Daybreak"
+      ]
+    },
+    {
+      "canonicalName": "The Saga of Tanya the Evil",
+      "canonicalSlug": "the-saga-of-tanya-the-evil",
+      "aliases": [
+        "The Saga of Tanya the Evil",
+        "TheSagaofTanyatheEvil",
+        "Saga of Tanya the Evil"
+      ]
+    },
+    {
+      "canonicalName": "The Shiunji Family Children",
+      "canonicalSlug": "the-shiunji-family-children",
+      "aliases": [
+        "The Shiunji Family Children",
+        "TheShiunjiFamilyChildren",
+        "Shiunji Family Children"
+      ]
+    },
+    {
+      "canonicalName": "The Testament of Sister New Devil",
+      "canonicalSlug": "the-testament-of-sister-new-devil",
+      "aliases": [
+        "The Testament of Sister New Devil",
+        "TheTestamentofSisterNewDevil",
+        "Testament of Sister New Devil"
+      ]
+    },
+    {
+      "canonicalName": "There's No Freaking Way I'll Be Your Lover! Unless...",
+      "canonicalSlug": "there-s-no-freaking-way-i-ll-be-your-lover-unless",
+      "aliases": [
+        "There's No Freaking Way I'll Be Your Lover! Unless...",
+        "There s No Freaking Way I ll Be Your Lover Unless",
+        "TheresNoFreakingWayIllBeYourLoverUnless"
+      ]
+    },
+    {
+      "canonicalName": "To Love-Ru",
+      "canonicalSlug": "to-love-ru",
+      "aliases": [
+        "To Love-Ru",
+        "To Love Ru",
+        "ToLoveRu",
+        "To LOVEる",
+        "出包王女"
+      ]
+    },
+    {
+      "canonicalName": "Too Many Losing Heroines!",
+      "canonicalSlug": "too-many-losing-heroines",
+      "aliases": [
+        "Too Many Losing Heroines!",
+        "Too Many Losing Heroines",
+        "TooManyLosingHeroines",
+        "Makeine",
+        "マケイン",
+        "敗北女角太多了",
+        "败北女角太多了",
+        "敗犬女角太多了"
+      ]
+    },
+    {
+      "canonicalName": "Touhou Project",
+      "canonicalSlug": "touhou-project",
+      "aliases": [
+        "Touhou Project",
+        "TouhouProject"
+      ]
+    },
+    {
+      "canonicalName": "Tower of Fantasy",
+      "canonicalSlug": "tower-of-fantasy",
+      "aliases": [
+        "Tower of Fantasy",
+        "TowerofFantasy",
+        "ToF",
+        "幻塔"
+      ]
+    },
+    {
+      "canonicalName": "Trails into Reverie",
+      "canonicalSlug": "trails-into-reverie",
+      "aliases": [
+        "Trails into Reverie",
+        "TrailsintoReverie"
+      ]
+    },
+    {
+      "canonicalName": "Trapped in a Dating Sim: The World of Otome Games Is Tough for Mobs",
+      "canonicalSlug": "trapped-in-a-dating-sim-the-world-of-otome-games-is-tough-for-mobs",
+      "aliases": [
+        "Trapped in a Dating Sim: The World of Otome Games Is Tough for Mobs",
+        "Trapped in a Dating Sim The World of Otome Games Is Tough for Mobs",
+        "TrappedinaDatingSimTheWorldofOtomeGamesIsToughforMobs"
+      ]
+    },
+    {
       "canonicalName": "Uma Musume: Pretty Derby",
       "canonicalSlug": "uma-musume-pretty-derby",
       "aliases": [
-        "uma musume",
-        "uma musume pretty derby",
-        "uma musume: pretty derby",
+        "Uma Musume: Pretty Derby",
+        "Uma Musume Pretty Derby",
+        "UmaMusumePrettyDerby",
+        "Uma Musume",
         "ウマ娘",
+        "賽馬娘",
         "赛马娘",
-        "賽馬娘"
+        "馬娘",
+        "马娘"
+      ]
+    },
+    {
+      "canonicalName": "Unicorn Overlord",
+      "canonicalSlug": "unicorn-overlord",
+      "aliases": [
+        "Unicorn Overlord",
+        "UnicornOverlord"
+      ]
+    },
+    {
+      "canonicalName": "Unnamed Memory",
+      "canonicalSlug": "unnamed-memory",
+      "aliases": [
+        "Unnamed Memory",
+        "UnnamedMemory"
+      ]
+    },
+    {
+      "canonicalName": "Visions of Mana",
+      "canonicalSlug": "visions-of-mana",
+      "aliases": [
+        "Visions of Mana",
+        "VisionsofMana"
+      ]
+    },
+    {
+      "canonicalName": "Vocaloid",
+      "canonicalSlug": "vocaloid",
+      "aliases": [
+        "Vocaloid",
+        "ボカロ",
+        "V家"
+      ]
+    },
+    {
+      "canonicalName": "VRChat",
+      "canonicalSlug": "vrchat",
+      "aliases": [
+        "VRChat"
+      ]
+    },
+    {
+      "canonicalName": "VShojo",
+      "canonicalSlug": "vshojo",
+      "aliases": [
+        "VShojo",
+        "微笑小酒館"
+      ]
+    },
+    {
+      "canonicalName": "Vtuber",
+      "canonicalSlug": "vtuber",
+      "aliases": [
+        "Vtuber",
+        "VTubers",
+        "V",
+        "虛擬主播",
+        "虚拟主播"
+      ]
+    },
+    {
+      "canonicalName": "WIXOSS",
+      "canonicalSlug": "wixoss",
+      "aliases": [
+        "WIXOSS"
+      ]
+    },
+    {
+      "canonicalName": "Working!!",
+      "canonicalSlug": "working",
+      "aliases": [
+        "Working!!",
+        "Working"
+      ]
+    },
+    {
+      "canonicalName": "WorldEnd",
+      "canonicalSlug": "worldend",
+      "aliases": [
+        "WorldEnd"
       ]
     },
     {
       "canonicalName": "Wuthering Waves",
       "canonicalSlug": "wuthering-waves",
       "aliases": [
-        "wuthering waves",
-        "鸣潮",
+        "Wuthering Waves",
+        "WutheringWaves",
+        "WuWa",
         "鳴潮",
-        "Wuwa"
+        "鸣潮"
+      ]
+    },
+    {
+      "canonicalName": "Xenoblade Chronicles 2",
+      "canonicalSlug": "xenoblade-chronicles-2",
+      "aliases": [
+        "Xenoblade Chronicles 2",
+        "XenobladeChronicles2"
+      ]
+    },
+    {
+      "canonicalName": "Xenoblade Chronicles 3",
+      "canonicalSlug": "xenoblade-chronicles-3",
+      "aliases": [
+        "Xenoblade Chronicles 3",
+        "XenobladeChronicles3"
+      ]
+    },
+    {
+      "canonicalName": "Xenoblade Chronicles X",
+      "canonicalSlug": "xenoblade-chronicles-x",
+      "aliases": [
+        "Xenoblade Chronicles X",
+        "XenobladeChroniclesX"
+      ]
+    },
+    {
+      "canonicalName": "Yosuga no Sora",
+      "canonicalSlug": "yosuga-no-sora",
+      "aliases": [
+        "Yosuga no Sora",
+        "YosuganoSora"
+      ]
+    },
+    {
+      "canonicalName": "Yu-Gi-Oh!",
+      "canonicalSlug": "yu-gi-oh",
+      "aliases": [
+        "Yu-Gi-Oh!",
+        "Yu Gi Oh",
+        "YuGiOh"
+      ]
+    },
+    {
+      "canonicalName": "Yuki Yuna Is a Hero",
+      "canonicalSlug": "yuki-yuna-is-a-hero",
+      "aliases": [
+        "Yuki Yuna Is a Hero",
+        "YukiYunaIsaHero"
+      ]
+    },
+    {
+      "canonicalName": "Yume Nikki",
+      "canonicalSlug": "yume-nikki",
+      "aliases": [
+        "Yume Nikki",
+        "YumeNikki"
       ]
     },
     {
       "canonicalName": "Zenless Zone Zero",
       "canonicalSlug": "zenless-zone-zero",
       "aliases": [
-        "zenless zone zero",
+        "Zenless Zone Zero",
+        "ZenlessZoneZero",
+        "ZZZ",
         "ゼンレスゾーンゼロ",
-        "绝区零",
         "絕區零",
-        "ZZZ"
+        "绝区零"
+      ]
+    },
+    {
+      "canonicalName": "Zombieland Saga",
+      "canonicalSlug": "zombieland-saga",
+      "aliases": [
+        "Zombieland Saga",
+        "ZombielandSaga"
       ]
     }
   ]

@@ -1,9 +1,9 @@
 {
   "version": 1,
-  "generatedAt": "2026-04-11T11:36:25.662Z",
+  "generatedAt": "2026-04-12T07:10:48.067Z",
   "tagType": "work",
   "sourceDirectory": "db image/tag",
-  "entryCount": 228,
+  "entryCount": 225,
   "entries": [
     {
       "canonicalName": "2.5 Dimensional Seduction",
@@ -184,45 +184,28 @@
       "sourceCount": 30
     },
     {
-      "canonicalName": "Atelier Ryza",
-      "canonicalSlug": "atelier-ryza",
+      "canonicalName": "Atelier",
+      "canonicalSlug": "atelier",
       "aliases": [
+        "Atelier",
         "Atelier Ryza",
         "AtelierRyza",
         "Ryza",
         "ライザのアトリエ",
         "萊莎的鍊金工房",
-        "莱莎的炼金工房"
-      ],
-      "sourceCount": 1
-    },
-    {
-      "canonicalName": "Atelier Yumia",
-      "canonicalSlug": "atelier-yumia",
-      "aliases": [
+        "莱莎的炼金工房",
         "Atelier Yumia",
         "AtelierYumia",
         "Yumia",
         "ユミアのアトリエ",
         "優米雅的鍊金工房",
-        "优米雅的炼金工房"
-      ],
-      "sourceCount": 1
-    },
-    {
-      "canonicalName": "Atelier Yumia: The Alchemist of Memories & the Envisioned Land",
-      "canonicalSlug": "atelier-yumia-the-alchemist-of-memories-the-envisioned-land",
-      "aliases": [
+        "优米雅的炼金工房",
         "Atelier Yumia: The Alchemist of Memories & the Envisioned Land",
         "Atelier Yumia The Alchemist of Memories the Envisioned Land",
         "AtelierYumiaTheAlchemistofMemoriestheEnvisionedLand",
-        "Atelier Yumia",
-        "Yumia",
-        "ユミアのアトリエ",
-        "優米雅的鍊金工房",
-        "优米雅的炼金工房"
+        "アトリエ"
       ],
-      "sourceCount": 2
+      "sourceCount": 4
     },
     {
       "canonicalName": "ATRI -My Dear Moments-",
@@ -821,16 +804,6 @@
         "HaganaiIDontHaveManyFriends"
       ],
       "sourceCount": 3
-    },
-    {
-      "canonicalName": "HeartCatch PreCure!",
-      "canonicalSlug": "heartcatch-precure",
-      "aliases": [
-        "HeartCatch PreCure!",
-        "HeartCatch PreCure",
-        "HeartCatchPreCure"
-      ],
-      "sourceCount": 1
     },
     {
       "canonicalName": "Heaven's Memo Pad",
@@ -1492,7 +1465,7 @@
         "原創",
         "原创"
       ],
-      "sourceCount": 10
+      "sourceCount": 15
     },
     {
       "canonicalName": "Oshi no Ko",
@@ -1582,6 +1555,21 @@
         "口袋妖怪"
       ],
       "sourceCount": 1
+    },
+    {
+      "canonicalName": "Precure!",
+      "canonicalSlug": "precure",
+      "aliases": [
+        "Precure!",
+        "Precure",
+        "HeartCatch PreCure!",
+        "HeartCatch PreCure",
+        "HeartCatchPreCure",
+        "Soaring Sky! Pretty Cure",
+        "Soaring Sky Pretty Cure",
+        "SoaringSkyPrettyCure"
+      ],
+      "sourceCount": 2
     },
     {
       "canonicalName": "Princess Connect! Re:Dive",
@@ -1824,16 +1812,6 @@
         "尘白禁区"
       ],
       "sourceCount": 68
-    },
-    {
-      "canonicalName": "Soaring Sky! Pretty Cure",
-      "canonicalSlug": "soaring-sky-pretty-cure",
-      "aliases": [
-        "Soaring Sky! Pretty Cure",
-        "Soaring Sky Pretty Cure",
-        "SoaringSkyPrettyCure"
-      ],
-      "sourceCount": 1
     },
     {
       "canonicalName": "Solo Leveling",

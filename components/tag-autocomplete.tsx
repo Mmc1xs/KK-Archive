@@ -106,6 +106,13 @@ export function TagAutocomplete({
     [selectedTags]
   );
 
+  const normalizedQuery = query.trim().toLowerCase();
+  const hasExactMatch = options.some(
+    (option) => option.name.trim().toLowerCase() === normalizedQuery || option.slug.trim().toLowerCase() === normalizedQuery
+  );
+  const canCreateNewTag = Boolean(query.trim()) && !hasExactMatch;
+  const optionCount = options.length + (canCreateNewTag ? 1 : 0);
+
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -190,7 +197,7 @@ export function TagAutocomplete({
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setIsOpen(true);
-      setHighlightedIndex((current) => Math.min(current + 1, Math.max(options.length - 1, 0)));
+      setHighlightedIndex((current) => Math.min(current + 1, Math.max(optionCount - 1, 0)));
       return;
     }
 
@@ -202,9 +209,9 @@ export function TagAutocomplete({
 
     if (event.key === "Enter") {
       event.preventDefault();
-      if (options[highlightedIndex] && query.trim()) {
+      if (highlightedIndex < options.length && options[highlightedIndex]) {
         addExistingTag(options[highlightedIndex]);
-      } else {
+      } else if (canCreateNewTag) {
         addNewTag(query);
       }
       return;
@@ -254,18 +261,31 @@ export function TagAutocomplete({
             {isLoading ? (
               <div className="tag-option-empty">Searching...</div>
             ) : options.length ? (
-              options.map((option, index) => (
-                <button
-                  key={`${idName}-${option.id}`}
-                  type="button"
-                  className={index === highlightedIndex ? "tag-option active" : "tag-option"}
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={() => addExistingTag(option)}
-                >
-                  <span>{option.name}</span>
-                  <small>{option.slug}</small>
-                </button>
-              ))
+              <>
+                {options.map((option, index) => (
+                  <button
+                    key={`${idName}-${option.id}`}
+                    type="button"
+                    className={index === highlightedIndex ? "tag-option active" : "tag-option"}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => addExistingTag(option)}
+                  >
+                    <span>{option.name}</span>
+                    <small>{option.slug}</small>
+                  </button>
+                ))}
+                {canCreateNewTag ? (
+                  <button
+                    type="button"
+                    className={highlightedIndex === options.length ? "tag-option active" : "tag-option"}
+                    onMouseDown={(event) => event.preventDefault()}
+                    onClick={() => addNewTag(query)}
+                  >
+                    <span>Create new tag</span>
+                    <small>{query.trim()}</small>
+                  </button>
+                ) : null}
+              </>
             ) : query.trim() ? (
               <button
                 type="button"

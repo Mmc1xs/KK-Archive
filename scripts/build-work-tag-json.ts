@@ -22,6 +22,16 @@ type WorkAliasFile = {
   entries: WorkAliasEntry[];
 };
 
+type PixivWorkAliasFile = {
+  version: number;
+  updatedAt: string;
+  entries: Array<{
+    canonicalName: string;
+    canonicalSlug: string;
+    aliases: string[];
+  }>;
+};
+
 type PixivWorkReport = {
   matched?: Array<{
     work?: {
@@ -35,6 +45,7 @@ type PixivWorkReport = {
 
 const TAG_REVIEW_DIR = path.resolve(process.cwd(), "db image", "tag");
 const OUTPUT_PATH = path.resolve(process.cwd(), "db image", "tag.json");
+const PIXIV_ALIAS_OUTPUT_PATH = path.resolve(process.cwd(), "scripts", "pixiv-work-aliases.json");
 const PIXIV_REPORT_PATH = path.resolve(
   process.cwd(),
   "scripts",
@@ -48,16 +59,24 @@ const manualAliases = new Map<string, string[]>([
   ["Aether Gazer", ["AG", "エーテルゲイザー", "深空之眼"]],
   ["Arknights", ["AK", "アークナイツ", "アクナイ", "明日方舟", "方舟"]],
   ["Arknights: Endfield", ["Endfield", "アークナイツ：エンドフィールド", "明日方舟：终末地", "明日方舟：終末地"]],
-  ["Atelier Ryza", ["Ryza", "ライザのアトリエ", "萊莎的鍊金工房", "莱莎的炼金工房"]],
-  ["Atelier Yumia", ["Yumia", "ユミアのアトリエ", "優米雅的鍊金工房", "优米雅的炼金工房"]],
   [
-    "Atelier Yumia: The Alchemist of Memories & the Envisioned Land",
+    "Atelier",
     [
+      "Atelier Ryza",
+      "AtelierRyza",
+      "Ryza",
+      "ライザのアトリエ",
+      "萊莎的鍊金工房",
+      "莱莎的炼金工房",
       "Atelier Yumia",
+      "AtelierYumia",
       "Yumia",
       "ユミアのアトリエ",
       "優米雅的鍊金工房",
       "优米雅的炼金工房",
+      "Atelier Yumia: The Alchemist of Memories & the Envisioned Land",
+      "Atelier Yumia The Alchemist of Memories the Envisioned Land",
+      "AtelierYumiaTheAlchemistofMemoriestheEnvisionedLand",
     ],
   ],
   ["Azur Lane", ["AL", "アズールレーン", "碧藍航線", "碧蓝航线", "艦B", "舰B"]],
@@ -231,6 +250,15 @@ appendManualAliases("BanG Dream!", [
   "MyGO!!!!!",
 ]);
 
+appendManualAliases("Precure!", [
+  "HeartCatch PreCure!",
+  "HeartCatch PreCure",
+  "HeartCatchPreCure",
+  "Soaring Sky! Pretty Cure",
+  "Soaring Sky Pretty Cure",
+  "SoaringSkyPrettyCure",
+]);
+
 function buildAutoAliases(canonicalName: string) {
   const collapsed = canonicalName.normalize("NFKC").trim().replace(/\s+/gu, " ");
   const withoutPunctuation = collapsed.replace(/[^0-9\p{L}]+/gu, " ").trim().replace(/\s+/gu, " ");
@@ -324,6 +352,19 @@ async function main() {
 
   await mkdir(path.dirname(OUTPUT_PATH), { recursive: true });
   await writeFile(OUTPUT_PATH, `${JSON.stringify(output, null, 2)}\n`, "utf8");
+
+  const pixivAliasOutput: PixivWorkAliasFile = {
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    entries: output.entries.map((entry) => ({
+      canonicalName: entry.canonicalName,
+      canonicalSlug: entry.canonicalSlug,
+      aliases: entry.aliases
+    }))
+  };
+
+  await mkdir(path.dirname(PIXIV_ALIAS_OUTPUT_PATH), { recursive: true });
+  await writeFile(PIXIV_ALIAS_OUTPUT_PATH, `${JSON.stringify(pixivAliasOutput, null, 2)}\n`, "utf8");
 
   console.log(`[WORK TAG] Wrote ${output.entryCount} work alias entries to ${OUTPUT_PATH}`);
 }

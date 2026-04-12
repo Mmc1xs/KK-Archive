@@ -84,8 +84,9 @@ export async function updateContentAction(contentId: number, formData: FormData)
   if (!existing) {
     redirectWithMessage("/admin/contents", "error", "Content not found");
   }
+  const isRepassingAlreadyPassed = reviewAction === "passed" && existing.reviewStatus === ReviewStatus.PASSED;
   const reviewStatusOverride =
-    reviewAction === "saved"
+    reviewAction === "saved" || isRepassingAlreadyPassed
       ? existing.reviewStatus
       : staff.role === "ADMIN" && reviewAction === "passed"
         ? ReviewStatus.PASSED
@@ -116,9 +117,11 @@ export async function updateContentAction(contentId: number, formData: FormData)
     contentId,
     {
       reviewStatusOverride,
-      preserveReviewStatus: reviewAction === "saved",
-      reviewHandledByUserId: reviewStatusOverride === ReviewStatus.EDITED ? staff.id : undefined,
-      passHandledByUserId: reviewStatusOverride === ReviewStatus.PASSED ? staff.id : undefined
+      preserveReviewStatus: reviewAction === "saved" || isRepassingAlreadyPassed,
+      reviewHandledByUserId:
+        reviewStatusOverride === ReviewStatus.EDITED && !isRepassingAlreadyPassed ? staff.id : undefined,
+      passHandledByUserId:
+        reviewStatusOverride === ReviewStatus.PASSED && !isRepassingAlreadyPassed ? staff.id : undefined
     }
   );
 
@@ -126,7 +129,7 @@ export async function updateContentAction(contentId: number, formData: FormData)
     redirectWithMessage(`/admin/contents/${contentId}/edit`, "error", result.error);
   }
 
-  if (reviewAction === "saved") {
+  if (reviewAction === "saved" || isRepassingAlreadyPassed) {
     redirectWithMessage(`/admin/contents/${contentId}/edit`, "success", "Content saved");
   }
 

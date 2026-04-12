@@ -3,7 +3,7 @@ import { ReviewStatus } from "@prisma/client";
 import { deleteContentAction } from "@/app/actions";
 import { requireStaff } from "@/lib/auth/session";
 import { buildContentHref } from "@/lib/content-href";
-import { getAdminContentReviewCounts, getAdminContentsPage } from "@/lib/content";
+import { getAdminContentsPage } from "@/lib/content";
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
 
@@ -90,15 +90,12 @@ export default async function AdminContentsPage({
   const pageSizeParam = typeof params.pageSize === "string" ? Number(params.pageSize) : 20;
   const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
   const currentPageSize = PAGE_SIZE_OPTIONS.includes(pageSizeParam as 20 | 50 | 100) ? pageSizeParam : 20;
-  const [{ items: contents, totalPages, totalCount }, reviewCounts] = await Promise.all([
-    getAdminContentsPage({
-      reviewStatus: review,
-      page: currentPage,
-      pageSize: currentPageSize,
-      viewerRole: staff.role
-    }),
-    getAdminContentReviewCounts()
-  ]);
+  const { items: contents, totalPages, totalCount, reviewCounts } = await getAdminContentsPage({
+    reviewStatus: review,
+    page: currentPage,
+    pageSize: currentPageSize,
+    viewerRole: staff.role
+  });
   const redirectTo = buildAdminContentsHref(review, currentPage, currentPageSize);
   const paginationItems = buildPagination(totalPages, currentPage);
 

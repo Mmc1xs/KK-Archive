@@ -1175,6 +1175,23 @@ function buildAdminContentWhere(reviewStatus?: ReviewStatus): Prisma.ContentWher
   return reviewStatus ? { reviewStatus } : {};
 }
 
+async function getAdminReviewStatusCounts() {
+  const grouped = await db.content.groupBy({
+    by: ["reviewStatus"],
+    _count: {
+      _all: true
+    }
+  });
+
+  const counts = new Map(grouped.map((item) => [item.reviewStatus, item._count._all]));
+
+  return {
+    unverified: counts.get(ReviewStatus.UNVERIFIED) ?? 0,
+    edited: counts.get(ReviewStatus.EDITED) ?? 0,
+    passed: counts.get(ReviewStatus.PASSED) ?? 0
+  };
+}
+
 export async function getAdminContentsPage(options?: {
   reviewStatus?: AdminContentReviewFilter;
   page?: number;
@@ -1187,14 +1204,13 @@ export async function getAdminContentsPage(options?: {
     Number.isInteger(options?.pageSize) && (options?.pageSize ?? 0) > 0 ? (options?.pageSize as number) : 20;
   const viewerRole = options?.viewerRole === UserRole.AUDIT ? UserRole.AUDIT : UserRole.ADMIN;
   const orderedStatuses = getAdminReviewStatusOrder(reviewStatus, viewerRole);
-  const statusCounts = await Promise.all(
-    orderedStatuses.map(async (status) => ({
-      status,
-      count: await db.content.count({
-        where: buildAdminContentWhere(status)
-      })
-    }))
-  );
+  const reviewCounts = await getAdminReviewStatusCounts();
+  const statusCounts = orderedStatuses.map((status) => ({
+    status,
+    count: reviewCounts[
+      status === ReviewStatus.UNVERIFIED ? "unverified" : status === ReviewStatus.EDITED ? "edited" : "passed"
+    ]
+  }));
   const totalCount = statusCounts.reduce((sum, item) => sum + item.count, 0);
   const itemOffset = (page - 1) * pageSize;
   let remainingSkip = itemOffset;
@@ -1230,25 +1246,13 @@ export async function getAdminContentsPage(options?: {
     totalCount,
     page,
     pageSize,
-    totalPages: Math.max(1, Math.ceil(totalCount / pageSize))
+    totalPages: Math.max(1, Math.ceil(totalCount / pageSize)),
+    reviewCounts
   };
 }
 
 export async function getAdminContentReviewCounts() {
-  const grouped = await db.content.groupBy({
-    by: ["reviewStatus"],
-    _count: {
-      _all: true
-    }
-  });
-
-  const counts = new Map(grouped.map((item) => [item.reviewStatus, item._count._all]));
-
-  return {
-    unverified: counts.get(ReviewStatus.UNVERIFIED) ?? 0,
-    edited: counts.get(ReviewStatus.EDITED) ?? 0,
-    passed: counts.get(ReviewStatus.PASSED) ?? 0
-  };
+  return getAdminReviewStatusCounts();
 }
 
 export async function getAdminContentById(id: number) {
@@ -1584,7 +1588,13 @@ export async function saveContent(
       return savedContent;
     });
 
-    revalidateTag("tags", "max");
+    try {
+      revalidateTag("tags", "max");
+    } catch (error) {
+      if (!(error instanceof Error && error.message.includes("static generation store missing"))) {
+        throw error;
+      }
+    }
 
     return { ok: true as const, contentId: content.id };
   } catch (error) {

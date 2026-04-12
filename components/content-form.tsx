@@ -267,9 +267,13 @@ export function ContentForm({ mode, role = "ADMIN", error, success, tagOptions, 
               <button type="submit" name="reviewAction" value="edited">
                 Update Content
               </button>
-              {role === "ADMIN" ? (
+              {role === "ADMIN" && content?.reviewStatus !== "PASSED" ? (
                 <button type="submit" name="reviewAction" value="passed" className="button secondary">
                   Update and Pass
+                </button>
+              ) : role === "ADMIN" ? (
+                <button type="button" className="button secondary" disabled title="This content is already passed. Use Save Content to keep the current review status.">
+                  Already Passed
                 </button>
               ) : null}
             </div>
