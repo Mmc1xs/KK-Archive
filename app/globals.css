@@ -725,6 +725,17 @@ img {
   border-bottom: 1px solid rgba(137, 213, 255, 0.35);
 }
 
+.content-card-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(137, 213, 255, 0.35);
+}
+
+.content-card-image {
+  object-fit: cover;
+}
+
 .card-body {
   padding: 16px 18px 18px;
   position: relative;
@@ -937,7 +948,7 @@ button {
   padding: 12px 12px 14px;
 }
 
-.search-results-grid .card-image {
+.search-results-grid .content-card-media {
   aspect-ratio: 4 / 3;
 }
 

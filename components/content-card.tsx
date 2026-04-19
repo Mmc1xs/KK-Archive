@@ -44,13 +44,15 @@ export function ContentCard({ content, locale = "en" }: ContentCardProps) {
 
   return (
     <ContentCardLink href={contentHref} locale={locale}>
-      <Image
-        className="card-image"
-        src={content.coverImageUrl}
-        alt={content.title}
-        width={1200}
-        height={900}
-      />
+      <div className="content-card-media">
+        <Image
+          className="content-card-image"
+          src={content.coverImageUrl}
+          alt={content.title}
+          fill
+          sizes="(max-width: 860px) 50vw, (max-width: 1200px) 33vw, 25vw"
+        />
+      </div>
       <div className="card-body">
         <div className="eyebrow">{work}</div>
         <h3>{content.title}</h3>
