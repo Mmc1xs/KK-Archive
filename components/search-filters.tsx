@@ -215,8 +215,6 @@ export function SearchFilters({
   const usageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const styleKey = initialStyles.map((item) => item.slug).sort().join("|");
-    const usageKey = initialUsages.map((item) => item.slug).sort().join("|");
     setSelectedAuthor(initialAuthor);
     setAuthorQuery(initialAuthor?.name ?? "");
     setSelectedWork(initialWork);
@@ -226,24 +224,7 @@ export function SearchFilters({
     setSelectedStyles(initialStyles);
     setSelectedUsages(initialUsages);
     setSelectedTypes(initialTypes);
-    return () => {
-      void styleKey;
-      void usageKey;
-    };
-  }, [
-    initialAuthor?.id,
-    initialAuthor?.slug,
-    initialAuthor?.name,
-    initialWork?.id,
-    initialWork?.slug,
-    initialWork?.name,
-    initialCharacter?.id,
-    initialCharacter?.slug,
-    initialCharacter?.name,
-    initialStyles,
-    initialUsages,
-    initialTypes
-  ]);
+  }, [initialAuthor, initialWork, initialCharacter, initialStyles, initialUsages, initialTypes]);
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {

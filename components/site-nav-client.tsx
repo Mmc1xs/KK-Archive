@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,12 +21,15 @@ type SessionUser = {
   role: "ADMIN" | "AUDIT" | "MEMBER";
 };
 
+const PLUGIN_DATA_READER_HREF = "/tool-static/PluginDataReader?v=20260413";
+
 const localeLabels = {
   en: {
     short: "EN",
     menu: "English",
     contents: "Contents",
     search: "Search",
+    tool: "Tool",
     admin: "Admin",
     profile: "Profile",
     logout: "Logout",
@@ -34,21 +37,23 @@ const localeLabels = {
     register: "Register"
   },
   "zh-CN": {
-    short: "中文",
+    short: "中",
     menu: "中文",
     contents: "内容",
     search: "搜索",
-    admin: "管理",
-    profile: "个人档案",
+    tool: "工具",
+    admin: "后台",
+    profile: "个人资料",
     logout: "登出",
     login: "登录",
     register: "注册"
   },
   ja: {
-    short: "日本語",
+    short: "日",
     menu: "日本語",
     contents: "コンテンツ",
     search: "検索",
+    tool: "ツール",
     admin: "管理",
     profile: "プロフィール",
     logout: "ログアウト",
@@ -62,7 +67,9 @@ export function SiteNavClient() {
   const [user, setUser] = useState<SessionUser | null>(null);
   const [resolved, setResolved] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [toolMenuOpen, setToolMenuOpen] = useState(false);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
+  const toolMenuRef = useRef<HTMLDivElement | null>(null);
   const locale = getCurrentUiLocale(pathname);
   const labels = localeLabels[locale];
 
@@ -105,14 +112,19 @@ export function SiteNavClient() {
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
-      if (!languageMenuRef.current?.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (!languageMenuRef.current?.contains(target)) {
         setLanguageMenuOpen(false);
+      }
+      if (!toolMenuRef.current?.contains(target)) {
+        setToolMenuOpen(false);
       }
     }
 
     function handleEscape(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setLanguageMenuOpen(false);
+        setToolMenuOpen(false);
       }
     }
 
@@ -133,6 +145,53 @@ export function SiteNavClient() {
         </Link>
         <Link href={getLocaleContentsHref(locale)}>{labels.contents}</Link>
         <Link href={getLocaleSearchHref(locale)}>{labels.search}</Link>
+        <div ref={toolMenuRef} style={{ position: "relative", zIndex: 80 }}>
+          <button
+            type="button"
+            className="nav-dropdown-trigger"
+            onClick={() => {
+              setToolMenuOpen((current) => !current);
+              setLanguageMenuOpen(false);
+            }}
+            aria-haspopup="menu"
+            aria-expanded={toolMenuOpen}
+          >
+            <span>{labels.tool}</span>
+            <span className="nav-dropdown-caret" aria-hidden="true">
+              ▼
+            </span>
+          </button>
+          {toolMenuOpen ? (
+            <div
+              role="menu"
+              aria-label="Tool selector"
+              style={{
+                position: "absolute",
+                top: "calc(100% + 8px)",
+                right: 0,
+                minWidth: 188,
+                display: "grid",
+                gap: 8,
+                padding: 10,
+                borderRadius: 18,
+                border: "1px solid rgba(117, 173, 222, 0.42)",
+                background: "rgba(255, 255, 255, 0.98)",
+                boxShadow: "0 16px 32px rgba(83, 140, 196, 0.16)",
+                zIndex: 9999
+              }}
+            >
+              <Link
+                href={PLUGIN_DATA_READER_HREF}
+                role="menuitem"
+                className="button secondary"
+                onClick={() => setToolMenuOpen(false)}
+                style={{ justifyContent: "center" }}
+              >
+                PluginDataReader
+              </Link>
+            </div>
+          ) : null}
+        </div>
         {user && (user.role === "ADMIN" || user.role === "AUDIT") ? <Link href="/admin">{labels.admin}</Link> : null}
       </div>
       <div className="inline-actions">
@@ -140,11 +199,14 @@ export function SiteNavClient() {
           <button
             type="button"
             className="link-pill"
-            onClick={() => setLanguageMenuOpen((current) => !current)}
+            onClick={() => {
+              setLanguageMenuOpen((current) => !current);
+              setToolMenuOpen(false);
+            }}
             aria-haspopup="menu"
             aria-expanded={languageMenuOpen}
           >
-            {`${labels.short} ▾`}
+            {`${labels.short} ▼`}
           </button>
           {languageMenuOpen ? (
             <div

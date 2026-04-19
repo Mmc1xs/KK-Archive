@@ -1,6 +1,6 @@
 "use server";
 
-import { ReviewStatus, UserRole } from "@prisma/client";
+import { Prisma, ReviewStatus, UserRole } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, requireStaff, requireUserWithoutTouch } from "@/lib/auth/session";
@@ -37,6 +37,114 @@ function getStringList(formData: FormData, key: string) {
     .getAll(key)
     .map((value) => String(value).trim())
     .filter(Boolean);
+}
+
+function getSafeRedirectPath(path: string, fallback = "/") {
+  return path.startsWith("/") && !path.startsWith("//") ? path : fallback;
+}
+
+export async function reportPassedContentIssueAction(formData: FormData) {
+  const user = await requireUserWithoutTouch();
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/"), "/");
+  const contentId = Number(formData.get("contentId"));
+  const issueTypeRaw = String(formData.get("issueType") || "").trim().toLowerCase();
+
+  const canSubmitReport =
+    user.role === UserRole.MEMBER || user.role === UserRole.AUDIT || user.role === UserRole.ADMIN;
+
+  if (!canSubmitReport) {
+    redirectWithMessage(redirectTo, "error", "You do not have permission to submit issue reports");
+  }
+
+  // Only allow the single report reason agreed by product spec.
+  if (!Number.isInteger(contentId) || contentId <= 0 || issueTypeRaw !== "fileissue") {
+    redirectWithMessage(redirectTo, "error", "Invalid content report");
+  }
+
+  const content = await db.content.findUnique({
+    where: { id: contentId },
+    select: {
+      reviewStatus: true
+    }
+  });
+
+  if (!content) {
+    redirectWithMessage(redirectTo, "error", "Content not found");
+  }
+
+  if (content.reviewStatus !== ReviewStatus.PASSED) {
+    redirectWithMessage(redirectTo, "error", "Only passed content can be reported");
+  }
+
+  try {
+    await db.$transaction(async (tx) => {
+      await tx.contentIssueReport.create({
+        data: {
+          contentId,
+          userId: user.id
+        }
+      });
+
+      await tx.content.update({
+        where: { id: contentId },
+        data: {
+          memberReportWebsiteDownloadCount: {
+            increment: 1
+          }
+        }
+      });
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      redirectWithMessage(redirectTo, "success", "You already reported this content");
+    }
+    throw error;
+  }
+
+  revalidatePath("/admin/contents");
+  revalidatePath(`/admin/contents/${contentId}/edit`);
+  revalidatePath("/contents");
+  revalidatePath("/zh-CN/contents");
+  revalidatePath("/ja/contents");
+  redirectWithMessage(redirectTo, "success", "Issue report recorded");
+}
+
+export async function clearContentIssueReportsAction(formData: FormData) {
+  await requireStaff({ touchActivity: false });
+  const contentId = Number(formData.get("contentId"));
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/contents"), "/admin/contents");
+
+  if (!Number.isInteger(contentId) || contentId <= 0) {
+    redirectWithMessage(redirectTo, "error", "Invalid content id");
+  }
+
+  const existing = await db.content.findUnique({
+    where: { id: contentId },
+    select: { id: true }
+  });
+
+  if (!existing) {
+    redirectWithMessage(redirectTo, "error", "Content not found");
+  }
+
+  await db.$transaction([
+    db.content.update({
+      where: { id: contentId },
+      data: {
+        memberReportOriginalSourceCount: 0,
+        memberReportWebsiteDownloadCount: 0
+      }
+    }),
+    db.contentIssueReport.deleteMany({
+      where: {
+        contentId
+      }
+    })
+  ]);
+
+  revalidatePath("/admin/contents");
+  revalidatePath(`/admin/contents/${contentId}/edit`);
+  redirectWithMessage(redirectTo, "success", "Report counts cleared");
 }
 
 export async function createContentAction(formData: FormData) {

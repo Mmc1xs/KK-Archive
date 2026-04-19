@@ -7,7 +7,7 @@
     "build": "prisma generate && next build",
     "build:postgres": "npm run db:use:postgres && prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "db:use:sqlite": "tsx scripts/set-prisma-runtime.ts sqlite",
     "db:use:postgres": "tsx scripts/set-prisma-runtime.ts postgres",
     "db:generate": "prisma generate",
@@ -59,9 +59,12 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "eslint": "^9.39.4",
+    "eslint-config-next": "^16.2.4",
     "prisma": "^6.5.0",
     "tsx": "^4.19.3",
     "typescript": "^5.9.2"

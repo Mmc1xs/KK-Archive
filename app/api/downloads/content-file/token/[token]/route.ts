@@ -7,14 +7,10 @@ import { db } from "@/lib/db";
 import { createR2DownloadUrl } from "@/lib/storage/r2";
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const user = await getCurrentSession({ touchActivity: false });
-  if (!user) {
-    const loginUrl = new URL("/login", request.url);
-    return NextResponse.redirect(loginUrl);
-  }
 
   const routeParams = await params;
   const fileId = parseContentFileToken(routeParams.token);
@@ -41,12 +37,14 @@ export async function GET(
     return NextResponse.json({ error: "File not found" }, { status: 404 });
   }
 
-  const isStaff = user.role === UserRole.ADMIN || user.role === UserRole.AUDIT;
-  const canAccessByStatus =
-    file.content.publishStatus === PublishStatus.PUBLISHED ||
-    file.content.publishStatus === PublishStatus.SUMMIT;
+  const isStaff = Boolean(user && (user.role === UserRole.ADMIN || user.role === UserRole.AUDIT));
+  const canAccessByStatus = isStaff
+    ? true
+    : user
+      ? file.content.publishStatus === PublishStatus.PUBLISHED || file.content.publishStatus === PublishStatus.SUMMIT
+      : file.content.publishStatus === PublishStatus.PUBLISHED;
 
-  if (!isStaff && !canAccessByStatus) {
+  if (!canAccessByStatus) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -56,7 +54,7 @@ export async function GET(
   });
 
   try {
-    await recordContentDownload(file.content.id);
+    await recordContentDownload(file.content.id, user?.id ?? null);
   } catch (error) {
     console.error("Failed to record content download", {
       fileId: file.id,

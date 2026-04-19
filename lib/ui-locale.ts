@@ -69,3 +69,15 @@ export function getLocaleSupportHref(locale: UiLocale) {
 export function getLocalePrivacyHref(locale: UiLocale) {
   return buildLocalizedHref(locale, "/privacy");
 }
+
+export function getLocaleAboutHref(locale: UiLocale) {
+  return buildLocalizedHref(locale, "/about");
+}
+
+export function getLocaleContactHref(locale: UiLocale) {
+  return buildLocalizedHref(locale, "/contact");
+}
+
+export function getLocaleTermsHref(locale: UiLocale) {
+  return buildLocalizedHref(locale, "/terms");
+}

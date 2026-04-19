@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { GoogleAdSenseSlot } from "@/components/google-adsense-slot";
@@ -134,7 +135,13 @@ export function HomePageView({
                 </p>
               </div>
               {featuredContent ? (
-                <img src={featuredContent.coverImageUrl} alt={featuredContent.title} className="hero-spotlight-image" />
+                <Image
+                  src={featuredContent.coverImageUrl}
+                  alt={featuredContent.title}
+                  className="hero-spotlight-image"
+                  width={528}
+                  height={528}
+                />
               ) : null}
             </article>
 

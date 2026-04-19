@@ -1,5 +1,7 @@
+﻿import Image from "next/image";
 import Link from "next/link";
 import { ReviewStatus } from "@prisma/client";
+import { reportPassedContentIssueAction } from "@/app/actions";
 import { TagLinks } from "@/components/tag-links";
 import { type UiLocale } from "@/lib/ui-locale";
 
@@ -49,6 +51,10 @@ type ContentDetailViewProps = {
   tgDownloadLink?: string;
   siteDownloadEntries: NormalizedDownloadEntry[];
   locale: UiLocale;
+  flashMessage?: {
+    type: "success" | "error";
+    message: string;
+  };
   copy: {
     unverifiedTitle: string;
     unverifiedBody: string;
@@ -84,12 +90,44 @@ function getReviewStatusMeta(reviewStatus: ReviewStatus, copy: ContentDetailView
   }
 }
 
+function getReportCopy(locale: UiLocale) {
+  switch (locale) {
+    case "zh-CN":
+      return {
+        label: "回报问题",
+        hoverHint: "仅回报文件问题（例如图片损坏或下载链接失效）。"
+      };
+    case "ja":
+      return {
+        label: "問題を報告",
+        hoverHint: "ファイルの問題（画像の破損やダウンロードリンク切れなど）のみ報告してください。"
+      };
+    default:
+      return {
+        label: "Report Issue",
+        hoverHint: "Only report file issues (for example broken images or broken downloads)."
+      };
+  }
+}
+function buildContentDetailPath(locale: UiLocale, slug: string) {
+  if (locale === "zh-CN") {
+    return `/zh-CN/contents/${slug}`;
+  }
+
+  if (locale === "ja") {
+    return `/ja/contents/${slug}`;
+  }
+
+  return `/contents/${slug}`;
+}
+
 export function ContentDetailView({
   content,
   user,
   tgDownloadLink,
   siteDownloadEntries,
   locale,
+  flashMessage,
   copy
 }: ContentDetailViewProps) {
   const authors = content.contentTags.filter((item) => item.tag.type === "AUTHOR").map((item) => item.tag);
@@ -100,11 +138,17 @@ export function ContentDetailView({
   const types = content.contentTags.filter((item) => item.tag.type === "TYPE").map((item) => item.tag);
   const galleryImages = content.images.slice(1);
   const isStaff = user?.role === "ADMIN" || user?.role === "AUDIT";
+  const canReportIssue =
+    (user?.role === "MEMBER" || user?.role === "AUDIT" || user?.role === "ADMIN") &&
+    content.reviewStatus === ReviewStatus.PASSED;
   const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus, copy.reviewStatus);
   const description = content.description?.trim();
+  const detailPath = buildContentDetailPath(locale, content.slug);
+  const reportCopy = getReportCopy(locale);
 
   return (
     <div className="page-section grid">
+      {flashMessage ? <div className={`notice ${flashMessage.type}`}>{flashMessage.message}</div> : null}
       {content.reviewStatus === ReviewStatus.UNVERIFIED ? (
         <section className="verification-warning" aria-label={copy.unverifiedTitle}>
           <strong>{copy.unverifiedTitle}</strong>
@@ -113,17 +157,25 @@ export function ContentDetailView({
       ) : null}
       <div className="detail-layout">
         <section className="panel">
-          <img src={content.coverImageUrl} alt={content.title} className="card-image" loading="eager" decoding="sync" />
+          <Image
+            src={content.coverImageUrl}
+            alt={content.title}
+            className="card-image"
+            width={1600}
+            height={1200}
+            priority
+          />
           {galleryImages.length ? (
             <div className="grid" style={{ marginTop: 20 }}>
               {galleryImages.map((image, index) => (
-                <img
+                <Image
                   key={image.id}
                   src={image.imageUrl}
                   alt={content.title}
                   className="card-image"
-                  loading={index < 2 ? "eager" : "lazy"}
-                  decoding={index < 2 ? "sync" : "async"}
+                  width={1600}
+                  height={1200}
+                  priority={index < 2}
                 />
               ))}
             </div>
@@ -142,6 +194,16 @@ export function ContentDetailView({
           <div className="detail-status-row">
             <div className="status">{content.publishStatus}</div>
             {isStaff ? <div className={reviewStatusMeta.className}>{reviewStatusMeta.label}</div> : null}
+            {canReportIssue ? (
+              <form action={reportPassedContentIssueAction} className="report-issue-form">
+                <input type="hidden" name="contentId" value={content.id} />
+                <input type="hidden" name="issueType" value="fileIssue" />
+                <input type="hidden" name="redirectTo" value={detailPath} />
+                <button type="submit" className="link-pill" title={reportCopy.hoverHint}>
+                  {reportCopy.label}
+                </button>
+              </form>
+            ) : null}
           </div>
           {description ? <p className="muted">{description}</p> : null}
           {content.sourceLink ? (
@@ -204,3 +266,4 @@ export function ContentDetailView({
     </div>
   );
 }
+

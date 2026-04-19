@@ -397,9 +397,10 @@ export async function recordContentView(contentId: number) {
   });
 }
 
-export async function recordContentDownload(contentId: number) {
+export async function recordContentDownload(contentId: number, userId?: number | null) {
   const downloadedAt = new Date();
   const dayBucket = getTaipeiDayBucket(downloadedAt);
+  const isUserDownload = typeof userId === "number";
 
   await db.contentDownloadDaily.upsert({
     where: {
@@ -419,6 +420,44 @@ export async function recordContentDownload(contentId: number) {
       downloadCount: 1
     }
   });
+
+  await db.contentDownloadAudienceDaily.upsert({
+    where: {
+      audienceDate: dayBucket
+    },
+    update: isUserDownload
+      ? {
+          userDownloadCount: {
+            increment: 1
+          }
+        }
+      : {
+          guestDownloadCount: {
+            increment: 1
+          }
+        },
+    create: {
+      audienceDate: dayBucket,
+      userDownloadCount: isUserDownload ? 1 : 0,
+      guestDownloadCount: isUserDownload ? 0 : 1
+    }
+  });
+
+  try {
+    await db.contentDownloadEvent.create({
+      data: {
+        contentId,
+        userId: isUserDownload ? userId : null,
+        downloadedAt
+      }
+    });
+  } catch (error) {
+    console.error("Failed to write content download event", {
+      contentId,
+      userId: typeof userId === "number" ? userId : null,
+      error
+    });
+  }
 }
 
 export async function getContentViewAnalytics() {
@@ -544,7 +583,7 @@ export async function getContentDownloadAnalytics() {
   const dayBucket = getTaipeiDayBucket(now);
   const nextDayBucket = addUtcDays(dayBucket, 1);
 
-  const [totalDownloads, dayDownloads] = await Promise.all([
+  const [totalDownloads, dayDownloads, audienceTotals] = await Promise.all([
     db.contentDownloadDaily.aggregate({
       _sum: {
         downloadCount: true
@@ -560,12 +599,20 @@ export async function getContentDownloadAnalytics() {
           lt: nextDayBucket
         }
       }
+    }),
+    db.contentDownloadAudienceDaily.aggregate({
+      _sum: {
+        userDownloadCount: true,
+        guestDownloadCount: true
+      }
     })
   ]);
 
   return {
     totalDownloads: totalDownloads._sum.downloadCount ?? 0,
-    perDayDownloads: dayDownloads._sum.downloadCount ?? 0
+    perDayDownloads: dayDownloads._sum.downloadCount ?? 0,
+    userDownloads: audienceTotals._sum.userDownloadCount ?? 0,
+    guestDownloads: audienceTotals._sum.guestDownloadCount ?? 0
   };
 }
 
@@ -1129,6 +1176,8 @@ const ADMIN_CONTENT_PAGE_SELECT = {
   slug: true,
   publishStatus: true,
   reviewStatus: true,
+  memberReportOriginalSourceCount: true,
+  memberReportWebsiteDownloadCount: true,
   firstEditedAt: true,
   editedAt: true,
   firstEditedBy: {

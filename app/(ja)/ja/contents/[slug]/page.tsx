@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContentDetailView } from "@/components/content-detail-view";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -34,16 +34,21 @@ export async function generateMetadata({
 
   return {
     title: titleParts.join(" | "),
-    description: `KK Archive で ${content.title} を表示します。プレビュー画像、構造化タグ、元ソース情報、利用可能なダウンロードを確認できます。参考元: ${descriptionSource}。`
+    description: `KK Archiveで${content.title}を表示。プレビュー画像、構造化タグ、元ソース情報、利用可能なダウンロード先を確認できます。参考: ${descriptionSource}。`
   };
 }
 
 export default async function ContentDetailPageJa({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
+  const query = await searchParams;
+  const success = typeof query.success === "string" ? query.success : undefined;
+  const error = typeof query.error === "string" ? query.error : undefined;
   const user = await getCurrentSession({ touchActivity: false });
   const content = await getBrowsableContentBySlug(slug, Boolean(user));
 
@@ -64,9 +69,16 @@ export default async function ContentDetailPageJa({
       tgDownloadLink={tgDownloadLink}
       siteDownloadEntries={siteDownloadEntries}
       locale="ja"
+      flashMessage={
+        success
+          ? { type: "success", message: "報告を受け付けました。ありがとうございます。" }
+          : error
+            ? { type: "error", message: error }
+            : undefined
+      }
       copy={{
-        unverifiedTitle: "未確認コンテンツ",
-        unverifiedBody: "この投稿はまだ完全に確認されていません。タグやメタデータが不完全または不正確な場合があります。",
+        unverifiedTitle: "未検証コンテンツ",
+        unverifiedBody: "この投稿はまだ完全に確認されていません。タグやメタデータが不完全、または不正確な場合があります。",
         visibleContentEyebrow: "公開コンテンツ",
         edit: "編集",
         originalSource: "元ソース",
@@ -74,7 +86,7 @@ export default async function ContentDetailPageJa({
         telegramDownload: "TG ダウンロード",
         websiteDownload: "サイトダウンロード",
         websiteDownloads: (count) => `サイトダウンロード (${count})`,
-        type: "種類",
+        type: "タイプ",
         author: "作者",
         work: "作品",
         character: "キャラクター",
@@ -83,7 +95,7 @@ export default async function ContentDetailPageJa({
         reviewStatus: {
           edited: "編集済み",
           passed: "確認済み",
-          unverified: "未確認"
+          unverified: "未検証"
         }
       }}
     />

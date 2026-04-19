@@ -44,11 +44,16 @@ export async function generateMetadata({
 }
 
 export default async function ContentDetailPage({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
+  const query = await searchParams;
+  const success = typeof query.success === "string" ? query.success : undefined;
+  const error = typeof query.error === "string" ? query.error : undefined;
   const user = await getCurrentSession({ touchActivity: false });
   const content = await getBrowsableContentBySlug(slug, Boolean(user));
 
@@ -69,6 +74,13 @@ export default async function ContentDetailPage({
       tgDownloadLink={tgDownloadLink}
       siteDownloadEntries={siteDownloadEntries}
       locale="en"
+      flashMessage={
+        success
+          ? { type: "success", message: "Thanks. Your report has been submitted." }
+          : error
+            ? { type: "error", message: error }
+            : undefined
+      }
       copy={{
         unverifiedTitle: "Unverified Content",
         unverifiedBody: "This post has not been fully reviewed yet. Tags and metadata may still be incomplete or inaccurate.",

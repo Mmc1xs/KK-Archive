@@ -6,28 +6,68 @@ import { getSiteOrigin } from "@/lib/site-origin";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const siteOrigin = getSiteOrigin();
+  const localizedPrefixes = ["ja", "zh-CN"] as const;
 
-  const staticRoutes: MetadataRoute.Sitemap = [
+  const staticRouteEntries: Array<{
+    path: string;
+    changeFrequency: "daily" | "weekly" | "monthly" | "yearly";
+    priority: number;
+  }> = [
     {
-      url: `${siteOrigin}/`,
+      path: "/",
       changeFrequency: "daily",
       priority: 1
     },
     {
-      url: `${siteOrigin}/contents`,
+      path: "/contents",
       changeFrequency: "daily",
       priority: 0.9
     },
     {
-      url: `${siteOrigin}/search`,
+      path: "/search",
       changeFrequency: "daily",
       priority: 0.8
     },
     {
-      url: `${siteOrigin}/privacy`,
+      path: "/about",
+      changeFrequency: "monthly",
+      priority: 0.4
+    },
+    {
+      path: "/contact",
+      changeFrequency: "monthly",
+      priority: 0.4
+    },
+    {
+      path: "/terms",
+      changeFrequency: "monthly",
+      priority: 0.4
+    },
+    {
+      path: "/support",
+      changeFrequency: "monthly",
+      priority: 0.3
+    },
+    {
+      path: "/privacy",
       changeFrequency: "yearly",
       priority: 0.3
     }
+  ];
+
+  const staticRoutes: MetadataRoute.Sitemap = [
+    ...staticRouteEntries.map((route) => ({
+      url: `${siteOrigin}${route.path}`,
+      changeFrequency: route.changeFrequency,
+      priority: route.priority
+    })),
+    ...localizedPrefixes.flatMap((prefix) =>
+      staticRouteEntries.map((route) => ({
+        url: route.path === "/" ? `${siteOrigin}/${prefix}` : `${siteOrigin}/${prefix}${route.path}`,
+        changeFrequency: route.changeFrequency,
+        priority: route.priority
+      }))
+    )
   ];
 
   const publicContents = await db.content.findMany({

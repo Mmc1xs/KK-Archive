@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { clearHomepageHotTopicSlotAction, replaceHomepageHotTopicSlotAction } from "@/app/actions";
 import { requireAdmin } from "@/lib/auth/session";
@@ -99,10 +100,12 @@ export default async function AdminHomepagePage({
 
                 {content ? (
                   <div className="admin-homepage-slot-content">
-                    <img
+                    <Image
                       src={content.coverImageUrl}
                       alt={content.title}
                       className="admin-homepage-slot-image"
+                      width={1200}
+                      height={900}
                     />
                     <div className="admin-homepage-slot-copy">
                       <div className="eyebrow">Preview</div>
@@ -144,10 +147,12 @@ export default async function AdminHomepagePage({
           <div className="admin-homepage-picker-grid">
             {picker.items.map((content) => (
               <article key={content.id} className="admin-homepage-picker-card">
-                <img
+                <Image
                   src={content.coverImageUrl}
                   alt={content.title}
                   className="admin-homepage-picker-image"
+                  width={1200}
+                  height={900}
                 />
                 <div className="admin-homepage-picker-copy">
                   <strong>{content.title}</strong>

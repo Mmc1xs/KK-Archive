@@ -1,3 +1,4 @@
+﻿import Image from "next/image";
 import { buildContentHref } from "@/lib/content-href";
 import { ContentCardLink } from "@/components/content-card-link";
 import { type UiLocale } from "@/lib/ui-locale";
@@ -27,11 +28,11 @@ const localeLabels: Record<UiLocale, { unknown: string; unverified: string }> = 
   },
   "zh-CN": {
     unknown: "未知",
-    unverified: "未校验"
+    unverified: "未验证"
   },
   ja: {
     unknown: "不明",
-    unverified: "未確認"
+    unverified: "未検証"
   }
 };
 
@@ -43,7 +44,13 @@ export function ContentCard({ content, locale = "en" }: ContentCardProps) {
 
   return (
     <ContentCardLink href={contentHref} locale={locale}>
-      <img className="card-image" src={content.coverImageUrl} alt={content.title} />
+      <Image
+        className="card-image"
+        src={content.coverImageUrl}
+        alt={content.title}
+        width={1200}
+        height={900}
+      />
       <div className="card-body">
         <div className="eyebrow">{work}</div>
         <h3>{content.title}</h3>

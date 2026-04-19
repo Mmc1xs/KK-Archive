@@ -9,6 +9,9 @@ export default async function AdminViewsPage() {
     getContentViewAnalytics(),
     getContentDownloadAnalytics()
   ]);
+  const trackedDownloads = contentDownloads.userDownloads + contentDownloads.guestDownloads;
+  const userDownloadShare = trackedDownloads ? Math.round((contentDownloads.userDownloads / trackedDownloads) * 100) : 0;
+  const guestDownloadShare = trackedDownloads ? 100 - userDownloadShare : 0;
 
   return (
     <div className="page-section grid admin-dashboard-grid">
@@ -63,6 +66,11 @@ export default async function AdminViewsPage() {
             <span className="eyebrow">Today Downloads</span>
             <strong>{contentDownloads.perDayDownloads}</strong>
             <small>Total website download opens recorded for today, excluding TG links</small>
+          </article>
+          <article className="admin-stat-card">
+            <span className="eyebrow">User : Guest Downloads</span>
+            <strong>{`${contentDownloads.userDownloads} : ${contentDownloads.guestDownloads}`}</strong>
+            <small>{`Share ${userDownloadShare}% : ${guestDownloadShare}% from tracked website downloads since audience tracking started`}</small>
           </article>
           <article className="admin-stat-card">
             <span className="eyebrow">Viewed Posts</span>

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContentDetailView } from "@/components/content-detail-view";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -17,7 +17,7 @@ export async function generateMetadata({
 
   if (!content) {
     return {
-      title: "内容不存在 | KK Archive"
+      title: "未找到内容 | KK Archive"
     };
   }
 
@@ -34,16 +34,21 @@ export async function generateMetadata({
 
   return {
     title: titleParts.join(" | "),
-    description: `在 KK Archive 查看 ${content.title}，包含预览图、结构化标签、原始来源与可用下载方式。来源参考：${descriptionSource}。`
+    description: `在 KK Archive 查看 ${content.title}，包含预览图、结构化标签、原始来源与可用下载链接。参考来源：${descriptionSource}。`
   };
 }
 
 export default async function ContentDetailPageZhCn({
-  params
+  params,
+  searchParams
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
+  const query = await searchParams;
+  const success = typeof query.success === "string" ? query.success : undefined;
+  const error = typeof query.error === "string" ? query.error : undefined;
   const user = await getCurrentSession({ touchActivity: false });
   const content = await getBrowsableContentBySlug(slug, Boolean(user));
 
@@ -64,9 +69,16 @@ export default async function ContentDetailPageZhCn({
       tgDownloadLink={tgDownloadLink}
       siteDownloadEntries={siteDownloadEntries}
       locale="zh-CN"
+      flashMessage={
+        success
+          ? { type: "success", message: "已收到你的回报，感谢反馈。" }
+          : error
+            ? { type: "error", message: error }
+            : undefined
+      }
       copy={{
-        unverifiedTitle: "未校验内容",
-        unverifiedBody: "这篇帖子尚未完成校对，标签与元数据可能仍不完整或不准确。",
+        unverifiedTitle: "未验证内容",
+        unverifiedBody: "这篇内容尚未完成完整审核，标签或元数据可能仍不完整或不准确。",
         visibleContentEyebrow: "公开内容",
         edit: "编辑",
         originalSource: "原始来源",
@@ -83,7 +95,7 @@ export default async function ContentDetailPageZhCn({
         reviewStatus: {
           edited: "已编辑",
           passed: "已通过",
-          unverified: "未校验"
+          unverified: "未验证"
         }
       }}
     />

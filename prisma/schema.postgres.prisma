@@ -57,6 +57,8 @@ model User {
   editedContents      Content[] @relation("ContentEditedBy")
   firstEditedContents Content[] @relation("ContentFirstEditedBy")
   passedContents      Content[] @relation("ContentPassedBy")
+  contentIssueReports ContentIssueReport[]
+  contentDownloadEvents ContentDownloadEvent[]
   staffUploads        StaffUpload[] @relation("StaffUploadUploader")
   uploadedHostedFiles ContentFile[] @relation("ContentFileUploadedBy")
   ignoredSiteDownloadDemos ContentSiteDownloadDemo[] @relation("ContentSiteDownloadDemoIgnoredBy")
@@ -93,6 +95,8 @@ model Content {
   firstEditedAt DateTime?             @map("first_edited_at")
   passedByUserId Int?                 @map("passed_by_user_id")
   passedAt      DateTime?             @map("passed_at")
+  memberReportOriginalSourceCount Int @default(0) @map("member_report_original_source_count")
+  memberReportWebsiteDownloadCount Int @default(0) @map("member_report_website_download_count")
   viewCount     Int                   @default(0) @map("view_count")
   lastViewedAt  DateTime?             @map("last_viewed_at")
   publishStatus PublishStatus         @default(DRAFT) @map("publish_status")
@@ -109,6 +113,8 @@ model Content {
   contentTags   ContentTag[]
   dailyViews    ContentViewDaily[]
   dailyDownloads ContentDownloadDaily[]
+  downloadEvents ContentDownloadEvent[]
+  issueReports   ContentIssueReport[]
   hotTopicSlots HomepageHotTopicSlot[]
 
   @@index([publishStatus, createdAt])
@@ -142,6 +148,45 @@ model ContentDownloadDaily {
   @@index([downloadDate])
   @@index([downloadDate, downloadCount])
   @@map("content_download_daily")
+}
+
+model ContentDownloadAudienceDaily {
+  audienceDate       DateTime @id @map("audience_date")
+  userDownloadCount  Int      @default(0) @map("user_download_count")
+  guestDownloadCount Int      @default(0) @map("guest_download_count")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  @@index([audienceDate])
+  @@map("content_download_audience_daily")
+}
+
+model ContentDownloadEvent {
+  id           Int      @id @default(autoincrement())
+  contentId    Int      @map("content_id")
+  userId       Int?     @map("user_id")
+  downloadedAt DateTime @default(now()) @map("downloaded_at")
+  content      Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([contentId, downloadedAt])
+  @@index([userId, downloadedAt])
+  @@index([downloadedAt])
+  @@map("content_download_events")
+}
+
+model ContentIssueReport {
+  id        Int      @id @default(autoincrement())
+  contentId Int      @map("content_id")
+  userId    Int      @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  content   Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([contentId, userId])
+  @@index([contentId, createdAt])
+  @@index([userId, createdAt])
+  @@map("content_issue_reports")
 }
 
 model HomepageHotTopicSlot {

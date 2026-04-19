@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ReviewStatus } from "@prisma/client";
-import { deleteContentAction } from "@/app/actions";
+import { clearContentIssueReportsAction, deleteContentAction, reportPassedContentIssueAction } from "@/app/actions";
 import { requireStaff } from "@/lib/auth/session";
 import { buildContentHref } from "@/lib/content-href";
 import { getAdminContentsPage } from "@/lib/content";
@@ -176,6 +176,7 @@ export default async function AdminContentsPage({
             <th>Slug</th>
             <th>Status</th>
             <th>Review</th>
+            <th>Reports</th>
             <th>Actions</th>
             <th>First Edited By</th>
           </tr>
@@ -185,6 +186,8 @@ export default async function AdminContentsPage({
             const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus);
             const displayEditedBy = content.firstEditedBy ?? content.editedBy;
             const displayEditedAt = content.firstEditedAt ?? content.editedAt;
+            const totalReportCount =
+              content.memberReportOriginalSourceCount + content.memberReportWebsiteDownloadCount;
 
             return (
               <tr key={content.id}>
@@ -197,6 +200,36 @@ export default async function AdminContentsPage({
                 <td>{content.publishStatus}</td>
                 <td>
                   <span className={reviewStatusMeta.className}>{reviewStatusMeta.label}</span>
+                </td>
+                <td>
+                  <div className="admin-content-report-cell">
+                    <span className={totalReportCount > 0 ? "status status-unverified" : "status"}>{`Total ${totalReportCount}`}</span>
+                    {content.reviewStatus === ReviewStatus.PASSED ? (
+                      <form action={reportPassedContentIssueAction}>
+                        <input type="hidden" name="contentId" value={content.id} />
+                        <input type="hidden" name="issueType" value="fileIssue" />
+                        <input type="hidden" name="redirectTo" value={redirectTo} />
+                        <button
+                          type="submit"
+                          className="link-pill"
+                          title="Only use this when downloadable files or images are broken."
+                        >
+                          Report Issue
+                        </button>
+                      </form>
+                    ) : (
+                      <small className="muted">Reporting is only available for passed content.</small>
+                    )}
+                    {totalReportCount > 0 ? (
+                      <form action={clearContentIssueReportsAction}>
+                        <input type="hidden" name="contentId" value={content.id} />
+                        <input type="hidden" name="redirectTo" value={redirectTo} />
+                        <button type="submit" className="link-pill">
+                          Clear Reports
+                        </button>
+                      </form>
+                    ) : null}
+                  </div>
                 </td>
                 <td>
                   <div className="inline-actions">

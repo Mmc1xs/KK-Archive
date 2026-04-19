@@ -17,6 +17,9 @@ Build a maintainable image browsing website with structured tag-based search.
 - Use server-side validation for admin actions.
 - Keep admin routes protected by role checks.
 - Avoid unnecessary abstractions.
+- Keep all user-facing locale strings in valid UTF-8 source text and preserve each language's exact wording when editing multilingual UI.
+- Never leave mojibake, partial corruption, or mixed-language fallback text in locale labels, nav menus, or translated buttons.
+- After changing multilingual UI text, verify the edited strings compile cleanly and render correctly in the target locale before moving on.
 
 ## Performance & Security guardrails
 - Keep public pages cache-friendly; do not make the entire app dynamic just to read session state.
