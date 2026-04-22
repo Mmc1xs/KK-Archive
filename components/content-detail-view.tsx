@@ -157,26 +157,29 @@ export function ContentDetailView({
       ) : null}
       <div className="detail-layout">
         <section className="panel">
-          <Image
-            src={content.coverImageUrl}
-            alt={content.title}
-            className="card-image"
-            width={1600}
-            height={1200}
-            priority
-          />
+          <div className="detail-image-media">
+            <Image
+              src={content.coverImageUrl}
+              alt={content.title}
+              className="detail-image"
+              fill
+              sizes="(max-width: 860px) 100vw, 50vw"
+              priority
+            />
+          </div>
           {galleryImages.length ? (
             <div className="grid" style={{ marginTop: 20 }}>
               {galleryImages.map((image, index) => (
-                <Image
-                  key={image.id}
-                  src={image.imageUrl}
-                  alt={content.title}
-                  className="card-image"
-                  width={1600}
-                  height={1200}
-                  priority={index < 2}
-                />
+                <div key={image.id} className="detail-image-media">
+                  <Image
+                    src={image.imageUrl}
+                    alt={content.title}
+                    className="detail-image"
+                    fill
+                    sizes="(max-width: 860px) 100vw, 50vw"
+                    priority={index < 2}
+                  />
+                </div>
               ))}
             </div>
           ) : null}
