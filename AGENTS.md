@@ -27,6 +27,7 @@ Build a maintainable image browsing website with structured tag-based search.
 - Add and maintain database indexes for frequent filters/sorts (especially foreign key + sort order patterns).
 - Keep search/filter APIs lightweight and cache-aware; avoid unnecessary repeated requests.
 - Prefer deployment/runtime regions close to the primary database region.
+- Keep Next.js image optimizer globally disabled (`next.config.ts` -> `images.unoptimized: true`) unless the owner explicitly approves re-enabling it after a cost review.
 - Never expose raw private storage credentials; member downloads should use controlled server-issued links/tokens.
 - Set explicit cache policies for static storage assets (such as images) when object names are immutable.
 - Track route-level latency (TTFB/total time) and optimize bottlenecks before adding new heavy features.
@@ -38,6 +39,7 @@ Build a maintainable image browsing website with structured tag-based search.
 - If Prisma client initialization breaks locally, restore it in the main workspace with `npm install` and `npx prisma generate` before doing anything else.
 
 ## Pre-commit / Pre-push verification
+- Run `npm run guard:image-cost` before every push; do not push when this check fails.
 - Never commit or push only on the basis of `tsc`, build success, or local reasoning when the change affects a user flow.
 - Before commit/push, re-test every changed flow end-to-end in the real UI or route it affects, and confirm there is no visible bug, stuck state, hydration warning, invalid validation message, or silent partial failure.
 - If a change touches content editing, always verify all of these on a real content record:

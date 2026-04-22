@@ -76,6 +76,7 @@ This file is for fresh Codex sessions that need to understand the project quickl
 
 - Dev server: `npm run dev`
 - Build: `npm run build`
+- Image cost guardrail: `npm run guard:image-cost`
 - Incremental sync: `npm run sync:new`
 - Full sync: `npm run sync:all`
 - R2 only: `npm run r2:upload-clean:new`

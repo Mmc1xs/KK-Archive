@@ -8,6 +8,7 @@
     "build:postgres": "npm run db:use:postgres && prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
+    "guard:image-cost": "node scripts/check-image-cost-guardrails.mjs",
     "db:use:sqlite": "tsx scripts/set-prisma-runtime.ts sqlite",
     "db:use:postgres": "tsx scripts/set-prisma-runtime.ts postgres",
     "db:generate": "prisma generate",
