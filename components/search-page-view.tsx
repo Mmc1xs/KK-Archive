@@ -1,4 +1,3 @@
-import { Fragment } from "react";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { ExoClickZone } from "@/components/exoclick-zone";
@@ -118,7 +117,6 @@ export function SearchPageView({
 }: SearchPageViewProps) {
   const searchHref = getLocaleSearchHref(locale);
   const hasSearchAdZone = Boolean(EXOCLICK_SEARCH_ZONE_ID && EXOCLICK_SEARCH_ZONE_CLASS);
-  const adInsertIndex = 3;
 
   return (
     <div className="page-section search-layout">
@@ -148,29 +146,9 @@ export function SearchPageView({
         </div>
 
         <div className="grid content-grid search-results-grid">
-          {resultsPage.items.map((content, index) => (
-            <Fragment key={content.id}>
-              <ContentCard content={content} locale={locale} />
-              {hasSearchAdZone && index === adInsertIndex ? (
-                <div className="search-results-ad-slot">
-                  <ExoClickZone
-                    className="search-results-ad-inner"
-                    zoneId={EXOCLICK_SEARCH_ZONE_ID}
-                    zoneClassName={EXOCLICK_SEARCH_ZONE_CLASS}
-                  />
-                </div>
-              ) : null}
-            </Fragment>
+          {resultsPage.items.map((content) => (
+            <ContentCard key={content.id} content={content} locale={locale} />
           ))}
-          {hasSearchAdZone && resultsPage.items.length > 0 && resultsPage.items.length <= adInsertIndex ? (
-            <div className="search-results-ad-slot">
-              <ExoClickZone
-                className="search-results-ad-inner"
-                zoneId={EXOCLICK_SEARCH_ZONE_ID}
-                zoneClassName={EXOCLICK_SEARCH_ZONE_CLASS}
-              />
-            </div>
-          ) : null}
         </div>
 
         {resultsPage.hasPrevious || resultsPage.hasNext ? (
@@ -208,6 +186,16 @@ export function SearchPageView({
               {copy.next}
             </Link>
           </nav>
+        ) : null}
+
+        {hasSearchAdZone && resultsPage.items.length >= 8 ? (
+          <div className="search-results-ad-slot">
+            <ExoClickZone
+              className="search-results-ad-inner"
+              zoneId={EXOCLICK_SEARCH_ZONE_ID}
+              zoneClassName={EXOCLICK_SEARCH_ZONE_CLASS}
+            />
+          </div>
         ) : null}
       </section>
     </div>

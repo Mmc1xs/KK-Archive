@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { ExoClickPopunder } from "@/components/exoclick-popunder";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { SiteFooterClient } from "@/components/site-footer-client";
 import { SiteNavClient } from "@/components/site-nav-client";
@@ -13,6 +14,7 @@ export function SiteLayoutFrame({ children }: Readonly<{ children: React.ReactNo
           <GoogleAnalytics measurementId={gaMeasurementId} />
         </Suspense>
       ) : null}
+      <ExoClickPopunder />
       <header className="site-header">
         <div className="shell">
           <nav className="site-nav" style={{ position: "relative", zIndex: 60, overflow: "visible" }}>

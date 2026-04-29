@@ -229,7 +229,12 @@ export function ContentDetailView({
                   </a>
                 ) : null}
                 {siteDownloadEntries.length === 1 ? (
-                  <a href={siteDownloadEntries[0].url} target="_blank" rel="noreferrer" className="link-pill">
+                  <a
+                    href={siteDownloadEntries[0].url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link-pill exo-download-trigger"
+                  >
                     {copy.websiteDownload}
                   </a>
                 ) : null}
@@ -245,7 +250,7 @@ export function ContentDetailView({
                           href={entry.url}
                           target="_blank"
                           rel="noreferrer"
-                          className="download-menu-item"
+                          className="download-menu-item exo-download-trigger"
                         >
                           {entry.label}
                         </a>
