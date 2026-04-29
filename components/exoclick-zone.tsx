@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type AdProviderCommand = {
   serve: Record<string, never>;
@@ -71,14 +71,60 @@ type ExoClickZoneProps = {
   zoneId: string;
   zoneClassName: string;
   className?: string;
+  noFillTimeoutMs?: number;
 };
 
-export function ExoClickZone({ zoneId, zoneClassName, className }: ExoClickZoneProps) {
+export function ExoClickZone({
+  zoneId,
+  zoneClassName,
+  className,
+  noFillTimeoutMs = 4500
+}: ExoClickZoneProps) {
   const loadedRef = useRef(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const insRef = useRef<HTMLModElement | null>(null);
+  const [status, setStatus] = useState<"loading" | "filled" | "empty">("loading");
 
   useEffect(() => {
     let cancelled = false;
+    let noFillTimer: ReturnType<typeof setTimeout> | null = null;
+    let observer: MutationObserver | null = null;
+
+    const hasRenderableAd = () => {
+      const container = containerRef.current;
+      const ins = insRef.current;
+      if (!container || !ins) {
+        return false;
+      }
+
+      // ExoClick async banner usually injects iframe/content into the ins container.
+      if (ins.childElementCount > 0) {
+        return true;
+      }
+
+      if ((ins.textContent || "").trim().length > 0) {
+        return true;
+      }
+
+      if (container.querySelector("iframe, video, object, embed, img")) {
+        return true;
+      }
+
+      return false;
+    };
+
+    const markFilledIfReady = () => {
+      if (cancelled) {
+        return;
+      }
+      if (hasRenderableAd()) {
+        setStatus((prev) => (prev === "filled" ? prev : "filled"));
+        if (noFillTimer) {
+          clearTimeout(noFillTimer);
+          noFillTimer = null;
+        }
+      }
+    };
 
     async function requestAd() {
       if (loadedRef.current || !containerRef.current) {
@@ -94,8 +140,26 @@ export function ExoClickZone({ zoneId, zoneClassName, className }: ExoClickZoneP
       try {
         (window.AdProvider = window.AdProvider || []).push({ serve: {} });
         loadedRef.current = true;
+        setStatus("loading");
+        markFilledIfReady();
+
+        observer = new MutationObserver(() => {
+          markFilledIfReady();
+        });
+        observer.observe(containerRef.current, {
+          childList: true,
+          subtree: true,
+          attributes: true
+        });
+
+        noFillTimer = setTimeout(() => {
+          if (!cancelled && !hasRenderableAd()) {
+            setStatus("empty");
+          }
+        }, noFillTimeoutMs);
       } catch {
         loadedRef.current = false;
+        setStatus("empty");
       }
     }
 
@@ -103,12 +167,24 @@ export function ExoClickZone({ zoneId, zoneClassName, className }: ExoClickZoneP
 
     return () => {
       cancelled = true;
+      if (observer) {
+        observer.disconnect();
+      }
+      if (noFillTimer) {
+        clearTimeout(noFillTimer);
+      }
     };
-  }, [zoneId]);
+  }, [noFillTimeoutMs, zoneId]);
+
+  if (status === "empty") {
+    return null;
+  }
+
+  const combinedClassName = `${className ?? ""} ${status === "filled" ? "is-filled" : "is-loading"}`.trim();
 
   return (
-    <div ref={containerRef} className={className}>
-      <ins className={zoneClassName} data-zoneid={zoneId} />
+    <div ref={containerRef} className={combinedClassName}>
+      <ins ref={insRef} className={zoneClassName} data-zoneid={zoneId} />
     </div>
   );
 }
