@@ -1,5 +1,7 @@
+import { Fragment } from "react";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
+import { ExoClickZone } from "@/components/exoclick-zone";
 import { SearchFilters, type SearchFiltersLabels } from "@/components/search-filters";
 import { getLocaleSearchHref, type UiLocale } from "@/lib/ui-locale";
 
@@ -64,6 +66,9 @@ type SearchPageViewProps = {
   };
 };
 
+const EXOCLICK_SEARCH_ZONE_ID = process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_BANNER_ZONE_ID?.trim() || "5913272";
+const EXOCLICK_SEARCH_ZONE_CLASS = process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_BANNER_CLASS?.trim() || "ea56a97888e2";
+
 function buildSearchHref(locale: UiLocale, options: {
   page: number;
   author?: string;
@@ -112,6 +117,8 @@ export function SearchPageView({
   copy
 }: SearchPageViewProps) {
   const searchHref = getLocaleSearchHref(locale);
+  const hasSearchAdZone = Boolean(EXOCLICK_SEARCH_ZONE_ID && EXOCLICK_SEARCH_ZONE_CLASS);
+  const adInsertIndex = 3;
 
   return (
     <div className="page-section search-layout">
@@ -141,9 +148,29 @@ export function SearchPageView({
         </div>
 
         <div className="grid content-grid search-results-grid">
-          {resultsPage.items.map((content) => (
-            <ContentCard key={content.id} content={content} locale={locale} />
+          {resultsPage.items.map((content, index) => (
+            <Fragment key={content.id}>
+              <ContentCard content={content} locale={locale} />
+              {hasSearchAdZone && index === adInsertIndex ? (
+                <div className="search-results-ad-slot">
+                  <ExoClickZone
+                    className="search-results-ad-inner"
+                    zoneId={EXOCLICK_SEARCH_ZONE_ID}
+                    zoneClassName={EXOCLICK_SEARCH_ZONE_CLASS}
+                  />
+                </div>
+              ) : null}
+            </Fragment>
           ))}
+          {hasSearchAdZone && resultsPage.items.length > 0 && resultsPage.items.length <= adInsertIndex ? (
+            <div className="search-results-ad-slot">
+              <ExoClickZone
+                className="search-results-ad-inner"
+                zoneId={EXOCLICK_SEARCH_ZONE_ID}
+                zoneClassName={EXOCLICK_SEARCH_ZONE_CLASS}
+              />
+            </div>
+          ) : null}
         </div>
 
         {resultsPage.hasPrevious || resultsPage.hasNext ? (
