@@ -65,8 +65,10 @@ type SearchPageViewProps = {
   };
 };
 
-const EXOCLICK_SEARCH_ZONE_ID = process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_BANNER_ZONE_ID?.trim() || "5913272";
-const EXOCLICK_SEARCH_ZONE_CLASS = process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_BANNER_CLASS?.trim() || "ea56a97888e2";
+const EXOCLICK_SEARCH_LEADERBOARD_ZONE_ID = process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_LEADERBOARD_ZONE_ID?.trim() || "";
+const EXOCLICK_SEARCH_LEADERBOARD_CLASS = process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_LEADERBOARD_CLASS?.trim() || "";
+const EXOCLICK_SEARCH_BANNER_ZONE_ID = process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_BANNER_ZONE_ID?.trim() || "5913272";
+const EXOCLICK_SEARCH_BANNER_CLASS = process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_BANNER_CLASS?.trim() || "ea56a97888e2";
 
 function buildSearchHref(locale: UiLocale, options: {
   page: number;
@@ -116,7 +118,13 @@ export function SearchPageView({
   copy
 }: SearchPageViewProps) {
   const searchHref = getLocaleSearchHref(locale);
-  const hasSearchAdZone = Boolean(EXOCLICK_SEARCH_ZONE_ID && EXOCLICK_SEARCH_ZONE_CLASS);
+  const isUsingLeaderboard = Boolean(EXOCLICK_SEARCH_LEADERBOARD_ZONE_ID && EXOCLICK_SEARCH_LEADERBOARD_CLASS);
+  const exoSearchZoneId = isUsingLeaderboard ? EXOCLICK_SEARCH_LEADERBOARD_ZONE_ID : EXOCLICK_SEARCH_BANNER_ZONE_ID;
+  const exoSearchZoneClass = isUsingLeaderboard ? EXOCLICK_SEARCH_LEADERBOARD_CLASS : EXOCLICK_SEARCH_BANNER_CLASS;
+  const searchAdInnerClass = isUsingLeaderboard
+    ? "search-results-ad-inner search-results-ad-inner--leaderboard"
+    : "search-results-ad-inner search-results-ad-inner--rectangle";
+  const hasSearchAdZone = Boolean(exoSearchZoneId && exoSearchZoneClass);
 
   return (
     <div className="page-section search-layout">
@@ -190,11 +198,7 @@ export function SearchPageView({
 
         {hasSearchAdZone && resultsPage.items.length >= 8 ? (
           <div className="search-results-ad-slot">
-            <ExoClickZone
-              className="search-results-ad-inner"
-              zoneId={EXOCLICK_SEARCH_ZONE_ID}
-              zoneClassName={EXOCLICK_SEARCH_ZONE_CLASS}
-            />
+            <ExoClickZone className={searchAdInnerClass} zoneId={exoSearchZoneId} zoneClassName={exoSearchZoneClass} />
           </div>
         ) : null}
       </section>
