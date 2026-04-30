@@ -12,7 +12,7 @@ export default function ContactPageZhCn() {
         },
         {
           title: "版权与下架请求",
-          body: "若需移除特定内容，请附上受影响页面 URL、权利证明及明确请求说明，便于我们正确处理。"
+          body: "若需移除特定内容，请附上受影响页面 URL、权利证明及明确请求说明，便于我们正确处理。也可参考页脚中的 DMCA 下架政策页面。"
         },
         {
           title: "账号与安全反馈",

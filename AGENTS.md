@@ -28,6 +28,7 @@ Build a maintainable image browsing website with structured tag-based search.
 - Keep search/filter APIs lightweight and cache-aware; avoid unnecessary repeated requests.
 - Prefer deployment/runtime regions close to the primary database region.
 - Keep Next.js image optimizer globally disabled (`next.config.ts` -> `images.unoptimized: true`) unless the owner explicitly approves re-enabling it after a cost review.
+- For split posts, always upload/relocate each post image to its own slug-scoped object path (`contents/<content-slug>/<file>`), then update DB image URLs to that slug path; never leave split posts sharing the old source folder path.
 - Never expose raw private storage credentials; member downloads should use controlled server-issued links/tokens.
 - Set explicit cache policies for static storage assets (such as images) when object names are immutable.
 - Track route-level latency (TTFB/total time) and optimize bottlenecks before adding new heavy features.

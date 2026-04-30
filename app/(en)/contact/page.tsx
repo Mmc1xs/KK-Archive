@@ -12,7 +12,7 @@ export default function ContactPage() {
         },
         {
           title: "Copyright and Takedown",
-          body: "If you need removal of specific content, include affected page URLs, proof of rights, and the exact request details so we can process it correctly."
+          body: "If you need removal of specific content, include affected page URLs, proof of rights, and the exact request details so we can process it correctly. You can also follow the dedicated DMCA Policy page in the footer."
         },
         {
           title: "Account and Security Reports",

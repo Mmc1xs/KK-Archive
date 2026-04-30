@@ -6,6 +6,8 @@ import { buildContentHref } from "@/lib/content-href";
 import { getAdminContentsPage } from "@/lib/content";
 
 const PAGE_SIZE_OPTIONS = [20, 50, 100] as const;
+type AdminReviewFilter = "all" | "unverified" | "edited" | "passed";
+type AdminPublishFilter = "all" | "compliance-rejected";
 
 function buildPagination(totalPages: number, currentPage: number) {
   if (totalPages <= 7) {
@@ -40,7 +42,8 @@ function buildPagination(totalPages: number, currentPage: number) {
 }
 
 function buildAdminContentsHref(
-  review: "all" | "unverified" | "edited" | "passed",
+  review: AdminReviewFilter,
+  publish: AdminPublishFilter,
   page: number,
   pageSize: number
 ) {
@@ -48,6 +51,10 @@ function buildAdminContentsHref(
 
   if (review !== "all") {
     params.set("review", review);
+  }
+
+  if (publish !== "all") {
+    params.set("publish", publish);
   }
 
   if (page > 1) {
@@ -84,19 +91,24 @@ export default async function AdminContentsPage({
   const error = typeof params.error === "string" ? params.error : undefined;
   const review =
     typeof params.review === "string" && ["all", "unverified", "edited", "passed"].includes(params.review)
-      ? (params.review as "all" | "unverified" | "edited" | "passed")
+      ? (params.review as AdminReviewFilter)
+      : "all";
+  const publish =
+    typeof params.publish === "string" && ["all", "compliance-rejected"].includes(params.publish)
+      ? (params.publish as AdminPublishFilter)
       : "all";
   const pageParam = typeof params.page === "string" ? Number(params.page) : 1;
   const pageSizeParam = typeof params.pageSize === "string" ? Number(params.pageSize) : 20;
   const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
   const currentPageSize = PAGE_SIZE_OPTIONS.includes(pageSizeParam as 20 | 50 | 100) ? pageSizeParam : 20;
-  const { items: contents, totalPages, totalCount, reviewCounts } = await getAdminContentsPage({
+  const { items: contents, totalPages, totalCount, reviewCounts, publishCounts } = await getAdminContentsPage({
     reviewStatus: review,
+    publishStatus: publish,
     page: currentPage,
     pageSize: currentPageSize,
     viewerRole: staff.role
   });
-  const redirectTo = buildAdminContentsHref(review, currentPage, currentPageSize);
+  const redirectTo = buildAdminContentsHref(review, publish, currentPage, currentPageSize);
   const paginationItems = buildPagination(totalPages, currentPage);
 
   return (
@@ -106,23 +118,26 @@ export default async function AdminContentsPage({
           <div className="eyebrow">Admin Contents</div>
           <h1 className="title-lg">Manage Contents</h1>
           <div className="inline-actions">
-            <Link href={buildAdminContentsHref("all", 1, currentPageSize)} className={review === "all" ? "button secondary" : "link-pill"}>
+            <Link
+              href={buildAdminContentsHref("all", publish, 1, currentPageSize)}
+              className={review === "all" ? "button secondary" : "link-pill"}
+            >
               All
             </Link>
             <Link
-              href={buildAdminContentsHref("unverified", 1, currentPageSize)}
+              href={buildAdminContentsHref("unverified", publish, 1, currentPageSize)}
               className={review === "unverified" ? "button secondary" : "link-pill"}
             >
               Unverified
             </Link>
             <Link
-              href={buildAdminContentsHref("edited", 1, currentPageSize)}
+              href={buildAdminContentsHref("edited", publish, 1, currentPageSize)}
               className={review === "edited" ? "button secondary" : "link-pill"}
             >
               Edited
             </Link>
             <Link
-              href={buildAdminContentsHref("passed", 1, currentPageSize)}
+              href={buildAdminContentsHref("passed", publish, 1, currentPageSize)}
               className={review === "passed" ? "button secondary" : "link-pill"}
             >
               Passed
@@ -132,7 +147,7 @@ export default async function AdminContentsPage({
           <div className="admin-contents-toolbar">
             <div className="admin-contents-review-stats">
               <Link
-                href="/admin/contents?review=unverified"
+                href={buildAdminContentsHref("unverified", publish, 1, currentPageSize)}
                 className={review === "unverified" ? "admin-stat-card admin-review-stat admin-review-stat-active" : "admin-stat-card admin-review-stat"}
               >
                 <span className="eyebrow">Unverified</span>
@@ -140,7 +155,7 @@ export default async function AdminContentsPage({
                 <small>Waiting for audit handling</small>
               </Link>
               <Link
-                href="/admin/contents?review=edited"
+                href={buildAdminContentsHref("edited", publish, 1, currentPageSize)}
                 className={review === "edited" ? "admin-stat-card admin-review-stat admin-review-stat-active" : "admin-stat-card admin-review-stat"}
               >
                 <span className="eyebrow">Edited</span>
@@ -148,12 +163,28 @@ export default async function AdminContentsPage({
                 <small>Reviewed by audit staff</small>
               </Link>
               <Link
-                href="/admin/contents?review=passed"
+                href={buildAdminContentsHref("passed", publish, 1, currentPageSize)}
                 className={review === "passed" ? "admin-stat-card admin-review-stat admin-review-stat-active" : "admin-stat-card admin-review-stat"}
               >
                 <span className="eyebrow">Passed</span>
                 <strong>{reviewCounts.passed}</strong>
                 <small>Approved by admin</small>
+              </Link>
+              <Link
+                href={
+                  publish === "compliance-rejected"
+                    ? buildAdminContentsHref(review, "all", 1, currentPageSize)
+                    : buildAdminContentsHref(review, "compliance-rejected", 1, currentPageSize)
+                }
+                className={
+                  publish === "compliance-rejected"
+                    ? "admin-stat-card admin-review-stat admin-review-stat-active"
+                    : "admin-stat-card admin-review-stat"
+                }
+              >
+                <span className="eyebrow">Compliance Rejected</span>
+                <strong>{publishCounts.complianceRejected}</strong>
+                <small>{publish === "compliance-rejected" ? "Click to clear this filter" : "Blocked by compliance review"}</small>
               </Link>
             </div>
         {staff.role === "ADMIN" ? (
@@ -166,7 +197,7 @@ export default async function AdminContentsPage({
       {success ? <div className="notice">{success}</div> : null}
       {error ? <div className="notice">{error}</div> : null}
       <div className="split">
-        <p className="muted">Status rules: `PUBLISHED` is public, `SUMMIT` is visible to logged-in users, `DRAFT` stays admin-only, and `INVISIBLE` is hidden from all frontend pages.</p>
+        <p className="muted">Status rules: `PUBLISHED` is public, `SUMMIT` is visible to logged-in users, `DRAFT` stays admin-only, `COMPLIANCE_REJECTED` is blocked by compliance, and `INVISIBLE` is hidden from all frontend pages.</p>
         <div className="status">{`Page ${currentPage} / ${totalPages} - ${totalCount} posts`}</div>
       </div>
       <table className="table">
@@ -262,7 +293,7 @@ export default async function AdminContentsPage({
       {totalPages > 1 ? (
         <nav className="pagination-nav" aria-label="Admin contents pagination">
           <Link
-            href={buildAdminContentsHref(review, currentPage > 1 ? currentPage - 1 : 1, currentPageSize)}
+            href={buildAdminContentsHref(review, publish, currentPage > 1 ? currentPage - 1 : 1, currentPageSize)}
             className={currentPage > 1 ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
             aria-disabled={currentPage <= 1}
           >
@@ -277,7 +308,7 @@ export default async function AdminContentsPage({
               ) : (
                 <Link
                   key={item}
-                  href={buildAdminContentsHref(review, item, currentPageSize)}
+                  href={buildAdminContentsHref(review, publish, item, currentPageSize)}
                   className={item === currentPage ? "button secondary pagination-page-current" : "link-pill pagination-page"}
                   aria-current={item === currentPage ? "page" : undefined}
                 >
@@ -289,7 +320,7 @@ export default async function AdminContentsPage({
               {PAGE_SIZE_OPTIONS.map((size) => (
                 <Link
                   key={size}
-                  href={buildAdminContentsHref(review, 1, size)}
+                  href={buildAdminContentsHref(review, publish, 1, size)}
                   className={size === currentPageSize ? "button secondary pagination-page-current" : "link-pill pagination-page"}
                 >
                   {size} / page
@@ -298,7 +329,7 @@ export default async function AdminContentsPage({
             </div>
           </div>
           <Link
-            href={buildAdminContentsHref(review, currentPage < totalPages ? currentPage + 1 : totalPages, currentPageSize)}
+            href={buildAdminContentsHref(review, publish, currentPage < totalPages ? currentPage + 1 : totalPages, currentPageSize)}
             className={currentPage < totalPages ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
             aria-disabled={currentPage >= totalPages}
           >

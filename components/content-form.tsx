@@ -35,7 +35,7 @@ type ContentFormProps = {
     storageFolder?: string | null;
     sourceLink: string | null;
     reviewStatus: "UNVERIFIED" | "EDITED" | "PASSED";
-    publishStatus: "DRAFT" | "SUMMIT" | "PUBLISHED" | "INVISIBLE";
+    publishStatus: "DRAFT" | "SUMMIT" | "PUBLISHED" | "COMPLIANCE_REJECTED" | "INVISIBLE";
     images: Array<{ id: number; imageUrl: string; sortOrder?: number }>;
     downloadLinks: Array<{ url: string }>;
     hostedFiles: Array<{
@@ -173,6 +173,7 @@ export function ContentForm({ mode, role = "ADMIN", error, success, tagOptions, 
             <option value="DRAFT">Draft</option>
             <option value="SUMMIT">Summit</option>
             <option value="PUBLISHED">Published</option>
+            <option value="COMPLIANCE_REJECTED">Compliance Rejected</option>
             <option value="INVISIBLE">Invisible (Hidden)</option>
           </select>
         </div>

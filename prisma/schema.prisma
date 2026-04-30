@@ -24,6 +24,7 @@ enum PublishStatus {
   DRAFT
   SUMMIT
   PUBLISHED
+  COMPLIANCE_REJECTED
   INVISIBLE
 }
 

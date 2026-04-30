@@ -81,3 +81,11 @@ export function getLocaleContactHref(locale: UiLocale) {
 export function getLocaleTermsHref(locale: UiLocale) {
   return buildLocalizedHref(locale, "/terms");
 }
+
+export function getLocale2257Href(locale: UiLocale) {
+  return buildLocalizedHref(locale, "/usc-2257");
+}
+
+export function getLocaleDmcaHref(locale: UiLocale) {
+  return buildLocalizedHref(locale, "/dmca");
+}

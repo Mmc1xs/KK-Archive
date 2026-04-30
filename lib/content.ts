@@ -1145,13 +1145,21 @@ export async function searchPublishedContents(filters: {
   };
 }
 
-export async function getAdminContents(filter?: { reviewStatus?: "all" | "unverified" | "edited" | "passed" }) {
+export async function getAdminContents(filter?: {
+  reviewStatus?: "all" | "unverified" | "edited" | "passed";
+  publishStatus?: "all" | "compliance-rejected";
+}) {
   const reviewStatus = filter?.reviewStatus ?? "all";
+  const publishStatus = filter?.publishStatus ?? "all";
+  const publishStatusFilter = getPublishStatusFilterValue(publishStatus);
   const orderedStatuses = getAdminReviewStatusOrder(reviewStatus, UserRole.ADMIN);
   const results = await Promise.all(
     orderedStatuses.map((status) =>
       db.content.findMany({
-        where: buildAdminContentWhere(status),
+        where: buildAdminContentWhere({
+          reviewStatus: status,
+          publishStatus: publishStatusFilter
+        }),
         orderBy: ADMIN_CONTENT_ORDER_BY,
         include: {
           contentTags: {
@@ -1166,6 +1174,7 @@ export async function getAdminContents(filter?: { reviewStatus?: "all" | "unveri
 }
 
 type AdminContentReviewFilter = "all" | "unverified" | "edited" | "passed";
+type AdminContentPublishFilter = "all" | "compliance-rejected";
 
 const ADMIN_REVIEW_STATUS_PRIORITY = [ReviewStatus.EDITED, ReviewStatus.UNVERIFIED, ReviewStatus.PASSED] as const;
 const AUDIT_REVIEW_STATUS_PRIORITY = [ReviewStatus.UNVERIFIED, ReviewStatus.EDITED, ReviewStatus.PASSED] as const;
@@ -1220,13 +1229,36 @@ function getAdminReviewStatusOrder(reviewStatus: AdminContentReviewFilter, viewe
   return viewerRole === UserRole.AUDIT ? [...AUDIT_REVIEW_STATUS_PRIORITY] : [...ADMIN_REVIEW_STATUS_PRIORITY];
 }
 
-function buildAdminContentWhere(reviewStatus?: ReviewStatus): Prisma.ContentWhereInput {
-  return reviewStatus ? { reviewStatus } : {};
+function getPublishStatusFilterValue(publishStatus: AdminContentPublishFilter) {
+  switch (publishStatus) {
+    case "compliance-rejected":
+      return PublishStatus.COMPLIANCE_REJECTED;
+    default:
+      return null;
+  }
 }
 
-async function getAdminReviewStatusCounts() {
+function buildAdminContentWhere(options: {
+  reviewStatus?: ReviewStatus;
+  publishStatus?: PublishStatus | null;
+}): Prisma.ContentWhereInput {
+  const where: Prisma.ContentWhereInput = {};
+
+  if (options.reviewStatus) {
+    where.reviewStatus = options.reviewStatus;
+  }
+
+  if (options.publishStatus) {
+    where.publishStatus = options.publishStatus;
+  }
+
+  return where;
+}
+
+async function getAdminReviewStatusCounts(publishStatus?: PublishStatus | null) {
   const grouped = await db.content.groupBy({
     by: ["reviewStatus"],
+    where: publishStatus ? { publishStatus } : undefined,
     _count: {
       _all: true
     }
@@ -1241,19 +1273,40 @@ async function getAdminReviewStatusCounts() {
   };
 }
 
+async function getAdminPublishStatusCounts() {
+  const grouped = await db.content.groupBy({
+    by: ["publishStatus"],
+    _count: {
+      _all: true
+    }
+  });
+
+  const counts = new Map(grouped.map((item) => [item.publishStatus, item._count._all]));
+
+  return {
+    complianceRejected: counts.get(PublishStatus.COMPLIANCE_REJECTED) ?? 0
+  };
+}
+
 export async function getAdminContentsPage(options?: {
   reviewStatus?: AdminContentReviewFilter;
+  publishStatus?: AdminContentPublishFilter;
   page?: number;
   pageSize?: number;
   viewerRole?: UserRole;
 }) {
   const reviewStatus = options?.reviewStatus ?? "all";
+  const publishStatus = options?.publishStatus ?? "all";
   const page = Number.isInteger(options?.page) && (options?.page ?? 0) > 0 ? (options?.page as number) : 1;
   const pageSize =
     Number.isInteger(options?.pageSize) && (options?.pageSize ?? 0) > 0 ? (options?.pageSize as number) : 20;
   const viewerRole = options?.viewerRole === UserRole.AUDIT ? UserRole.AUDIT : UserRole.ADMIN;
   const orderedStatuses = getAdminReviewStatusOrder(reviewStatus, viewerRole);
-  const reviewCounts = await getAdminReviewStatusCounts();
+  const publishStatusFilter = getPublishStatusFilterValue(publishStatus);
+  const [reviewCounts, publishCounts] = await Promise.all([
+    getAdminReviewStatusCounts(publishStatusFilter),
+    getAdminPublishStatusCounts()
+  ]);
   const statusCounts = orderedStatuses.map((status) => ({
     status,
     count: reviewCounts[
@@ -1278,7 +1331,10 @@ export async function getAdminContentsPage(options?: {
 
     const take = Math.min(remainingTake, count - remainingSkip);
     const rows = await db.content.findMany({
-      where: buildAdminContentWhere(status),
+      where: buildAdminContentWhere({
+        reviewStatus: status,
+        publishStatus: publishStatusFilter
+      }),
       orderBy: ADMIN_CONTENT_ORDER_BY,
       skip: remainingSkip,
       take,
@@ -1296,7 +1352,8 @@ export async function getAdminContentsPage(options?: {
     page,
     pageSize,
     totalPages: Math.max(1, Math.ceil(totalCount / pageSize)),
-    reviewCounts
+    reviewCounts,
+    publishCounts
   };
 }
 
