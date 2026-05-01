@@ -55,7 +55,7 @@ export default async function ContentDetailPage({
   const success = typeof query.success === "string" ? query.success : undefined;
   const error = typeof query.error === "string" ? query.error : undefined;
   const user = await getCurrentSession({ touchActivity: false });
-  const content = await getBrowsableContentBySlug(slug, Boolean(user));
+  const content = await getBrowsableContentBySlug(slug, Boolean(user), user?.role);
 
   if (!content) {
     notFound();
@@ -91,6 +91,14 @@ export default async function ContentDetailPage({
         telegramDownload: "TG Download",
         websiteDownload: "Website Download",
         websiteDownloads: (count) => `Website Download (${count})`,
+        websiteDownloadLoginRequired: "Website Download is available for logged-in members only.",
+        login: "Login",
+        adBlockNotice: {
+          title: "Ad blocker detected",
+          body: "Please disable your ad blocker or add this site to allowlist. Ads help keep downloads and updates running.",
+          action: "I disabled it",
+          close: "Close"
+        },
         type: "Type",
         author: "Author",
         work: "Work",

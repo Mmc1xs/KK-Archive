@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
+import { HomeStickyBanner } from "@/components/home-sticky-banner";
 import { GoogleAdSenseSlot } from "@/components/google-adsense-slot";
 import { getLocaleContentsHref, getLocaleSearchHref, type UiLocale } from "@/lib/ui-locale";
 
@@ -205,6 +206,7 @@ export function HomePageView({
           ))}
         </div>
       </section>
+      <HomeStickyBanner />
     </div>
   );
 }

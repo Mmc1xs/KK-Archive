@@ -50,7 +50,7 @@ export default async function ContentDetailPageZhCn({
   const success = typeof query.success === "string" ? query.success : undefined;
   const error = typeof query.error === "string" ? query.error : undefined;
   const user = await getCurrentSession({ touchActivity: false });
-  const content = await getBrowsableContentBySlug(slug, Boolean(user));
+  const content = await getBrowsableContentBySlug(slug, Boolean(user), user?.role);
 
   if (!content) {
     notFound();
@@ -86,6 +86,14 @@ export default async function ContentDetailPageZhCn({
         telegramDownload: "TG 下载",
         websiteDownload: "网站下载",
         websiteDownloads: (count) => `网站下载 (${count})`,
+        websiteDownloadLoginRequired: "网站下载仅对已登录会员开放。",
+        login: "登录",
+        adBlockNotice: {
+          title: "检测到广告拦截器",
+          body: "请关闭广告拦截器或将本站加入白名单。广告收入用于维持下载与持续更新。",
+          action: "我已关闭",
+          close: "关闭"
+        },
         type: "类型",
         author: "作者",
         work: "作品",

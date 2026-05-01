@@ -2,8 +2,10 @@
 import Link from "next/link";
 import { ReviewStatus } from "@prisma/client";
 import { reportPassedContentIssueAction } from "@/app/actions";
+import { AdBlockNoticeModal } from "@/components/adblock-notice-modal";
+import { HomeStickyBanner } from "@/components/home-sticky-banner";
 import { TagLinks } from "@/components/tag-links";
-import { type UiLocale } from "@/lib/ui-locale";
+import { getLocaleLoginHref, type UiLocale } from "@/lib/ui-locale";
 
 type ContentDetailContent = {
   id: number;
@@ -65,6 +67,14 @@ type ContentDetailViewProps = {
     telegramDownload: string;
     websiteDownload: string;
     websiteDownloads: (count: number) => string;
+    websiteDownloadLoginRequired: string;
+    login: string;
+    adBlockNotice: {
+      title: string;
+      body: string;
+      action: string;
+      close: string;
+    };
     type: string;
     author: string;
     work: string;
@@ -145,6 +155,9 @@ export function ContentDetailView({
   const description = content.description?.trim();
   const detailPath = buildContentDetailPath(locale, content.slug);
   const reportCopy = getReportCopy(locale);
+  const loginHref = getLocaleLoginHref(locale);
+  const canUseWebsiteDownload = Boolean(user);
+  const showWebsiteDownloadGate = !canUseWebsiteDownload && siteDownloadEntries.length > 0;
 
   return (
     <div className="page-section grid">
@@ -228,7 +241,7 @@ export function ContentDetailView({
                     {copy.telegramDownload}
                   </a>
                 ) : null}
-                {siteDownloadEntries.length === 1 ? (
+                {canUseWebsiteDownload && siteDownloadEntries.length === 1 ? (
                   <a
                     href={siteDownloadEntries[0].url}
                     target="_blank"
@@ -238,7 +251,7 @@ export function ContentDetailView({
                     {copy.websiteDownload}
                   </a>
                 ) : null}
-                {siteDownloadEntries.length > 1 ? (
+                {canUseWebsiteDownload && siteDownloadEntries.length > 1 ? (
                   <details className="download-menu">
                     <summary className="link-pill download-menu-trigger">
                       {copy.websiteDownloads(siteDownloadEntries.length)}
@@ -258,6 +271,14 @@ export function ContentDetailView({
                     </div>
                   </details>
                 ) : null}
+                {showWebsiteDownloadGate ? (
+                  <div className="download-auth-note">
+                    <span>{copy.websiteDownloadLoginRequired}</span>
+                    <Link href={loginHref} className="link-pill">
+                      {copy.login}
+                    </Link>
+                  </div>
+                ) : null}
               </div>
             </section>
           ) : null}
@@ -271,6 +292,8 @@ export function ContentDetailView({
           </div>
         </aside>
       </div>
+      {siteDownloadEntries.length > 0 ? <AdBlockNoticeModal copy={copy.adBlockNotice} /> : null}
+      <HomeStickyBanner />
     </div>
   );
 }

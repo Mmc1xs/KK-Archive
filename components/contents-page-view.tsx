@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
+import { HomeStickyBanner } from "@/components/home-sticky-banner";
 import { getLocaleContentsHref, type UiLocale } from "@/lib/ui-locale";
 
 type ContentsPageContent = {
@@ -81,56 +82,59 @@ export function ContentsPageView({
   const contentsHref = getLocaleContentsHref(locale);
 
   return (
-    <section className="page-section panel">
-      <div className="split">
-        <div>
-          <div className="eyebrow">{copy.eyebrow}</div>
-          <h1 className="title-lg">{copy.title}</h1>
-        </div>
-        <div className="status">{copy.status(currentPage, totalPages, totalCount)}</div>
-      </div>
-      <div className="grid content-grid">
-        {items.map((content) => (
-          <ContentCard key={content.id} content={content} locale={locale} />
-        ))}
-      </div>
-      {totalPages > 1 ? (
-        <nav className="pagination-nav" aria-label={copy.paginationLabel}>
-          <Link
-            href={currentPage > 1 ? `${contentsHref}?page=${currentPage - 1}` : `${contentsHref}?page=1`}
-            className={currentPage > 1 ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
-            aria-disabled={currentPage <= 1}
-          >
-            {copy.previous}
-          </Link>
-          <div className="pagination-pages">
-            {paginationItems.map((item, index) =>
-              item === "ellipsis" ? (
-                <span key={`ellipsis-${index}`} className="pagination-ellipsis" aria-hidden="true">
-                  ...
-                </span>
-              ) : (
-                <Link
-                  key={item}
-                  href={item === 1 ? contentsHref : `${contentsHref}?page=${item}`}
-                  className={item === currentPage ? "button secondary pagination-page-current" : "link-pill pagination-page"}
-                  aria-current={item === currentPage ? "page" : undefined}
-                >
-                  {item}
-                </Link>
-              )
-            )}
-            <span className="pagination-summary">{copy.pageSummary(pageSize)}</span>
+    <>
+      <section className="page-section panel">
+        <div className="split">
+          <div>
+            <div className="eyebrow">{copy.eyebrow}</div>
+            <h1 className="title-lg">{copy.title}</h1>
           </div>
-          <Link
-            href={currentPage < totalPages ? `${contentsHref}?page=${currentPage + 1}` : `${contentsHref}?page=${totalPages}`}
-            className={currentPage < totalPages ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
-            aria-disabled={currentPage >= totalPages}
-          >
-            {copy.next}
-          </Link>
-        </nav>
-      ) : null}
-    </section>
+          <div className="status">{copy.status(currentPage, totalPages, totalCount)}</div>
+        </div>
+        <div className="grid content-grid">
+          {items.map((content) => (
+            <ContentCard key={content.id} content={content} locale={locale} />
+          ))}
+        </div>
+        {totalPages > 1 ? (
+          <nav className="pagination-nav" aria-label={copy.paginationLabel}>
+            <Link
+              href={currentPage > 1 ? `${contentsHref}?page=${currentPage - 1}` : `${contentsHref}?page=1`}
+              className={currentPage > 1 ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
+              aria-disabled={currentPage <= 1}
+            >
+              {copy.previous}
+            </Link>
+            <div className="pagination-pages">
+              {paginationItems.map((item, index) =>
+                item === "ellipsis" ? (
+                  <span key={`ellipsis-${index}`} className="pagination-ellipsis" aria-hidden="true">
+                    ...
+                  </span>
+                ) : (
+                  <Link
+                    key={item}
+                    href={item === 1 ? contentsHref : `${contentsHref}?page=${item}`}
+                    className={item === currentPage ? "button secondary pagination-page-current" : "link-pill pagination-page"}
+                    aria-current={item === currentPage ? "page" : undefined}
+                  >
+                    {item}
+                  </Link>
+                )
+              )}
+              <span className="pagination-summary">{copy.pageSummary(pageSize)}</span>
+            </div>
+            <Link
+              href={currentPage < totalPages ? `${contentsHref}?page=${currentPage + 1}` : `${contentsHref}?page=${totalPages}`}
+              className={currentPage < totalPages ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
+              aria-disabled={currentPage >= totalPages}
+            >
+              {copy.next}
+            </Link>
+          </nav>
+        ) : null}
+      </section>
+      <HomeStickyBanner />
+    </>
   );
 }

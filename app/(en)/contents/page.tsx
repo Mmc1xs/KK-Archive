@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
+import { HomeStickyBanner } from "@/components/home-sticky-banner";
 import { getCurrentSession } from "@/lib/auth/session";
 import { getBrowsableContentsPage } from "@/lib/content";
 
@@ -54,60 +55,68 @@ export default async function ContentsPage({
   const user = await getCurrentSession({ touchActivity: false });
   const pageParam = typeof params.page === "string" ? Number(params.page) : 1;
   const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const { items, totalPages, totalCount } = await getBrowsableContentsPage(Boolean(user), currentPage, PAGE_SIZE);
+  const { items, totalPages, totalCount } = await getBrowsableContentsPage(
+    Boolean(user),
+    currentPage,
+    PAGE_SIZE,
+    user?.role
+  );
   const paginationItems = buildPagination(totalPages, currentPage);
 
   return (
-    <section className="page-section panel">
-      <div className="split">
-        <div>
-          <div className="eyebrow">Browsable Library</div>
-          <h1 className="title-lg">Available Content</h1>
-        </div>
-        <div className="status">{`Page ${currentPage} / ${totalPages} - ${totalCount} posts`}</div>
-      </div>
-      <div className="grid content-grid">
-        {items.map((content) => (
-          <ContentCard key={content.id} content={content} />
-        ))}
-      </div>
-      {totalPages > 1 ? (
-        <nav className="pagination-nav" aria-label="Contents pagination">
-          <Link
-            href={currentPage > 1 ? `/contents?page=${currentPage - 1}` : "/contents?page=1"}
-            className={currentPage > 1 ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
-            aria-disabled={currentPage <= 1}
-          >
-            Previous
-          </Link>
-          <div className="pagination-pages">
-            {paginationItems.map((item, index) =>
-              item === "ellipsis" ? (
-                <span key={`ellipsis-${index}`} className="pagination-ellipsis" aria-hidden="true">
-                  ...
-                </span>
-              ) : (
-                <Link
-                  key={item}
-                  href={item === 1 ? "/contents" : `/contents?page=${item}`}
-                  className={item === currentPage ? "button secondary pagination-page-current" : "link-pill pagination-page"}
-                  aria-current={item === currentPage ? "page" : undefined}
-                >
-                  {item}
-                </Link>
-              )
-            )}
-            <span className="pagination-summary">{PAGE_SIZE} / page</span>
+    <>
+      <section className="page-section panel">
+        <div className="split">
+          <div>
+            <div className="eyebrow">Browsable Library</div>
+            <h1 className="title-lg">Available Content</h1>
           </div>
-          <Link
-            href={currentPage < totalPages ? `/contents?page=${currentPage + 1}` : `/contents?page=${totalPages}`}
-            className={currentPage < totalPages ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
-            aria-disabled={currentPage >= totalPages}
-          >
-            Next
-          </Link>
-        </nav>
-      ) : null}
-    </section>
+          <div className="status">{`Page ${currentPage} / ${totalPages} - ${totalCount} posts`}</div>
+        </div>
+        <div className="grid content-grid">
+          {items.map((content) => (
+            <ContentCard key={content.id} content={content} />
+          ))}
+        </div>
+        {totalPages > 1 ? (
+          <nav className="pagination-nav" aria-label="Contents pagination">
+            <Link
+              href={currentPage > 1 ? `/contents?page=${currentPage - 1}` : "/contents?page=1"}
+              className={currentPage > 1 ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
+              aria-disabled={currentPage <= 1}
+            >
+              Previous
+            </Link>
+            <div className="pagination-pages">
+              {paginationItems.map((item, index) =>
+                item === "ellipsis" ? (
+                  <span key={`ellipsis-${index}`} className="pagination-ellipsis" aria-hidden="true">
+                    ...
+                  </span>
+                ) : (
+                  <Link
+                    key={item}
+                    href={item === 1 ? "/contents" : `/contents?page=${item}`}
+                    className={item === currentPage ? "button secondary pagination-page-current" : "link-pill pagination-page"}
+                    aria-current={item === currentPage ? "page" : undefined}
+                  >
+                    {item}
+                  </Link>
+                )
+              )}
+              <span className="pagination-summary">{PAGE_SIZE} / page</span>
+            </div>
+            <Link
+              href={currentPage < totalPages ? `/contents?page=${currentPage + 1}` : `/contents?page=${totalPages}`}
+              className={currentPage < totalPages ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
+              aria-disabled={currentPage >= totalPages}
+            >
+              Next
+            </Link>
+          </nav>
+        ) : null}
+      </section>
+      <HomeStickyBanner />
+    </>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { ExoClickZone } from "@/components/exoclick-zone";
+import { HomeStickyBanner } from "@/components/home-sticky-banner";
 import { SearchFilters, type SearchFiltersLabels } from "@/components/search-filters";
 import { getLocaleSearchHref, type UiLocale } from "@/lib/ui-locale";
 
@@ -202,6 +203,7 @@ export function SearchPageView({
           </div>
         ) : null}
       </section>
+      <HomeStickyBanner />
     </div>
   );
 }

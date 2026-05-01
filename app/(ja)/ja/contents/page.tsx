@@ -20,7 +20,12 @@ export default async function ContentsPageJa({
   const user = await getCurrentSession({ touchActivity: false });
   const pageParam = typeof params.page === "string" ? Number(params.page) : 1;
   const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const { items, totalPages, totalCount } = await getBrowsableContentsPage(Boolean(user), currentPage, PAGE_SIZE);
+  const { items, totalPages, totalCount } = await getBrowsableContentsPage(
+    Boolean(user),
+    currentPage,
+    PAGE_SIZE,
+    user?.role
+  );
 
   return (
     <ContentsPageView

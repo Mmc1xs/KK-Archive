@@ -38,6 +38,7 @@ export default async function SearchPageZhCn({
     getSearchFilterBootstrap({ author, work, character, styles, usages }),
     searchPublishedContents({
       isLoggedIn: Boolean(user),
+      viewerRole: user?.role,
       author,
       work,
       character,

@@ -50,7 +50,7 @@ export default async function ContentDetailPageJa({
   const success = typeof query.success === "string" ? query.success : undefined;
   const error = typeof query.error === "string" ? query.error : undefined;
   const user = await getCurrentSession({ touchActivity: false });
-  const content = await getBrowsableContentBySlug(slug, Boolean(user));
+  const content = await getBrowsableContentBySlug(slug, Boolean(user), user?.role);
 
   if (!content) {
     notFound();
@@ -86,6 +86,14 @@ export default async function ContentDetailPageJa({
         telegramDownload: "TG ダウンロード",
         websiteDownload: "サイトダウンロード",
         websiteDownloads: (count) => `サイトダウンロード (${count})`,
+        websiteDownloadLoginRequired: "サイトダウンロードはログイン済みメンバーのみ利用できます。",
+        login: "ログイン",
+        adBlockNotice: {
+          title: "広告ブロックが検出されました",
+          body: "広告ブロッカーを無効にするか、このサイトを許可リストに追加してください。広告収益でダウンロードと更新を維持しています。",
+          action: "無効にしました",
+          close: "閉じる"
+        },
         type: "タイプ",
         author: "作者",
         work: "作品",
