@@ -177,8 +177,16 @@ async function resolveCharacterTagIds(existingIds: number[], newNames: string[],
   return [...new Set(ids)];
 }
 
-function getVisibleStatuses(isLoggedIn: boolean) {
-  return isLoggedIn ? [PublishStatus.PUBLISHED, PublishStatus.SUMMIT] : [PublishStatus.PUBLISHED];
+function getVisibleStatuses(isLoggedIn: boolean, viewerRole?: UserRole | null) {
+  if (!isLoggedIn) {
+    return [PublishStatus.PUBLISHED];
+  }
+
+  if (viewerRole === UserRole.AUDIT || viewerRole === UserRole.ADMIN) {
+    return [PublishStatus.PUBLISHED, PublishStatus.SUMMIT, PublishStatus.COMPLIANCE_REJECTED];
+  }
+
+  return [PublishStatus.PUBLISHED, PublishStatus.SUMMIT];
 }
 
 const getCachedHomepageContents = unstable_cache(
@@ -616,11 +624,11 @@ export async function getContentDownloadAnalytics() {
   };
 }
 
-export async function getBrowsableContents(isLoggedIn: boolean) {
+export async function getBrowsableContents(isLoggedIn: boolean, viewerRole?: UserRole | null) {
   return db.content.findMany({
     where: {
       publishStatus: {
-        in: getVisibleStatuses(isLoggedIn)
+        in: getVisibleStatuses(isLoggedIn, viewerRole)
       }
     },
     orderBy: { createdAt: "desc" },
@@ -632,7 +640,12 @@ export async function getBrowsableContents(isLoggedIn: boolean) {
   });
 }
 
-export async function getBrowsableContentsPage(isLoggedIn: boolean, page: number, pageSize: number) {
+export async function getBrowsableContentsPage(
+  isLoggedIn: boolean,
+  page: number,
+  pageSize: number,
+  viewerRole?: UserRole | null
+) {
   const safePage = Number.isInteger(page) && page > 0 ? page : 1;
   const safePageSize = Number.isInteger(pageSize) && pageSize > 0 ? pageSize : 12;
 
@@ -642,7 +655,7 @@ export async function getBrowsableContentsPage(isLoggedIn: boolean, page: number
 
   const where = {
     publishStatus: {
-      in: getVisibleStatuses(isLoggedIn)
+      in: getVisibleStatuses(isLoggedIn, viewerRole)
     }
   };
 
@@ -701,7 +714,7 @@ const getCachedPublicBrowsableContentsPage = unstable_cache(
   { revalidate: 600 }
 );
 
-export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolean) {
+export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolean, viewerRole?: UserRole | null) {
   if (!isLoggedIn) {
     return getRequestScopedPublicBrowsableContentBySlug(slug);
   }
@@ -710,7 +723,7 @@ export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolea
     where: {
       slug,
       publishStatus: {
-        in: getVisibleStatuses(isLoggedIn)
+        in: getVisibleStatuses(isLoggedIn, viewerRole)
       }
     },
     include: {
@@ -961,7 +974,11 @@ function normalizeSearchSlugs(values?: string[]) {
   return [...new Set((values ?? []).map((value) => value.trim()).filter(Boolean))].sort();
 }
 
-function buildSearchWhere(isLoggedIn: boolean, filters: SearchContentFilters): Prisma.ContentWhereInput {
+function buildSearchWhere(
+  isLoggedIn: boolean,
+  filters: SearchContentFilters,
+  viewerRole?: UserRole | null
+): Prisma.ContentWhereInput {
   const styleSlugs = normalizeSearchSlugs(filters.styles);
   const usageSlugs = normalizeSearchSlugs(filters.usages);
   const typeSlugs = normalizeSearchSlugs(filters.types);
@@ -1032,7 +1049,7 @@ function buildSearchWhere(isLoggedIn: boolean, filters: SearchContentFilters): P
 
   return {
     publishStatus: {
-      in: getVisibleStatuses(isLoggedIn)
+      in: getVisibleStatuses(isLoggedIn, viewerRole)
     },
     ...(authorSlug
       ? {
@@ -1087,6 +1104,7 @@ const getCachedPublicSearchResults = unstable_cache(
 
 export async function searchPublishedContents(filters: {
   isLoggedIn: boolean;
+  viewerRole?: UserRole | null;
   author?: string;
   work?: string;
   character?: string;
@@ -1118,14 +1136,18 @@ export async function searchPublishedContents(filters: {
     );
   }
 
-  const where = buildSearchWhere(filters.isLoggedIn, {
-    ...filters,
-    work: normalizedWork,
-    character: normalizedCharacter,
-    styles: normalizedStyles,
-    usages: normalizedUsages,
-    types: normalizedTypes
-  });
+  const where = buildSearchWhere(
+    filters.isLoggedIn,
+    {
+      ...filters,
+      work: normalizedWork,
+      character: normalizedCharacter,
+      styles: normalizedStyles,
+      usages: normalizedUsages,
+      types: normalizedTypes
+    },
+    filters.viewerRole
+  );
   const rows = await db.content.findMany({
     where,
     orderBy: { createdAt: "desc" },
