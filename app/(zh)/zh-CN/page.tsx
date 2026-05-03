@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { HomePageView } from "@/components/home-page-view";
 import {
+  getHomepageBulletins,
   getHomepageHotTopicContents,
   getHomepageLatestPublishedContents,
   getHomepageOverviewStats
@@ -51,9 +52,10 @@ const copy = {
 };
 
 export default async function HomePageZhCn() {
-  const [hotTopicContents, latestPublishedContents, overviewStats] = await Promise.all([
+  const [hotTopicContents, latestPublishedContents, bulletins, overviewStats] = await Promise.all([
     getHomepageHotTopicContents(),
     getHomepageLatestPublishedContents(),
+    getHomepageBulletins("zh-CN"),
     getHomepageOverviewStats()
   ]);
 
@@ -61,6 +63,7 @@ export default async function HomePageZhCn() {
     <HomePageView
       hotTopicContents={hotTopicContents}
       latestPublishedContents={latestPublishedContents}
+      bulletins={bulletins}
       overviewStats={overviewStats}
       copy={copy}
       locale="zh-CN"
