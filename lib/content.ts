@@ -4,7 +4,7 @@ import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
-import { contentSchema, homepageBulletinSchema } from "@/lib/validation";
+import { contentSchema } from "@/lib/validation";
 import { revalidateTag } from "next/cache";
 
 function slugifyTagName(name: string) {
@@ -429,6 +429,117 @@ function getHomepageBulletinOrderBy() {
   ];
 }
 
+function parseOptionalDate(value: unknown) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return null;
+  }
+
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return date;
+}
+
+function normalizeOptionalUrl(value: unknown) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol === "https:") {
+      return raw;
+    }
+
+    if (
+      process.env.NODE_ENV !== "production" &&
+      parsed.protocol === "http:" &&
+      (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1")
+    ) {
+      return raw;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function parseHomepageBulletinInput(input: unknown) {
+  const source = typeof input === "object" && input !== null ? (input as Record<string, unknown>) : {};
+
+  const localeRaw = String(source.locale ?? "").trim();
+  if (!isHomepageBulletinLocale(localeRaw)) {
+    return { ok: false as const, error: "Locale is invalid" };
+  }
+
+  const title = String(source.title ?? "").trim();
+  if (!title) {
+    return { ok: false as const, error: "Title is required" };
+  }
+  if (title.length > 120) {
+    return { ok: false as const, error: "Title must be at most 120 characters" };
+  }
+
+  const summary = String(source.summary ?? "").trim();
+  if (summary.length > 280) {
+    return { ok: false as const, error: "Summary must be at most 280 characters" };
+  }
+
+  const linkUrl = normalizeOptionalUrl(source.linkUrl);
+  if (String(source.linkUrl ?? "").trim() && !linkUrl) {
+    return { ok: false as const, error: "Link must be a valid HTTPS URL" };
+  }
+
+  const startsAt = parseOptionalDate(source.startsAt);
+  const endsAt = parseOptionalDate(source.endsAt);
+  const publishedAt = parseOptionalDate(source.publishedAt);
+
+  if (String(source.startsAt ?? "").trim() && !startsAt) {
+    return { ok: false as const, error: "Start time is invalid" };
+  }
+
+  if (String(source.endsAt ?? "").trim() && !endsAt) {
+    return { ok: false as const, error: "End time is invalid" };
+  }
+
+  if (String(source.publishedAt ?? "").trim() && !publishedAt) {
+    return { ok: false as const, error: "Published time is invalid" };
+  }
+
+  if (startsAt && endsAt && endsAt.getTime() < startsAt.getTime()) {
+    return { ok: false as const, error: "End time must be after start time" };
+  }
+
+  const sortOrder = Number(source.sortOrder ?? 0);
+  if (!Number.isInteger(sortOrder) || sortOrder < 0 || sortOrder > 9999) {
+    return { ok: false as const, error: "Sort order must be between 0 and 9999" };
+  }
+
+  const isActive = source.isActive === true || source.isActive === "true" || source.isActive === 1 || source.isActive === "1";
+  const isPinned = source.isPinned === true || source.isPinned === "true" || source.isPinned === 1 || source.isPinned === "1";
+
+  return {
+    ok: true as const,
+    data: {
+      locale: localeRaw,
+      title,
+      summary,
+      linkUrl,
+      publishedAt,
+      startsAt,
+      endsAt,
+      isActive,
+      isPinned,
+      sortOrder
+    }
+  };
+}
+
 export async function getHomepageBulletins(locale: HomepageBulletinLocale, limit = 6) {
   const safeLimit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 20) : 6;
 
@@ -457,11 +568,11 @@ export async function getAdminHomepageBulletins(locale?: HomepageBulletinLocale)
 }
 
 export async function saveHomepageBulletin(input: unknown, bulletinId?: number) {
-  const parsed = homepageBulletinSchema.safeParse(input);
-  if (!parsed.success) {
+  const parsed = parseHomepageBulletinInput(input);
+  if (!parsed.ok) {
     return {
       ok: false as const,
-      error: parsed.error.issues[0]?.message ?? "Invalid bulletin data"
+      error: parsed.error
     };
   }
 
