@@ -228,6 +228,167 @@ img {
   min-height: 0;
 }
 
+.hero-copy-bulletin-demo {
+  grid-template-rows: minmax(360px, 1fr) auto;
+  gap: 18px;
+}
+
+.hero-bulletin-board {
+  display: grid;
+  align-content: flex-start;
+  gap: 12px;
+  min-height: 100%;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(102, 196, 255, 0.42);
+  background:
+    linear-gradient(180deg, rgba(234, 246, 255, 0.96), rgba(214, 236, 252, 0.88)),
+    radial-gradient(circle at top left, rgba(102, 196, 255, 0.2), transparent 34%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.75) inset,
+    0 12px 26px rgba(59, 123, 184, 0.12),
+    0 0 0 3px rgba(102, 196, 255, 0.08);
+  position: relative;
+}
+
+.hero-bulletin-board::before,
+.hero-bulletin-board::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+}
+
+.hero-bulletin-board::before {
+  inset: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(72, 157, 225, 0.36);
+}
+
+.hero-bulletin-board::after {
+  inset: 0;
+  border-radius: 20px;
+  box-shadow:
+    0 0 0 1px rgba(84, 171, 235, 0.3),
+    0 0 18px rgba(102, 196, 255, 0.16) inset;
+}
+
+.hero-bulletin-board h2 {
+  margin: 0;
+  font-size: clamp(1.1rem, 1.7vw, 1.4rem);
+  line-height: 1.25;
+  color: var(--accent-strong);
+  letter-spacing: 0.02em;
+}
+
+.hero-bulletin-head {
+  display: grid;
+  gap: 4px;
+  padding-top: 6px;
+}
+
+.hero-bulletin-screen {
+  height: 8px;
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(72, 157, 225, 0.8), rgba(148, 217, 255, 0.55)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0));
+  box-shadow: 0 0 10px rgba(102, 196, 255, 0.22);
+}
+
+.hero-bulletin-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.hero-bulletin-item {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(72, 157, 225, 0.34);
+  background:
+    linear-gradient(180deg, rgba(79, 171, 231, 0.2), rgba(74, 143, 208, 0.12)),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06));
+}
+
+.hero-bulletin-item-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  border: 1px solid rgba(84, 171, 235, 0.5);
+  background:
+    linear-gradient(180deg, rgba(133, 212, 255, 0.4), rgba(77, 154, 217, 0.25)),
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0));
+  box-shadow: 0 0 8px rgba(102, 196, 255, 0.16);
+  position: relative;
+}
+
+.hero-bulletin-item-icon::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 9px;
+  width: 12px;
+  height: 8px;
+  border: 1px solid rgba(28, 103, 161, 0.75);
+  border-top: 0;
+  border-radius: 0 0 2px 2px;
+}
+
+.hero-bulletin-item-icon::after {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 9px;
+  width: 12px;
+  border-top: 1px solid rgba(28, 103, 161, 0.75);
+  transform: skewY(-21deg);
+  transform-origin: left top;
+}
+
+.hero-bulletin-item-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.hero-bulletin-item-copy strong {
+  font-size: 0.96rem;
+  line-height: 1.3;
+  color: #154a7f;
+}
+
+.hero-bulletin-item-copy small {
+  color: #2e6fa8;
+  line-height: 1.4;
+}
+
+.hero-bulletin-item-date {
+  font-size: 0.78rem;
+  color: #2a7fc5;
+  font-weight: 700;
+  border-left: 1px solid rgba(72, 157, 225, 0.34);
+  padding-left: 10px;
+  white-space: nowrap;
+}
+
+.hero-bulletin-list li {
+  position: relative;
+  margin: 0;
+  padding-left: 0;
+  color: inherit;
+  line-height: inherit;
+}
+
+.hero-bulletin-list li::before {
+  content: none;
+}
+
 .hero-feature-pills {
   display: flex;
   flex-wrap: wrap;
@@ -577,6 +738,84 @@ img {
 
 .admin-homepage-picker-pagination {
   margin-top: 18px;
+}
+
+.link-pill.active {
+  border-color: rgba(63, 181, 255, 0.72);
+  box-shadow: 0 8px 18px rgba(63, 181, 255, 0.2);
+}
+
+.admin-bulletin-list {
+  display: grid;
+  gap: 16px;
+}
+
+.admin-bulletin-item {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(117, 173, 222, 0.4);
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.admin-bulletin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-bulletin-span-2 {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  display: grid;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.field-label input[type="text"],
+.field-label input[type="url"],
+.field-label input[type="number"],
+.field-label input[type="datetime-local"],
+.field-label select,
+.field-label textarea {
+  width: 100%;
+  border: 1px solid rgba(117, 173, 222, 0.42);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.field-label textarea {
+  resize: vertical;
+  min-height: 92px;
+}
+
+.field-label-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: end;
+  min-height: 44px;
+}
+
+.field-label-checkbox input[type="checkbox"] {
+  margin-right: 8px;
+}
+
+@media (max-width: 900px) {
+  .admin-bulletin-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-bulletin-span-2 {
+    grid-column: auto;
+  }
 }
 
 .panel-header {
@@ -1064,6 +1303,28 @@ button {
   z-index: 60;
   width: min(728px, calc(100vw - 28px));
   pointer-events: none;
+}
+
+.home-sticky-ad-close {
+  position: absolute;
+  right: 6px;
+  top: -14px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(117, 173, 222, 0.6);
+  background: rgba(255, 255, 255, 0.97);
+  color: #2a5783;
+  font-size: 12px;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(20, 45, 68, 0.16);
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.home-sticky-ad-close:hover {
+  background: rgba(231, 246, 255, 0.98);
 }
 
 .home-sticky-ad-inner {
@@ -2052,6 +2313,10 @@ button {
   .hero-copy {
     grid-template-rows: auto auto auto;
     gap: 18px;
+  }
+
+  .hero-copy-bulletin-demo {
+    grid-template-rows: auto auto;
   }
 
   .tool-page-shell {
