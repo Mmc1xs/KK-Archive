@@ -399,7 +399,7 @@ const HOMEPAGE_BULLETIN_LIST_SELECT = {
   sortOrder: true,
   createdAt: true,
   updatedAt: true
-} satisfies Prisma.HomepageBulletinSelect;
+};
 
 function isHomepageBulletinLocale(value: string): value is HomepageBulletinLocale {
   return HOMEPAGE_BULLETIN_LOCALES.includes(value as HomepageBulletinLocale);
@@ -417,7 +417,7 @@ function getHomepageBulletinWhere(locale: HomepageBulletinLocale, now = new Date
         OR: [{ endsAt: null }, { endsAt: { gte: now } }]
       }
     ]
-  } satisfies Prisma.HomepageBulletinWhereInput;
+  };
 }
 
 function getHomepageBulletinOrderBy() {
@@ -558,7 +558,7 @@ export async function getHomepageBulletins(locale: HomepageBulletinLocale, limit
 }
 
 export async function getAdminHomepageBulletins(locale?: HomepageBulletinLocale) {
-  const where = locale ? ({ locale } satisfies Prisma.HomepageBulletinWhereInput) : undefined;
+  const where = locale ? { locale } : undefined;
 
   return db.homepageBulletin.findMany({
     where,
@@ -588,7 +588,7 @@ export async function saveHomepageBulletin(input: unknown, bulletinId?: number) 
     isActive: data.isActive,
     isPinned: data.isPinned,
     sortOrder: data.sortOrder
-  } satisfies Prisma.HomepageBulletinUncheckedCreateInput;
+  };
 
   try {
     if (Number.isInteger(bulletinId) && Number(bulletinId) > 0) {
