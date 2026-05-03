@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
+    "dev:turbo": "next dev",
     "build": "prisma generate && next build",
     "build:postgres": "npm run db:use:postgres && prisma generate && next build",
     "start": "next start",
@@ -34,6 +35,8 @@
     "clean:import-new": "tsx scripts/import-new-clean-posts.ts",
     "clean:sync-new": "tsx scripts/sync-new-clean-content.ts",
     "clean:sync-all": "tsx scripts/sync-all-clean-content.ts",
+    "cut:import:queue": "tsx scripts/import-cut-queue.ts",
+    "cut:import:queue:file": "tsx scripts/import-cut-queue.ts",
     "clean:move-unuploaded:later": "tsx scripts/move-unuploaded-clean-to-later.ts",
     "clean:move-unuploaded:later:apply": "tsx scripts/move-unuploaded-clean-to-later.ts --apply",
     "tag:export-review": "tsx scripts/export-tag-review-json.ts",

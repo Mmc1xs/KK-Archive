@@ -2,8 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { HomeStickyBanner } from "@/components/home-sticky-banner";
-import { GoogleAdSenseSlot } from "@/components/google-adsense-slot";
-import { getLocaleContentsHref, getLocaleSearchHref, type UiLocale } from "@/lib/ui-locale";
+import { getLocaleContentsHref, type UiLocale } from "@/lib/ui-locale";
 
 type HomePageContent = {
   title: string;
@@ -25,12 +24,20 @@ type HomePageOverviewStats = {
   indexedAuthors: number;
 };
 
+type HomePageBulletinItem = {
+  id: number;
+  title: string;
+  summary: string;
+  linkUrl: string | null;
+  publishedAt: Date | string | null;
+};
+
 type HomePageCopy = {
   heroEyebrow: string;
   heroScreenReaderTitle: string;
-  featurePills: [string, string, string];
-  searchArchiveLabel: string;
-  browseFilesLabel: string;
+  bulletinTitle?: string;
+  bulletinEmptyTitle?: string;
+  bulletinEmptyMeta?: string;
   briefingEyebrow: string;
   archiveOverviewLabel: string;
   onlineLabel: string;
@@ -58,51 +65,76 @@ type HomePageCopy = {
 type HomePageViewProps = {
   hotTopicContents: HomePageContent[];
   latestPublishedContents: HomePageContent[];
+  bulletins: HomePageBulletinItem[];
   overviewStats: HomePageOverviewStats;
   copy: HomePageCopy;
   locale?: UiLocale;
 };
 
+function formatBulletinDate(value: Date | string | null, locale: UiLocale) {
+  if (!value) {
+    return "";
+  }
+
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat(locale === "zh-CN" ? "zh-CN" : locale, {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(date);
+}
+
 export function HomePageView({
   hotTopicContents,
   latestPublishedContents,
+  bulletins,
   overviewStats,
   copy,
   locale = "en"
 }: HomePageViewProps) {
   const featuredContent = hotTopicContents[0] ?? latestPublishedContents[0];
-  const searchHref = getLocaleSearchHref(locale);
   const contentsHref = getLocaleContentsHref(locale);
+  const bulletinTitle = copy.bulletinTitle ?? copy.heroEyebrow;
+  const bulletinEmptyTitle = copy.bulletinEmptyTitle ?? "No announcements yet";
+  const bulletinEmptyMeta = copy.bulletinEmptyMeta ?? "Please check back later.";
 
   return (
     <div className="page-section grid">
       <section className="hero">
         <div className="hero-layout">
-          <div className="hero-copy">
-            <div className="hero-copy-top">
-              <div className="eyebrow">{copy.heroEyebrow}</div>
-              <h1 className="sr-only">{copy.heroScreenReaderTitle}</h1>
-            </div>
-            <div className="hero-copy-reserved">
-              <GoogleAdSenseSlot slot={process.env.NEXT_PUBLIC_ADSENSE_HOME_SLOT_ID} label="Homepage sponsor" />
-            </div>
-            <div className="hero-copy-bottom">
-              <div className="hero-feature-pills">
-                {copy.featurePills.map((item) => (
-                  <span key={item} className="hero-feature-pill">
-                    {item}
-                  </span>
-                ))}
-              </div>
-              <div className="inline-actions">
-                <Link href={searchHref} className="button">
-                  {copy.searchArchiveLabel}
-                </Link>
-                <Link href={contentsHref} className="link-pill">
-                  {copy.browseFilesLabel}
-                </Link>
-              </div>
-            </div>
+          <div className="hero-copy hero-copy-bulletin-demo">
+            <h1 className="sr-only">{copy.heroScreenReaderTitle}</h1>
+            <article className="hero-bulletin-board">
+              <header className="hero-bulletin-head">
+                <div className="eyebrow">{copy.heroEyebrow}</div>
+                <h2>{bulletinTitle}</h2>
+              </header>
+              <div className="hero-bulletin-screen" aria-hidden="true" />
+              <ul className="hero-bulletin-list">
+                {(bulletins.length ? bulletins : [{ id: -1, title: bulletinEmptyTitle, summary: bulletinEmptyMeta, linkUrl: null, publishedAt: null }]).map(
+                  (item) => (
+                    <li key={`home-bulletin-${item.id}`} className="hero-bulletin-item">
+                      <span className="hero-bulletin-item-icon" aria-hidden="true" />
+                      <div className="hero-bulletin-item-copy">
+                        {item.linkUrl ? (
+                          <a href={item.linkUrl} target="_blank" rel="noreferrer">
+                            <strong>{item.title}</strong>
+                          </a>
+                        ) : (
+                          <strong>{item.title}</strong>
+                        )}
+                        <small>{item.summary}</small>
+                      </div>
+                      <time className="hero-bulletin-item-date">{formatBulletinDate(item.publishedAt, locale)}</time>
+                    </li>
+                  )
+                )}
+              </ul>
+            </article>
           </div>
 
           <div className="hero-intel-panel">
