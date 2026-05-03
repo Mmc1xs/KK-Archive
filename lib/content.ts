@@ -542,29 +542,43 @@ function parseHomepageBulletinInput(input: unknown) {
 
 export async function getHomepageBulletins(locale: HomepageBulletinLocale, limit = 6) {
   const safeLimit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 20) : 6;
-
-  return db.homepageBulletin.findMany({
-    where: getHomepageBulletinWhere(locale),
-    orderBy: getHomepageBulletinOrderBy(),
-    take: safeLimit,
-    select: {
-      id: true,
-      title: true,
-      summary: true,
-      linkUrl: true,
-      publishedAt: true
+  try {
+    return await db.homepageBulletin.findMany({
+      where: getHomepageBulletinWhere(locale),
+      orderBy: getHomepageBulletinOrderBy(),
+      take: safeLimit,
+      select: {
+        id: true,
+        title: true,
+        summary: true,
+        linkUrl: true,
+        publishedAt: true
+      }
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+      return [];
     }
-  });
+
+    throw error;
+  }
 }
 
 export async function getAdminHomepageBulletins(locale?: HomepageBulletinLocale) {
   const where = locale ? { locale } : undefined;
+  try {
+    return await db.homepageBulletin.findMany({
+      where,
+      orderBy: getHomepageBulletinOrderBy(),
+      select: HOMEPAGE_BULLETIN_LIST_SELECT
+    });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2021") {
+      return [];
+    }
 
-  return db.homepageBulletin.findMany({
-    where,
-    orderBy: getHomepageBulletinOrderBy(),
-    select: HOMEPAGE_BULLETIN_LIST_SELECT
-  });
+    throw error;
+  }
 }
 
 export async function saveHomepageBulletin(input: unknown, bulletinId?: number) {

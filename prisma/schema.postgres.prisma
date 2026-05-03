@@ -200,6 +200,26 @@ model HomepageHotTopicSlot {
   @@map("homepage_hot_topic_slots")
 }
 
+model HomepageBulletin {
+  id          Int       @id @default(autoincrement())
+  locale      String
+  title       String
+  summary     String    @default("")
+  linkUrl     String?   @map("link_url")
+  publishedAt DateTime? @map("published_at")
+  startsAt    DateTime? @map("starts_at")
+  endsAt      DateTime? @map("ends_at")
+  isActive    Boolean   @default(true) @map("is_active")
+  isPinned    Boolean   @default(false) @map("is_pinned")
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([locale, isActive, isPinned, sortOrder, publishedAt])
+  @@index([startsAt, endsAt])
+  @@map("homepage_bulletins")
+}
+
 model ContentImage {
   id        Int      @id @default(autoincrement())
   contentId Int      @map("content_id")
