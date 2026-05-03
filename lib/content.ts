@@ -4,7 +4,7 @@ import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
-import { contentSchema } from "@/lib/validation";
+import { contentSchema, homepageBulletinSchema } from "@/lib/validation";
 import { revalidateTag } from "next/cache";
 
 function slugifyTagName(name: string) {
@@ -379,6 +379,150 @@ const getCachedHomepageOverviewStats = unstable_cache(
 
 export async function getHomepageOverviewStats() {
   return getCachedHomepageOverviewStats();
+}
+
+type HomepageBulletinLocale = "en" | "zh-CN" | "ja";
+
+const HOMEPAGE_BULLETIN_LOCALES: readonly HomepageBulletinLocale[] = ["en", "zh-CN", "ja"];
+
+const HOMEPAGE_BULLETIN_LIST_SELECT = {
+  id: true,
+  locale: true,
+  title: true,
+  summary: true,
+  linkUrl: true,
+  publishedAt: true,
+  startsAt: true,
+  endsAt: true,
+  isActive: true,
+  isPinned: true,
+  sortOrder: true,
+  createdAt: true,
+  updatedAt: true
+} satisfies Prisma.HomepageBulletinSelect;
+
+function isHomepageBulletinLocale(value: string): value is HomepageBulletinLocale {
+  return HOMEPAGE_BULLETIN_LOCALES.includes(value as HomepageBulletinLocale);
+}
+
+function getHomepageBulletinWhere(locale: HomepageBulletinLocale, now = new Date()) {
+  return {
+    locale,
+    isActive: true,
+    AND: [
+      {
+        OR: [{ startsAt: null }, { startsAt: { lte: now } }]
+      },
+      {
+        OR: [{ endsAt: null }, { endsAt: { gte: now } }]
+      }
+    ]
+  } satisfies Prisma.HomepageBulletinWhereInput;
+}
+
+function getHomepageBulletinOrderBy() {
+  return [
+    { isPinned: "desc" as const },
+    { sortOrder: "asc" as const },
+    { publishedAt: "desc" as const },
+    { id: "desc" as const }
+  ];
+}
+
+export async function getHomepageBulletins(locale: HomepageBulletinLocale, limit = 6) {
+  const safeLimit = Number.isInteger(limit) && limit > 0 ? Math.min(limit, 20) : 6;
+
+  return db.homepageBulletin.findMany({
+    where: getHomepageBulletinWhere(locale),
+    orderBy: getHomepageBulletinOrderBy(),
+    take: safeLimit,
+    select: {
+      id: true,
+      title: true,
+      summary: true,
+      linkUrl: true,
+      publishedAt: true
+    }
+  });
+}
+
+export async function getAdminHomepageBulletins(locale?: HomepageBulletinLocale) {
+  const where = locale ? ({ locale } satisfies Prisma.HomepageBulletinWhereInput) : undefined;
+
+  return db.homepageBulletin.findMany({
+    where,
+    orderBy: getHomepageBulletinOrderBy(),
+    select: HOMEPAGE_BULLETIN_LIST_SELECT
+  });
+}
+
+export async function saveHomepageBulletin(input: unknown, bulletinId?: number) {
+  const parsed = homepageBulletinSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false as const,
+      error: parsed.error.issues[0]?.message ?? "Invalid bulletin data"
+    };
+  }
+
+  const data = parsed.data;
+  const payload = {
+    locale: data.locale,
+    title: data.title,
+    summary: data.summary,
+    linkUrl: data.linkUrl ?? null,
+    publishedAt: data.publishedAt ?? null,
+    startsAt: data.startsAt ?? null,
+    endsAt: data.endsAt ?? null,
+    isActive: data.isActive,
+    isPinned: data.isPinned,
+    sortOrder: data.sortOrder
+  } satisfies Prisma.HomepageBulletinUncheckedCreateInput;
+
+  try {
+    if (Number.isInteger(bulletinId) && Number(bulletinId) > 0) {
+      const updated = await db.homepageBulletin.update({
+        where: { id: Number(bulletinId) },
+        data: payload,
+        select: { id: true }
+      });
+      return { ok: true as const, bulletinId: updated.id };
+    }
+
+    const created = await db.homepageBulletin.create({
+      data: payload,
+      select: { id: true }
+    });
+    return { ok: true as const, bulletinId: created.id };
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return { ok: false as const, error: "Bulletin not found" };
+    }
+
+    return {
+      ok: false as const,
+      error: "Failed to save bulletin"
+    };
+  }
+}
+
+export async function deleteHomepageBulletin(bulletinId: number) {
+  if (!Number.isInteger(bulletinId) || bulletinId <= 0) {
+    return { ok: false as const, error: "Invalid bulletin id" };
+  }
+
+  try {
+    await db.homepageBulletin.delete({
+      where: { id: bulletinId }
+    });
+    return { ok: true as const };
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+      return { ok: false as const, error: "Bulletin not found" };
+    }
+
+    return { ok: false as const, error: "Failed to delete bulletin" };
+  }
 }
 
 export async function recordContentView(contentId: number) {
