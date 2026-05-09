@@ -178,23 +178,6 @@ export function HomePageView({
               ) : null}
             </article>
 
-            <article className="hero-intel-card hero-intel-list">
-              <div className="hero-intel-list-header">
-                <div className="eyebrow">{copy.roadmapEyebrow}</div>
-              </div>
-              <div className="hero-intel-list-items">
-                {copy.roadmapItems.map((item) => (
-                  <article key={item.title} className="hero-intel-list-item">
-                    <span className="hero-intel-dot" aria-hidden="true" />
-                    <div>
-                      <strong>{item.title}</strong>
-                      <small>{item.description}</small>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </article>
-
             <article className="hero-intel-card">
               <div className="eyebrow">{copy.reservedEyebrow}</div>
               <span className="hero-intel-mini">{copy.reservedLabel}</span>
