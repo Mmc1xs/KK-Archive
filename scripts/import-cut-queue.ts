@@ -1,0 +1,511 @@
+﻿import "./load-env";
+import path from "path";
+import { existsSync } from "fs";
+import { promises as fs } from "fs";
+import { pathToFileURL } from "url";
+import { PublishStatus, ReviewStatus, TagType, UserRole, type Tag } from "@prisma/client";
+import { db } from "../lib/db";
+import { uploadR2Object, buildR2PublicUrl } from "../lib/storage/r2";
+import { buildContentFileDownloadPath } from "../lib/downloads/content-file-token";
+
+type QueueFile = {
+  version: 1;
+  defaults?: {
+    typeName?: string;
+    publishStatus?: PublishStatus;
+    reviewStatus?: ReviewStatus;
+  };
+  items: QueueItem[];
+};
+
+type QueueItem = {
+  folder: string;
+  sourceLink: string;
+  tgLink?: string;
+  titleOverride?: string;
+  authorOverride?: string;
+  characterName?: string;
+  workName?: string;
+  typeName?: string;
+  copyTagsFromSlug?: string;
+  styleNames?: string[];
+  usageNames?: string[];
+  description?: string;
+};
+
+type PixivIllustResponse = {
+  error: boolean;
+  message: string;
+  body: {
+    illustTitle: string;
+    userName: string;
+    tags?: {
+      tags?: Array<{ tag: string }>;
+    };
+  };
+};
+
+type WorkAliasesFile = {
+  entries: Array<{
+    canonicalName: string;
+    aliases: string[];
+  }>;
+};
+
+const CUT_ROOT = path.resolve(process.cwd(), "db image", "cut");
+const DEFAULT_QUEUE = path.join(CUT_ROOT, "queue.json");
+const WORK_ALIAS_PATH = path.resolve(process.cwd(), "scripts", "pixiv-work-aliases.json");
+
+function slugify(input: string) {
+  const base = input
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+  return base || "tag";
+}
+
+function sanitizeFileName(fileName: string) {
+  const ext = path.extname(fileName).toLowerCase();
+  const base = path
+    .basename(fileName, ext)
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9._-]+/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  return `${base || "file"}${ext}`;
+}
+
+function guessMime(fileName: string) {
+  const ext = path.extname(fileName).toLowerCase();
+  switch (ext) {
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".png":
+      return "image/png";
+    case ".webp":
+      return "image/webp";
+    case ".gif":
+      return "image/gif";
+    case ".zip":
+      return "application/zip";
+    case ".7z":
+      return "application/x-7z-compressed";
+    case ".rar":
+      return "application/vnd.rar";
+    default:
+      return "application/octet-stream";
+  }
+}
+
+function parsePixivArtworkId(sourceLink: string) {
+  const matched = sourceLink.match(/artworks\/(\d+)/i);
+  return matched?.[1] ?? null;
+}
+
+function normalizeKey(input: string) {
+  return input
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]+/g, "")
+    .trim();
+}
+
+async function fetchPixivIllust(artworkId: string) {
+  const response = await fetch(`https://www.pixiv.net/ajax/illust/${artworkId}`, {
+    headers: {
+      Referer: "https://www.pixiv.net/",
+      "User-Agent": "Mozilla/5.0"
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Pixiv request failed: ${response.status} ${response.statusText}`);
+  }
+
+  const json = (await response.json()) as PixivIllustResponse;
+  if (json.error || !json.body) {
+    throw new Error(`Pixiv response error: ${json.message || "unknown"}`);
+  }
+
+  return {
+    title: json.body.illustTitle?.trim() || null,
+    author: json.body.userName?.trim() || null,
+    tags: (json.body.tags?.tags ?? []).map((x) => x.tag).filter(Boolean)
+  };
+}
+
+async function ensureUniqueContentSlug(baseSlug: string) {
+  let slug = baseSlug || "content";
+  let counter = 2;
+  while (await db.content.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
+  return slug;
+}
+
+async function ensureUniqueTagSlug(baseSlug: string) {
+  let slug = baseSlug || "tag";
+  let counter = 2;
+  while (await db.tag.findUnique({ where: { slug } })) {
+    slug = `${baseSlug}-${counter}`;
+    counter += 1;
+  }
+  return slug;
+}
+
+async function ensureTagByTypeAndName(type: TagType, name: string, workTagId?: number | null) {
+  const found = await db.tag.findFirst({
+    where: {
+      type,
+      name,
+      ...(type === TagType.CHARACTER ? { workTagId: workTagId ?? null } : {})
+    }
+  });
+
+  if (found) {
+    return found;
+  }
+
+  const baseSlug =
+    type === TagType.AUTHOR
+      ? `author-${slugify(name)}`
+      : type === TagType.CHARACTER
+        ? `character-${workTagId ?? "none"}-${slugify(name)}`
+        : `${type.toLowerCase()}-${slugify(name)}`;
+
+  const slug = await ensureUniqueTagSlug(baseSlug);
+  return db.tag.create({
+    data: {
+      name,
+      slug,
+      type,
+      ...(type === TagType.CHARACTER ? { workTagId: workTagId ?? null } : {})
+    }
+  });
+}
+
+async function loadWorkAliasMap() {
+  if (!existsSync(WORK_ALIAS_PATH)) {
+    return new Map<string, string>();
+  }
+
+  const raw = await fs.readFile(WORK_ALIAS_PATH, "utf8");
+  const parsed = JSON.parse(raw) as WorkAliasesFile;
+  const map = new Map<string, string>();
+
+  for (const entry of parsed.entries ?? []) {
+    const canon = entry.canonicalName?.trim();
+    if (!canon) continue;
+
+    map.set(normalizeKey(canon), canon);
+    for (const alias of entry.aliases ?? []) {
+      if (!alias) continue;
+      map.set(normalizeKey(alias), canon);
+    }
+  }
+
+  return map;
+}
+
+async function inferWorkTag(item: QueueItem, pixivTags: string[], aliasMap: Map<string, string>) {
+  if (item.workName) {
+    const direct = await db.tag.findFirst({ where: { type: TagType.WORK, name: item.workName } });
+    if (!direct) {
+      throw new Error(`workName not found in DB: ${item.workName}`);
+    }
+    return direct;
+  }
+
+  for (const rawTag of pixivTags) {
+    const canonical = aliasMap.get(normalizeKey(rawTag));
+    if (!canonical) continue;
+    const work = await db.tag.findFirst({ where: { type: TagType.WORK, name: canonical } });
+    if (work) {
+      return work;
+    }
+  }
+
+  return null;
+}
+
+async function resolveBaseTags(item: QueueItem, inferredWorkTag: Tag | null) {
+  if (!item.copyTagsFromSlug) {
+    return {
+      workTag: inferredWorkTag,
+      extraStyleTags: [] as Tag[],
+      extraUsageTags: [] as Tag[],
+      baseTypeTag: null as Tag | null,
+      baseCharacterTag: null as Tag | null
+    };
+  }
+
+  const ref = await db.content.findUnique({
+    where: { slug: item.copyTagsFromSlug },
+    select: {
+      contentTags: {
+        select: { tag: true }
+      }
+    }
+  });
+
+  if (!ref) {
+    throw new Error(`copyTagsFromSlug not found: ${item.copyTagsFromSlug}`);
+  }
+
+  const tags = ref.contentTags.map((x) => x.tag);
+  const workTag = tags.find((t) => t.type === TagType.WORK) ?? inferredWorkTag;
+  const baseTypeTag = tags.find((t) => t.type === TagType.TYPE) ?? null;
+  const baseCharacterTag = tags.find((t) => t.type === TagType.CHARACTER) ?? null;
+  const extraStyleTags = tags.filter((t) => t.type === TagType.STYLE);
+  const extraUsageTags = tags.filter((t) => t.type === TagType.USAGE);
+
+  return { workTag, extraStyleTags, extraUsageTags, baseTypeTag, baseCharacterTag };
+}
+
+async function importOne(item: QueueItem, defaults: QueueFile["defaults"], aliasMap: Map<string, string>) {
+  const sourceLink = item.sourceLink.trim();
+  const artworkId = parsePixivArtworkId(sourceLink);
+
+  if (artworkId) {
+    const existingBySource = await db.content.findFirst({
+      where: { sourceLink },
+      select: { id: true, slug: true, title: true }
+    });
+
+    if (existingBySource) {
+      return { skipped: true, reason: "source_exists", existingBySource };
+    }
+  }
+
+  const folderPath = path.join(CUT_ROOT, item.folder);
+  const downloadFolderPath = path.join(folderPath, "d");
+
+  const folderItems = await fs.readdir(folderPath, { withFileTypes: true });
+  const imageFiles = folderItems
+    .filter((x) => x.isFile())
+    .map((x) => x.name)
+    .filter((name) => /\.(jpg|jpeg|png|webp)$/i.test(name))
+    .sort((a, b) => a.localeCompare(b, "en"));
+
+  if (imageFiles.length === 0) {
+    throw new Error(`No images found in ${folderPath}`);
+  }
+
+  const downloadFiles = existsSync(downloadFolderPath)
+    ? (await fs.readdir(downloadFolderPath, { withFileTypes: true }))
+        .filter((x) => x.isFile())
+        .map((x) => x.name)
+        .sort((a, b) => a.localeCompare(b, "en"))
+    : [];
+
+  const pixiv = artworkId ? await fetchPixivIllust(artworkId) : { title: null, author: null, tags: [] as string[] };
+
+  const title = item.titleOverride?.trim() || pixiv.title || item.characterName?.trim() || item.folder.trim();
+  const authorName = item.authorOverride?.trim() || pixiv.author || "Unknown";
+  const characterName = item.characterName?.trim() || item.folder.trim();
+
+  const inferredWorkTag = await inferWorkTag(item, pixiv.tags, aliasMap);
+  const baseTags = await resolveBaseTags(item, inferredWorkTag);
+  const workTag = baseTags.workTag;
+
+  if (!workTag) {
+    throw new Error(
+      `Unable to infer work tag for folder '${item.folder}'. Add workName or copyTagsFromSlug in queue.json.`
+    );
+  }
+
+  const typeName = item.typeName?.trim() || defaults?.typeName || baseTags.baseTypeTag?.name || "Character card";
+  const typeTag = await db.tag.findFirst({ where: { type: TagType.TYPE, name: typeName } });
+  if (!typeTag) {
+    throw new Error(`Type tag not found: ${typeName}`);
+  }
+
+  const authorTag = await ensureTagByTypeAndName(TagType.AUTHOR, authorName);
+  const characterTag = await ensureTagByTypeAndName(TagType.CHARACTER, characterName, workTag.id);
+
+  const styleTags = item.styleNames?.length
+    ? await Promise.all(item.styleNames.map((name) => ensureTagByTypeAndName(TagType.STYLE, name)))
+    : baseTags.extraStyleTags;
+
+  const usageTags = item.usageNames?.length
+    ? await Promise.all(item.usageNames.map((name) => ensureTagByTypeAndName(TagType.USAGE, name)))
+    : baseTags.extraUsageTags;
+
+  const slugBase = artworkId
+    ? `pixiv-${artworkId}-${slugify(characterName || item.folder)}`
+    : `manual-${slugify(characterName || item.folder)}`;
+  const slug = await ensureUniqueContentSlug(slugBase);
+
+  const imageUrls: string[] = [];
+  for (let i = 0; i < imageFiles.length; i += 1) {
+    const name = imageFiles[i];
+    const buf = await fs.readFile(path.join(folderPath, name));
+    const objectKey = `contents/${slug}/${String(i + 1).padStart(2, "0")}-${sanitizeFileName(name)}`;
+    await uploadR2Object({ key: objectKey, body: buf, contentType: guessMime(name), contentLength: buf.byteLength });
+    imageUrls.push(buildR2PublicUrl(objectKey));
+  }
+
+  const tagIds = Array.from(
+    new Set([
+      authorTag.id,
+      typeTag.id,
+      workTag.id,
+      characterTag.id,
+      ...styleTags.map((x) => x.id),
+      ...usageTags.map((x) => x.id)
+    ])
+  );
+
+  const content = await db.content.create({
+    data: {
+      title,
+      slug,
+      description:
+        item.description?.trim() ||
+        (artworkId
+          ? `Imported from db image/cut/${item.folder}. Auto-enriched from Pixiv artwork ${artworkId}.`
+          : `Imported from db image/cut/${item.folder}. Source: ${sourceLink}`),
+      coverImageUrl: imageUrls[0],
+      sourceLink,
+      storageFolder: slug,
+      reviewStatus: item.copyTagsFromSlug ? defaults?.reviewStatus ?? ReviewStatus.UNVERIFIED : defaults?.reviewStatus ?? ReviewStatus.UNVERIFIED,
+      publishStatus: defaults?.publishStatus ?? PublishStatus.PUBLISHED,
+      contentTags: { create: tagIds.map((tagId) => ({ tagId })) },
+      images: {
+        create: imageUrls.map((imageUrl, sortOrder) => ({ imageUrl, sortOrder }))
+      }
+    },
+    select: { id: true, slug: true, title: true }
+  });
+
+  const uploader = await db.user.findFirst({
+    where: { role: UserRole.ADMIN },
+    orderBy: { id: "asc" },
+    select: { id: true }
+  });
+
+  if (!uploader) {
+    throw new Error("No admin uploader user found");
+  }
+
+  const downloadResults: Array<{ sortOrder: number; url: string; fileName: string }> = [];
+
+  for (let i = 0; i < downloadFiles.length; i += 1) {
+    const fileName = downloadFiles[i];
+    const filePath = path.join(downloadFolderPath, fileName);
+    const buf = await fs.readFile(filePath);
+    const safe = sanitizeFileName(fileName);
+    const ext = path.extname(safe).toLowerCase() || ".bin";
+    const objectKey = `uploadfiles/${slug}/${String(i + 1).padStart(2, "0")}-download${ext}`;
+
+    await uploadR2Object({ key: objectKey, body: buf, contentType: guessMime(fileName), contentLength: buf.byteLength });
+
+    const file = await db.contentFile.create({
+      data: {
+        contentId: content.id,
+        fileName,
+        objectKey,
+        mimeType: guessMime(fileName),
+        byteSize: buf.byteLength,
+        sortOrder: i,
+        uploadedByUserId: uploader.id
+      },
+      select: { id: true }
+    });
+
+    const url = buildContentFileDownloadPath(file.id);
+    await db.contentDownloadLink.create({ data: { contentId: content.id, url, sortOrder: i } });
+    downloadResults.push({ sortOrder: i, url, fileName });
+  }
+
+  if (item.tgLink?.trim()) {
+    const sortOrder = downloadResults.length;
+    await db.contentDownloadLink.create({
+      data: {
+        contentId: content.id,
+        url: item.tgLink.trim(),
+        sortOrder
+      }
+    });
+    downloadResults.push({ sortOrder, url: item.tgLink.trim(), fileName: "TG" });
+  }
+
+  return {
+    skipped: false,
+    folder: item.folder,
+    content,
+    pixiv: {
+      artworkId,
+      title: pixiv.title,
+      author: pixiv.author,
+      tags: pixiv.tags
+    },
+    resolved: {
+      finalTitle: title,
+      finalAuthor: authorName,
+      work: workTag.name,
+      character: characterTag.name,
+      type: typeTag.name,
+      styles: styleTags.map((x) => x.name),
+      usages: usageTags.map((x) => x.name)
+    },
+    imageCount: imageUrls.length,
+    downloads: downloadResults
+  };
+}
+
+async function main() {
+  const queuePath = process.argv[2] ? path.resolve(process.cwd(), process.argv[2]) : DEFAULT_QUEUE;
+  if (!existsSync(queuePath)) {
+    throw new Error(`Queue file not found: ${queuePath}`);
+  }
+
+  const raw = await fs.readFile(queuePath, "utf8");
+  const queue = JSON.parse(raw.replace(/^\uFEFF/, "")) as QueueFile;
+
+  if (!Array.isArray(queue.items) || queue.items.length === 0) {
+    console.log(JSON.stringify({ queuePath, count: 0, results: [], note: "queue has no items" }, null, 2));
+    return;
+  }
+
+  const aliasMap = await loadWorkAliasMap();
+  const results = [] as unknown[];
+
+  for (const item of queue.items) {
+    if (!item.folder || !item.sourceLink) {
+      results.push({ skipped: true, reason: "missing_folder_or_source", item });
+      continue;
+    }
+
+    try {
+      const result = await importOne(item, queue.defaults, aliasMap);
+      results.push(result);
+      console.log(`[CUT] ${item.folder} -> ${"skipped" in result && result.skipped ? "SKIPPED" : "IMPORTED"}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      results.push({ folder: item.folder, failed: true, error: message });
+      console.error(`[CUT] ${item.folder} -> FAILED: ${message}`);
+    }
+  }
+
+  console.log(JSON.stringify({ queuePath, count: queue.items.length, results }, null, 2));
+}
+
+const isDirectRun = process.argv[1] ? import.meta.url === pathToFileURL(process.argv[1]).href : false;
+
+if (isDirectRun) {
+  main()
+    .catch((error) => {
+      console.error(error);
+      process.exitCode = 1;
+    })
+    .finally(async () => {
+      await db.$disconnect();
+    });
+}

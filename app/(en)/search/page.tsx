@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { SearchPageView } from "@/components/search-page-view";
-import { getCurrentSession } from "@/lib/auth/session";
 import { getSearchFilterBootstrap, searchPublishedContents } from "@/lib/content";
 
 const PAGE_SIZE = 12;
@@ -33,13 +32,10 @@ export default async function SearchPage({
   const types = readValues(params.types);
   const pageParam = typeof params.page === "string" ? Number(params.page) : 1;
   const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const user = await getCurrentSession({ touchActivity: false });
-
   const [searchFilterBootstrap, resultsPage] = await Promise.all([
     getSearchFilterBootstrap({ author, work, character, styles, usages }),
     searchPublishedContents({
-      isLoggedIn: Boolean(user),
-      viewerRole: user?.role,
+      isLoggedIn: false,
       author,
       work,
       character,

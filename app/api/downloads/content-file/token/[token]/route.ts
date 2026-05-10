@@ -6,11 +6,36 @@ import { parseContentFileToken } from "@/lib/downloads/content-file-token";
 import { db } from "@/lib/db";
 import { createR2DownloadUrl } from "@/lib/storage/r2";
 
+function resolveLoginPath(request: Request) {
+  const referer = request.headers.get("referer");
+  if (!referer) {
+    return "/login";
+  }
+
+  try {
+    const refererPath = new URL(referer).pathname;
+    if (refererPath.startsWith("/zh-CN/")) {
+      return "/zh-CN/login";
+    }
+    if (refererPath.startsWith("/ja/")) {
+      return "/ja/login";
+    }
+  } catch {
+    // Fallback to default login path when referer is malformed.
+  }
+
+  return "/login";
+}
+
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const user = await getCurrentSession({ touchActivity: false });
+  if (!user) {
+    const loginUrl = new URL(resolveLoginPath(request), request.url);
+    return NextResponse.redirect(loginUrl);
+  }
 
   const routeParams = await params;
   const fileId = parseContentFileToken(routeParams.token);
@@ -40,9 +65,7 @@ export async function GET(
   const isStaff = Boolean(user && (user.role === UserRole.ADMIN || user.role === UserRole.AUDIT));
   const canAccessByStatus = isStaff
     ? true
-    : user
-      ? file.content.publishStatus === PublishStatus.PUBLISHED || file.content.publishStatus === PublishStatus.SUMMIT
-      : file.content.publishStatus === PublishStatus.PUBLISHED;
+    : file.content.publishStatus === PublishStatus.PUBLISHED || file.content.publishStatus === PublishStatus.SUMMIT;
 
   if (!canAccessByStatus) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -54,7 +77,7 @@ export async function GET(
   });
 
   try {
-    await recordContentDownload(file.content.id, user?.id ?? null);
+    await recordContentDownload(file.content.id, user.id);
   } catch (error) {
     console.error("Failed to record content download", {
       fileId: file.id,

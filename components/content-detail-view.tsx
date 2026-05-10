@@ -5,7 +5,7 @@ import { reportPassedContentIssueAction } from "@/app/actions";
 import { AdBlockNoticeModal } from "@/components/adblock-notice-modal";
 import { HomeStickyBanner } from "@/components/home-sticky-banner";
 import { TagLinks } from "@/components/tag-links";
-import { getLocaleLoginHref, type UiLocale } from "@/lib/ui-locale";
+import { type UiLocale } from "@/lib/ui-locale";
 
 type ContentDetailContent = {
   id: number;
@@ -155,9 +155,7 @@ export function ContentDetailView({
   const description = content.description?.trim();
   const detailPath = buildContentDetailPath(locale, content.slug);
   const reportCopy = getReportCopy(locale);
-  const loginHref = getLocaleLoginHref(locale);
-  const canUseWebsiteDownload = Boolean(user);
-  const showWebsiteDownloadGate = !canUseWebsiteDownload && siteDownloadEntries.length > 0;
+  const canUseWebsiteDownload = siteDownloadEntries.length > 0;
 
   return (
     <div className="page-section grid">
@@ -270,14 +268,6 @@ export function ContentDetailView({
                       ))}
                     </div>
                   </details>
-                ) : null}
-                {showWebsiteDownloadGate ? (
-                  <div className="download-auth-note">
-                    <span>{copy.websiteDownloadLoginRequired}</span>
-                    <Link href={loginHref} className="link-pill">
-                      {copy.login}
-                    </Link>
-                  </div>
                 ) : null}
               </div>
             </section>

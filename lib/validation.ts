@@ -118,6 +118,90 @@ export const contentSchema = z.object({
   imageUrls: z.array(contentImageUrlSchema).min(1, "At least one image is required")
 });
 
+const HOMEPAGE_BULLETIN_LOCALES = ["en", "zh-CN", "ja"] as const;
+
+function normalizeOptionalDate(value: unknown) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    return undefined;
+  }
+
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? raw : date;
+}
+
+export const homepageBulletinSchema = z
+  .object({
+    locale: z.enum(HOMEPAGE_BULLETIN_LOCALES),
+    title: z.string().trim().min(1, "Title is required").max(120, "Title must be at most 120 characters"),
+    summary: z.string().trim().max(280, "Summary must be at most 280 characters").default(""),
+    linkUrl: z.preprocess(
+      (value) => {
+        const normalized = String(value ?? "").trim();
+        return normalized ? normalized : undefined;
+      },
+      z
+        .string()
+        .url("Link must be a valid URL")
+        .refine(
+          (value) => isAllowedExternalUrl(value),
+          "Link must use https (localhost http is allowed in development)"
+        )
+        .optional()
+    ),
+    publishedAt: z.preprocess(
+      normalizeOptionalDate,
+      z.date({ invalid_type_error: "Published time is invalid" }).optional()
+    ),
+    startsAt: z.preprocess(
+      normalizeOptionalDate,
+      z.date({ invalid_type_error: "Start time is invalid" }).optional()
+    ),
+    endsAt: z.preprocess(
+      normalizeOptionalDate,
+      z.date({ invalid_type_error: "End time is invalid" }).optional()
+    ),
+    isActive: z.coerce.boolean().default(true),
+    isPinned: z.coerce.boolean().default(false),
+    sortOrder: z.coerce.number().int("Sort order must be an integer").min(0).max(9999).default(0)
+  })
+  .refine(
+    (data) => {
+      if (!data.startsAt || !data.endsAt) {
+        return true;
+      }
+
+      return data.endsAt.getTime() >= data.startsAt.getTime();
+    },
+    {
+      message: "End time must be after start time",
+      path: ["endsAt"]
+    }
+  );
+
+export const modLibraryEntrySchema = z.object({
+  name: z.string().trim().min(1, "Name is required").max(255, "Name must be at most 255 characters"),
+  version: z.string().trim().max(120, "Version must be at most 120 characters").default(""),
+  author: z.string().trim().max(255, "Author must be at most 255 characters").default(""),
+  guid: z.string().trim().min(1, "Guid is required").max(255, "Guid must be at most 255 characters"),
+  filename: z.string().trim().min(1, "Filename is required").max(400, "Filename must be at most 400 characters"),
+  messageLink: z
+    .string()
+    .trim()
+    .max(1200, "Message link must be at most 1200 characters")
+    .default("")
+    .refine(
+      (value) => value.length === 0 || isAllowedExternalUrl(value),
+      "Message link must use https (localhost http is allowed in development)"
+    )
+});
+
+export const modLibraryBindingSchema = z.object({
+  modId: z.coerce.number().int().positive("Invalid mod id"),
+  contentId: z.coerce.number().int().positive("Invalid content id"),
+  note: z.string().trim().max(200, "Note must be at most 200 characters").default("")
+});
+
 export function normalizeTagType(type: string) {
   switch (type) {
     case "author":

@@ -23,6 +23,12 @@ export default async function AdminPage() {
               <Link href="/admin/homepage" className="button secondary">
                 Homepage
               </Link>
+              <Link href="/admin/homepage/bulletins" className="button secondary">
+                Bulletin Manager
+              </Link>
+              <Link href="/admin/mod-library" className="button secondary">
+                Mod Library
+              </Link>
               <Link href="/admin/activity" className="button secondary">
                 Account Activity
               </Link>
@@ -52,6 +58,12 @@ export default async function AdminPage() {
               </Link>
               <Link href="/admin/homepage" className="link-pill">
                 Manage Hot Topic
+              </Link>
+              <Link href="/admin/homepage/bulletins" className="link-pill">
+                Manage Bulletin
+              </Link>
+              <Link href="/admin/mod-library" className="link-pill">
+                Manage Mod Library
               </Link>
               <Link href="/admin/views" className="link-pill">
                 Open View Reports

@@ -54,6 +54,9 @@ export default async function AdminHomepagePage({
             <Link href="/admin" className="button secondary">
               Back to Dashboard
             </Link>
+            <Link href="/admin/homepage/bulletins" className="button secondary">
+              Bulletin Manager
+            </Link>
             <Link href="/" className="button secondary">
               View Homepage
             </Link>

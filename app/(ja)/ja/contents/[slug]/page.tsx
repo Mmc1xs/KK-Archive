@@ -1,4 +1,5 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ContentDetailView } from "@/components/content-detail-view";
 import { getCurrentSession } from "@/lib/auth/session";
@@ -56,9 +57,15 @@ export default async function ContentDetailPageJa({
     notFound();
   }
 
-  void recordContentView(content.id).catch(() => {
-    // Non-blocking analytics: view tracking failures should not block page rendering.
-  });
+  const requestHeaders = await headers();
+  const userAgent = requestHeaders.get("user-agent")?.toLowerCase() ?? "";
+  const isLikelyBot = /(bot|crawler|spider|headless|preview|facebookexternalhit|slurp|bingpreview)/i.test(userAgent);
+
+  if (!isLikelyBot) {
+    void recordContentView(content.id).catch(() => {
+      // Non-blocking analytics: view tracking failures should not block page rendering.
+    });
+  }
 
   const { tgDownloadLink, siteDownloadEntries } = normalizeContentDownloadEntries(content);
 

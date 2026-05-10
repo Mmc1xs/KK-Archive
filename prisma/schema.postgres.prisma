@@ -117,6 +117,7 @@ model Content {
   downloadEvents ContentDownloadEvent[]
   issueReports   ContentIssueReport[]
   hotTopicSlots HomepageHotTopicSlot[]
+  modBindings   ContentModBinding[]
 
   @@index([publishStatus, createdAt])
   @@index([reviewStatus, updatedAt])
@@ -357,4 +358,36 @@ model ContentTag {
   @@id([contentId, tagId])
   @@index([tagId, contentId])
   @@map("content_tags")
+}
+
+model ModLibraryEntry {
+  id         Int                 @id @default(autoincrement())
+  name       String
+  version    String              @default("")
+  author     String              @default("")
+  guid       String
+  filename   String
+  messageLink String             @default("") @map("message_link")
+  createdAt  DateTime            @default(now()) @map("created_at")
+  updatedAt  DateTime            @updatedAt @map("updated_at")
+  bindings   ContentModBinding[]
+
+  @@index([guid])
+  @@index([name, author])
+  @@index([filename])
+  @@map("mod_library_entries")
+}
+
+model ContentModBinding {
+  contentId  Int             @map("content_id")
+  modId      Int             @map("mod_id")
+  note       String          @default("")
+  createdAt  DateTime        @default(now()) @map("created_at")
+  content    Content         @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  mod        ModLibraryEntry @relation(fields: [modId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, modId])
+  @@index([modId, createdAt])
+  @@index([contentId, createdAt])
+  @@map("content_mod_bindings")
 }

@@ -5,7 +5,18 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, requireStaff, requireUserWithoutTouch } from "@/lib/auth/session";
 import { db } from "@/lib/db";
-import { HOMEPAGE_HOT_TOPIC_SLOT_COUNT, saveContent } from "@/lib/content";
+import {
+  HOMEPAGE_HOT_TOPIC_SLOT_COUNT,
+  deleteHomepageBulletin,
+  saveContent,
+  saveHomepageBulletin
+} from "@/lib/content";
+import {
+  bindModToContent,
+  deleteModLibraryEntry,
+  saveModLibraryEntry,
+  unbindModFromContent
+} from "@/lib/mod-library";
 import { deleteR2Object, extractR2ObjectKeyFromPublicUrl } from "@/lib/storage/r2";
 import { deleteTag, saveTag, updateTag } from "@/lib/tag";
 import { usernameSchema } from "@/lib/validation";
@@ -41,6 +52,10 @@ function getStringList(formData: FormData, key: string) {
 
 function getSafeRedirectPath(path: string, fallback = "/") {
   return path.startsWith("/") && !path.startsWith("//") ? path : fallback;
+}
+
+function getBooleanFromFormData(formData: FormData, key: string) {
+  return formData.get(key) === "on" || formData.get(key) === "true" || formData.get(key) === "1";
 }
 
 export async function reportPassedContentIssueAction(formData: FormData) {
@@ -319,6 +334,194 @@ export async function clearHomepageHotTopicSlotAction(formData: FormData) {
   revalidatePath("/");
   revalidatePath("/admin/homepage");
   redirect(getHomepageSlotRedirectPath(slot, "success", "Hot Topic slot cleared"));
+}
+
+export async function createHomepageBulletinAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/homepage/bulletins"), "/admin/homepage/bulletins");
+
+  const result = await saveHomepageBulletin({
+    locale: formData.get("locale"),
+    title: formData.get("title"),
+    summary: formData.get("summary"),
+    linkUrl: formData.get("linkUrl"),
+    publishedAt: formData.get("publishedAt"),
+    startsAt: formData.get("startsAt"),
+    endsAt: formData.get("endsAt"),
+    isActive: getBooleanFromFormData(formData, "isActive"),
+    isPinned: getBooleanFromFormData(formData, "isPinned"),
+    sortOrder: formData.get("sortOrder")
+  });
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  revalidatePath("/en");
+  revalidatePath("/zh-CN");
+  revalidatePath("/ja");
+  redirectWithMessage(redirectTo, "success", "Bulletin created");
+}
+
+export async function updateHomepageBulletinAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/homepage/bulletins"), "/admin/homepage/bulletins");
+  const bulletinId = Number(formData.get("bulletinId"));
+  if (!Number.isInteger(bulletinId) || bulletinId <= 0) {
+    redirectWithMessage(redirectTo, "error", "Invalid bulletin id");
+  }
+
+  const result = await saveHomepageBulletin(
+    {
+      locale: formData.get("locale"),
+      title: formData.get("title"),
+      summary: formData.get("summary"),
+      linkUrl: formData.get("linkUrl"),
+      publishedAt: formData.get("publishedAt"),
+      startsAt: formData.get("startsAt"),
+      endsAt: formData.get("endsAt"),
+      isActive: getBooleanFromFormData(formData, "isActive"),
+      isPinned: getBooleanFromFormData(formData, "isPinned"),
+      sortOrder: formData.get("sortOrder")
+    },
+    bulletinId
+  );
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  revalidatePath("/en");
+  revalidatePath("/zh-CN");
+  revalidatePath("/ja");
+  redirectWithMessage(redirectTo, "success", "Bulletin updated");
+}
+
+export async function deleteHomepageBulletinAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/homepage/bulletins"), "/admin/homepage/bulletins");
+  const bulletinId = Number(formData.get("bulletinId"));
+  const result = await deleteHomepageBulletin(bulletinId);
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  revalidatePath("/en");
+  revalidatePath("/zh-CN");
+  revalidatePath("/ja");
+  redirectWithMessage(redirectTo, "success", "Bulletin deleted");
+}
+
+export async function createModLibraryEntryAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/mod-library"), "/admin/mod-library");
+  const result = await saveModLibraryEntry({
+    name: formData.get("name"),
+    version: formData.get("version"),
+    author: formData.get("author"),
+    guid: formData.get("guid"),
+    filename: formData.get("filename"),
+    messageLink: formData.get("messageLink")
+  });
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  revalidatePath("/mod_library");
+  revalidatePath("/zh-CN/mod_library");
+  revalidatePath("/ja/mod_library");
+  revalidatePath("/admin/mod-library");
+  redirectWithMessage(redirectTo, "success", "Mod entry created");
+}
+
+export async function updateModLibraryEntryAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/mod-library"), "/admin/mod-library");
+  const modId = Number(formData.get("modId"));
+  if (!Number.isInteger(modId) || modId <= 0) {
+    redirectWithMessage(redirectTo, "error", "Invalid mod id");
+  }
+
+  const result = await saveModLibraryEntry(
+    {
+      name: formData.get("name"),
+      version: formData.get("version"),
+      author: formData.get("author"),
+      guid: formData.get("guid"),
+      filename: formData.get("filename"),
+      messageLink: formData.get("messageLink")
+    },
+    modId
+  );
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  revalidatePath("/mod_library");
+  revalidatePath("/zh-CN/mod_library");
+  revalidatePath("/ja/mod_library");
+  revalidatePath("/admin/mod-library");
+  redirectWithMessage(redirectTo, "success", "Mod entry updated");
+}
+
+export async function deleteModLibraryEntryAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/mod-library"), "/admin/mod-library");
+  const modId = Number(formData.get("modId"));
+  const result = await deleteModLibraryEntry(modId);
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  revalidatePath("/mod_library");
+  revalidatePath("/zh-CN/mod_library");
+  revalidatePath("/ja/mod_library");
+  revalidatePath("/admin/mod-library");
+  redirectWithMessage(redirectTo, "success", "Mod entry deleted");
+}
+
+export async function bindModLibraryEntryAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/mod-library"), "/admin/mod-library");
+  const result = await bindModToContent({
+    modId: formData.get("modId"),
+    contentId: formData.get("contentId"),
+    note: formData.get("note")
+  });
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  revalidatePath("/admin/mod-library");
+  redirectWithMessage(redirectTo, "success", "Binding saved");
+}
+
+export async function unbindModLibraryEntryAction(formData: FormData) {
+  await requireAdmin({ touchActivity: false });
+
+  const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/admin/mod-library"), "/admin/mod-library");
+  const modId = Number(formData.get("modId"));
+  const contentId = Number(formData.get("contentId"));
+  const result = await unbindModFromContent(modId, contentId);
+
+  if (!result.ok) {
+    redirectWithMessage(redirectTo, "error", result.error);
+  }
+
+  revalidatePath("/admin/mod-library");
+  redirectWithMessage(redirectTo, "success", "Binding removed");
 }
 
 export async function createTagAction(formData: FormData) {

@@ -8,6 +8,7 @@ import {
   getLocaleContentsHref,
   getLocaleHomeHref,
   getLocaleLoginHref,
+  getLocaleModLibraryHref,
   getLocaleProfileHref,
   getLocaleRegisterHref,
   getLocaleSearchHref,
@@ -22,6 +23,16 @@ type SessionUser = {
 };
 
 const PLUGIN_DATA_READER_HREF = "/tool-static/PluginDataReader?v=20260413";
+const SESSION_CACHE_KEY = "kk_site_nav_session_v1";
+const SESSION_CACHE_USER_MAX_AGE_MS = 15 * 60 * 1000;
+const SESSION_CACHE_GUEST_MAX_AGE_MS = 30 * 1000;
+const LOCALE_PREF_COOKIE_KEY = "kk_locale_pref";
+const LOCALE_PREF_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+
+type SessionSnapshot = {
+  user: SessionUser | null;
+  updatedAt: number;
+};
 
 const localeLabels = {
   en: {
@@ -30,6 +41,7 @@ const localeLabels = {
     contents: "Contents",
     search: "Search",
     tool: "Tool",
+    modLibrary: "Mod Library",
     admin: "Admin",
     profile: "Profile",
     logout: "Logout",
@@ -42,6 +54,7 @@ const localeLabels = {
     contents: "内容",
     search: "搜索",
     tool: "工具",
+    modLibrary: "Mod 库",
     admin: "后台",
     profile: "个人资料",
     logout: "登出",
@@ -54,6 +67,7 @@ const localeLabels = {
     contents: "コンテンツ",
     search: "検索",
     tool: "ツール",
+    modLibrary: "Mod ライブラリ",
     admin: "管理",
     profile: "プロフィール",
     logout: "ログアウト",
@@ -72,9 +86,43 @@ export function SiteNavClient() {
   const toolMenuRef = useRef<HTMLDivElement | null>(null);
   const locale = getCurrentUiLocale(pathname);
   const labels = localeLabels[locale];
+  const canAccessModLibrary = resolved && Boolean(user);
 
   useEffect(() => {
     let active = true;
+
+    function loadCachedSnapshot() {
+      try {
+        const raw = window.localStorage.getItem(SESSION_CACHE_KEY);
+        if (!raw) {
+          return null;
+        }
+
+        const snapshot = JSON.parse(raw) as SessionSnapshot;
+        if (!snapshot || typeof snapshot.updatedAt !== "number") {
+          return null;
+        }
+
+        const age = Date.now() - snapshot.updatedAt;
+        const maxAge = snapshot.user ? SESSION_CACHE_USER_MAX_AGE_MS : SESSION_CACHE_GUEST_MAX_AGE_MS;
+
+        if (age > maxAge) {
+          return null;
+        }
+
+        return snapshot;
+      } catch {
+        return null;
+      }
+    }
+
+    function persistSnapshot(snapshot: SessionSnapshot) {
+      try {
+        window.localStorage.setItem(SESSION_CACHE_KEY, JSON.stringify(snapshot));
+      } catch {
+        // Ignore quota/storage failures.
+      }
+    }
 
     async function loadSession() {
       try {
@@ -93,8 +141,13 @@ export function SiteNavClient() {
 
         const data = (await response.json()) as { user: SessionUser | null };
         if (active) {
-          setUser(data.user ?? null);
+          const nextUser = data.user ?? null;
+          setUser(nextUser);
           setResolved(true);
+          persistSnapshot({
+            user: nextUser,
+            updatedAt: Date.now()
+          });
         }
       } catch {
         if (active) {
@@ -103,12 +156,29 @@ export function SiteNavClient() {
       }
     }
 
+    const cached = loadCachedSnapshot();
+    if (cached) {
+      setUser(cached.user ?? null);
+      setResolved(true);
+      return () => {
+        active = false;
+      };
+    }
+
     void loadSession();
 
     return () => {
       active = false;
     };
   }, []);
+
+  function persistLocalePreference(localeOption: (typeof UI_LOCALES)[number]) {
+    try {
+      document.cookie = `${LOCALE_PREF_COOKIE_KEY}=${localeOption}; Max-Age=${LOCALE_PREF_COOKIE_MAX_AGE_SECONDS}; Path=/; SameSite=Lax`;
+    } catch {
+      // Ignore cookie write failures.
+    }
+  }
 
   useEffect(() => {
     function handlePointerDown(event: MouseEvent) {
@@ -145,6 +215,7 @@ export function SiteNavClient() {
         </Link>
         <Link href={getLocaleContentsHref(locale)}>{labels.contents}</Link>
         <Link href={getLocaleSearchHref(locale)}>{labels.search}</Link>
+        {canAccessModLibrary ? <Link href={getLocaleModLibraryHref(locale)}>{labels.modLibrary}</Link> : null}
         <div ref={toolMenuRef} style={{ position: "relative", zIndex: 80 }}>
           <button
             type="button"
@@ -233,7 +304,10 @@ export function SiteNavClient() {
                   href={getLocaleHomeHref(localeOption)}
                   role="menuitem"
                   className={localeOption === locale ? "button secondary" : "link-pill"}
-                  onClick={() => setLanguageMenuOpen(false)}
+                  onClick={() => {
+                    persistLocalePreference(localeOption);
+                    setLanguageMenuOpen(false);
+                  }}
                   style={{ justifyContent: "center" }}
                 >
                   {localeLabels[localeOption].menu}
@@ -249,7 +323,17 @@ export function SiteNavClient() {
             </Link>
             <span className="muted">{user.username ?? user.email}</span>
             <form action="/auth/logout" method="post">
-              <button type="submit" className="link-pill">
+              <button
+                type="submit"
+                className="link-pill"
+                onClick={() => {
+                  try {
+                    window.localStorage.removeItem(SESSION_CACHE_KEY);
+                  } catch {
+                    // Ignore storage failures.
+                  }
+                }}
+              >
                 {labels.logout}
               </button>
             </form>

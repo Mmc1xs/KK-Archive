@@ -42,6 +42,10 @@ export function getLocaleSearchHref(locale: UiLocale) {
   return buildLocalizedHref(locale, "/search");
 }
 
+export function getLocaleModLibraryHref(locale: UiLocale) {
+  return buildLocalizedHref(locale, "/mod_library");
+}
+
 export function buildLocalizedContentHref(locale: UiLocale, slug: string) {
   return buildLocalizedHref(locale, `/contents/${encodeURIComponent(slug)}`);
 }

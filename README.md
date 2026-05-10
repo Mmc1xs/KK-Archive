@@ -235,3 +235,21 @@ For more detailed operations or deployment notes, see:
 
 **KK Archive 是一個以結構化標籤為核心、支援公開瀏覽與後台審核流程的 KK / Koikatsu 檔案整理平台。**  
 **KK Archive is a structured-tag-based KK / Koikatsu archive platform with public browsing and internal review workflows.**
+
+---
+
+## Admin Workflow Screenshots
+
+For admin UI walkthrough and screenshots, see:
+
+- [docs/admin-workflow.md](/c:/Users/mlcmlc/Desktop/KK%20Diction/docs/admin-workflow.md)
+
+Key screenshot assets are stored in:
+
+- `docs/images/admin-dashboard-overview.jpg`
+- `docs/images/admin-content-view-details.jpg`
+- `docs/images/admin-manage-contents.jpg`
+- `docs/images/admin-edit-content-top.jpg`
+- `docs/images/admin-edit-content-tags-images.jpg`
+- `docs/images/admin-edit-content-downloads-hosted-files.jpg`
+- `docs/images/admin-tag-manager.jpg`

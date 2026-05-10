@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ContentCard } from "@/components/content-card";
 import { HomeStickyBanner } from "@/components/home-sticky-banner";
-import { getCurrentSession } from "@/lib/auth/session";
 import { getBrowsableContentsPage } from "@/lib/content";
 
 const PAGE_SIZE = 12;
@@ -52,15 +51,9 @@ export default async function ContentsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = await searchParams;
-  const user = await getCurrentSession({ touchActivity: false });
   const pageParam = typeof params.page === "string" ? Number(params.page) : 1;
   const currentPage = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-  const { items, totalPages, totalCount } = await getBrowsableContentsPage(
-    Boolean(user),
-    currentPage,
-    PAGE_SIZE,
-    user?.role
-  );
+  const { items, totalPages, totalCount } = await getBrowsableContentsPage(false, currentPage, PAGE_SIZE);
   const paginationItems = buildPagination(totalPages, currentPage);
 
   return (
