@@ -10,6 +10,13 @@ export type PluginEntry = {
   version: number | null;
   dataKeys: string[];
   rawData: unknown;
+  embeddedImages: EmbeddedImage[];
+};
+
+export type EmbeddedImage = {
+  path: string;
+  mimeType: string;
+  bytes: Uint8Array;
 };
 
 export type CardParseResult = {
@@ -188,8 +195,74 @@ function parsePluginEntry(guid: string, value: unknown): PluginEntry {
     guid,
     version,
     dataKeys: dataRecord ? Object.keys(dataRecord).sort((a, b) => a.localeCompare(b)) : [],
-    rawData
+    rawData,
+    embeddedImages: collectEmbeddedImages(rawData)
   };
+}
+
+function detectImageMimeType(bytes: Uint8Array) {
+  if (
+    bytes.byteLength >= PNG_SIGNATURE.length &&
+    PNG_SIGNATURE.every((value, index) => bytes[index] === value)
+  ) {
+    return "image/png";
+  }
+  if (bytes.byteLength >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
+    return "image/jpeg";
+  }
+  if (
+    bytes.byteLength >= 6 &&
+    bytes[0] === 0x47 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x38 &&
+    (bytes[4] === 0x37 || bytes[4] === 0x39) &&
+    bytes[5] === 0x61
+  ) {
+    return "image/gif";
+  }
+  if (
+    bytes.byteLength >= 12 &&
+    bytes[0] === 0x52 &&
+    bytes[1] === 0x49 &&
+    bytes[2] === 0x46 &&
+    bytes[3] === 0x46 &&
+    bytes[8] === 0x57 &&
+    bytes[9] === 0x45 &&
+    bytes[10] === 0x42 &&
+    bytes[11] === 0x50
+  ) {
+    return "image/webp";
+  }
+  return null;
+}
+
+function collectEmbeddedImages(value: unknown) {
+  const images: EmbeddedImage[] = [];
+  const visited = new WeakSet<object>();
+
+  function visit(item: unknown, path: string) {
+    if (item instanceof Uint8Array) {
+      const mimeType = detectImageMimeType(item);
+      if (mimeType) images.push({ path, mimeType, bytes: item });
+      return;
+    }
+    if (item === null || typeof item !== "object" || visited.has(item)) return;
+    visited.add(item);
+
+    if (item instanceof Map) {
+      for (const [key, child] of item.entries()) visit(child, `${path}.${String(key)}`);
+      return;
+    }
+    if (Array.isArray(item)) {
+      item.forEach((child, index) => visit(child, `${path}[${index}]`));
+      return;
+    }
+    for (const [key, child] of Object.entries(item)) visit(child, `${path}.${key}`);
+  }
+
+  visit(value, "$data");
+  return images;
 }
 
 function getPayloadBlock(payload: Uint8Array, entry: { name: string; position: number; size: number }) {

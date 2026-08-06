@@ -4,6 +4,7 @@ import {
   normalizeForJson,
   parseCharacterCard,
   type CardParseResult,
+  type EmbeddedImage,
   type PluginEntry
 } from "./lib/card-parser";
 
@@ -14,6 +15,8 @@ const query = ref("");
 const isReading = ref(false);
 const previewUrl = ref("");
 const expandedGuid = ref<string | null>(null);
+let imageUrlCache = new WeakMap<Uint8Array, string>();
+const imageObjectUrls = new Set<string>();
 
 const visiblePlugins = computed(() => {
   const needle = query.value.trim().toLocaleLowerCase();
@@ -41,6 +44,21 @@ function clearPreviewUrl() {
   previewUrl.value = "";
 }
 
+function clearEmbeddedImageUrls() {
+  imageObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+  imageObjectUrls.clear();
+  imageUrlCache = new WeakMap<Uint8Array, string>();
+}
+
+function embeddedImageUrl(image: EmbeddedImage) {
+  const cached = imageUrlCache.get(image.bytes);
+  if (cached) return cached;
+  const url = URL.createObjectURL(new Blob([image.bytes.slice().buffer], { type: image.mimeType }));
+  imageUrlCache.set(image.bytes, url);
+  imageObjectUrls.add(url);
+  return url;
+}
+
 async function readFile(file: File) {
   isReading.value = true;
   errorMessage.value = "";
@@ -48,6 +66,7 @@ async function readFile(file: File) {
   query.value = "";
   expandedGuid.value = null;
   clearPreviewUrl();
+  clearEmbeddedImageUrls();
 
   try {
     const parsed = await parseCharacterCard(file);
@@ -96,7 +115,10 @@ function exportJson() {
   URL.revokeObjectURL(url);
 }
 
-onBeforeUnmount(clearPreviewUrl);
+onBeforeUnmount(() => {
+  clearPreviewUrl();
+  clearEmbeddedImageUrls();
+});
 </script>
 
 <template>
@@ -106,7 +128,10 @@ onBeforeUnmount(clearPreviewUrl);
         <p class="eyebrow">KK Archive / Tools</p>
         <h1>Plugin Data Reader</h1>
       </div>
-      <div class="lab-badge"><span></span> Browser-only processing</div>
+      <div class="masthead-actions">
+        <a class="archive-link" href="/" target="_top">&larr; KK Archive</a>
+        <div class="lab-badge"><span></span> Browser-only processing</div>
+      </div>
     </header>
 
     <section class="intro-grid">
@@ -185,10 +210,28 @@ onBeforeUnmount(clearPreviewUrl);
                 <strong>{{ plugin.guid }}</strong>
                 <small>{{ plugin.dataKeys.length ? plugin.dataKeys.join(" / ") : "No named data keys" }}</small>
               </span>
+              <span v-if="plugin.embeddedImages.length" class="image-count">
+                {{ plugin.embeddedImages.length }} image{{ plugin.embeddedImages.length === 1 ? "" : "s" }}
+              </span>
               <span class="version-pill">v{{ plugin.version ?? "?" }}</span>
               <span class="expand-mark">{{ expandedGuid === plugin.guid ? "-" : "+" }}</span>
             </button>
-            <pre v-if="expandedGuid === plugin.guid">{{ pluginJson(plugin) }}</pre>
+            <div v-if="expandedGuid === plugin.guid" class="plugin-detail">
+              <div v-if="plugin.embeddedImages.length" class="embedded-image-grid">
+                <figure v-for="(image, imageIndex) in plugin.embeddedImages" :key="`${image.path}-${imageIndex}`">
+                  <img
+                    :src="embeddedImageUrl(image)"
+                    :alt="`${plugin.guid} embedded image ${imageIndex + 1}`"
+                    loading="lazy"
+                  />
+                  <figcaption>
+                    <span>{{ image.path }}</span>
+                    <small>{{ image.mimeType }} / {{ formatBytes(image.bytes.byteLength) }}</small>
+                  </figcaption>
+                </figure>
+              </div>
+              <pre>{{ pluginJson(plugin) }}</pre>
+            </div>
           </article>
         </div>
 
