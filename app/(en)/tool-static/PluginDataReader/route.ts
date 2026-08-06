@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { readToolIndexHtml } from "./tool-files";
+import { readVueToolIndexHtml } from "../PluginDataReaderVue/tool-files";
 
 const EXOCLICK_TOOL_INTERSTITIAL_ENABLED =
   (process.env.NEXT_PUBLIC_EXOCLICK_TOOL_INTERSTITIAL_ENABLED?.trim() || "true") !== "false";
@@ -46,7 +46,10 @@ function injectToolInterstitialSnippet(html: string) {
 }
 
 export async function GET() {
-  const rawHtml = await readToolIndexHtml();
+  const rawHtml = (await readVueToolIndexHtml()).replace(
+    /\/tool-static\/PluginDataReaderVue\//g,
+    "/tool-static/PluginDataReader/"
+  );
   const html = injectToolInterstitialSnippet(rawHtml);
 
   return new NextResponse(html, {

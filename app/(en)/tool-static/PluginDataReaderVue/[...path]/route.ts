@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { NextResponse } from "next/server";
-import { getVueToolFileContentType, resolveVueToolFilePath } from "../../PluginDataReaderVue/tool-files";
+import { getVueToolFileContentType, resolveVueToolFilePath } from "../tool-files";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const { path: pathParts } = await params;
