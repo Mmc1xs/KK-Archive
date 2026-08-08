@@ -10,6 +10,7 @@
     "start": "next start",
     "lint": "eslint .",
     "guard:image-cost": "node scripts/check-image-cost-guardrails.mjs",
+    "check:hot-topic": "tsx scripts/check-hot-topic-rotation.ts",
     "db:use:sqlite": "tsx scripts/set-prisma-runtime.ts sqlite",
     "db:use:postgres": "tsx scripts/set-prisma-runtime.ts postgres",
     "db:generate": "prisma generate",

@@ -1,7 +1,7 @@
 "use server";
 
 import { Prisma, ReviewStatus, UserRole } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, requireStaff, requireUserWithoutTouch } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -668,6 +668,7 @@ export async function deleteContentAction(formData: FormData) {
   revalidatePath(`/contents/${content.slug}`);
   revalidatePath(`/zh-CN/contents/${content.slug}`);
   revalidatePath(`/ja/contents/${content.slug}`);
+  revalidateTag("homepage-content", "max");
 
   redirectWithMessage(
     "/admin/contents",

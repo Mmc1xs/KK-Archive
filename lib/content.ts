@@ -6,6 +6,7 @@ import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 import { contentSchema } from "@/lib/validation";
 import { revalidateTag } from "next/cache";
+import { getTaipeiDateKey, selectDailyHotTopicIds } from "@/lib/hot-topic";
 
 function slugifyTagName(name: string) {
   const base = name
@@ -200,7 +201,7 @@ const getCachedHomepageContents = unstable_cache(
       include: HOMEPAGE_CONTENT_INCLUDE
     }),
   ["homepage-contents"],
-  { revalidate: 600 }
+  { revalidate: 600, tags: ["homepage-content"] }
 );
 
 const getCachedHomepageHotTopicSlots = unstable_cache(
@@ -215,6 +216,75 @@ const getCachedHomepageHotTopicSlots = unstable_cache(
     }),
   ["homepage-hot-topic-slots"],
   { revalidate: 300 }
+);
+
+const getCachedDailyHomepageHotTopicContents = unstable_cache(
+  async (dateKey: string) => {
+    const candidates = await db.content.findMany({
+      where: {
+        publishStatus: PublishStatus.PUBLISHED
+      },
+      orderBy: {
+        id: "asc"
+      },
+      select: {
+        id: true
+      }
+    });
+    const selectedIds = selectDailyHotTopicIds(
+      candidates.map((content) => content.id),
+      dateKey,
+      HOMEPAGE_HOT_TOPIC_SLOT_COUNT
+    );
+
+    if (!selectedIds.length) {
+      return [];
+    }
+
+    const selectedContents = await db.content.findMany({
+      where: {
+        id: { in: selectedIds },
+        publishStatus: PublishStatus.PUBLISHED
+      },
+      include: HOMEPAGE_CONTENT_INCLUDE
+    });
+    const contentById = new Map(selectedContents.map((content) => [content.id, content]));
+
+    return selectedIds
+      .map((id) => contentById.get(id))
+      .filter((content): content is HomepageContent => Boolean(content));
+  },
+  ["homepage-daily-hot-topic"],
+  { revalidate: 86_400, tags: ["homepage-content"] }
+);
+
+const getCachedHomepageLatestPublishedContents = unstable_cache(
+  async (dateKey: string) => {
+    const [hotTopicContents, fallbackContents] = await Promise.all([
+      getCachedDailyHomepageHotTopicContents(dateKey),
+      getCachedHomepageContents()
+    ]);
+    const selectedContentIds = hotTopicContents.map((content) => content.id);
+    const latest = await db.content.findMany({
+      where: {
+        publishStatus: PublishStatus.PUBLISHED,
+        ...(selectedContentIds.length
+          ? {
+              id: {
+                notIn: selectedContentIds
+              }
+            }
+          : {})
+      },
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      include: HOMEPAGE_CONTENT_INCLUDE
+    });
+
+    return latest.length ? latest : fallbackContents.slice(0, 8);
+  },
+  ["homepage-latest-published"],
+  { revalidate: 600, tags: ["homepage-content"] }
 );
 
 function buildHomepageSlotState(
@@ -263,39 +333,12 @@ export async function getAdminHomepageHotTopicSlots(): Promise<HomepageHotTopicS
   return buildHomepageSlotState(rows);
 }
 
-export async function getHomepageLatestPublishedContents() {
-  const [slots, fallbackContents] = await Promise.all([
-    getHomepageHotTopicSlots(),
-    getCachedHomepageContents()
-  ]);
-  const selectedContentIds = slots
-    .map((slot) => slot.content?.id ?? null)
-    .filter((id): id is number => Number.isInteger(id));
-
-  const latest = await db.content.findMany({
-    where: {
-      publishStatus: PublishStatus.PUBLISHED,
-      ...(selectedContentIds.length
-        ? {
-            id: {
-              notIn: selectedContentIds
-            }
-          }
-        : {})
-    },
-    orderBy: { createdAt: "desc" },
-    take: 8,
-    include: HOMEPAGE_CONTENT_INCLUDE
-  });
-
-  return latest.length ? latest : fallbackContents.slice(0, 8);
+export async function getHomepageLatestPublishedContents(date = new Date()) {
+  return getCachedHomepageLatestPublishedContents(getTaipeiDateKey(date));
 }
 
-export async function getHomepageHotTopicContents() {
-  const slots = await getHomepageHotTopicSlots();
-  return slots
-    .map((slot) => slot.content)
-    .filter((content): content is HomepageContent => Boolean(content));
+export async function getHomepageHotTopicContents(date = new Date()) {
+  return getCachedDailyHomepageHotTopicContents(getTaipeiDateKey(date));
 }
 
 export async function getHomepageHotTopicPickerPage(page: number, pageSize: number) {
@@ -1987,6 +2030,7 @@ export async function saveContent(
 
     try {
       revalidateTag("tags", "max");
+      revalidateTag("homepage-content", "max");
     } catch (error) {
       if (!(error instanceof Error && error.message.includes("static generation store missing"))) {
         throw error;

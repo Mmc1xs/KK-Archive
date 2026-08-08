@@ -57,7 +57,7 @@ export default async function AdminPage() {
                 Open Activity Details
               </Link>
               <Link href="/admin/homepage" className="link-pill">
-                Manage Hot Topic
+                Preview Hot Topic Rotation
               </Link>
               <Link href="/admin/homepage/bulletins" className="link-pill">
                 Manage Bulletin
