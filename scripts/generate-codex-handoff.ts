@@ -2,42 +2,29 @@ import "./load-env";
 
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { execFile } from "node:child_process";
-import { promisify } from "node:util";
 
 type PackageJson = {
   scripts?: Record<string, string>;
 };
 
-const execFileAsync = promisify(execFile);
 const outPath = path.resolve(process.cwd(), "docs", "codex-handoff.md");
 
 const importantScripts = [
   "dev",
   "build",
+  "build:postgres",
+  "guard:image-cost",
+  "tool:vue:check",
+  "tool:vue:build",
   "sync:new",
   "sync:all",
-  "r2:upload-clean:new",
-  "r2:upload-clean",
-  "tag:export-review",
-  "tag:import-review",
+  "cut:import:queue",
+  "mods:sync:telegram",
 ];
 
 async function readPackageJson() {
   const packageJsonModule = (await import("../package.json")) as PackageJson;
   return packageJsonModule;
-}
-
-async function getGitOutput(args: string[]) {
-  try {
-    const { stdout } = await execFileAsync("git", args, {
-      cwd: process.cwd(),
-      windowsHide: true,
-    });
-    return stdout.trim();
-  } catch {
-    return "";
-  }
 }
 
 function formatScriptList(scripts: Record<string, string>) {
@@ -47,23 +34,9 @@ function formatScriptList(scripts: Record<string, string>) {
     .join("\n");
 }
 
-function formatWorktree(statusOutput: string) {
-  if (!statusOutput) {
-    return "- clean worktree";
-  }
-
-  return statusOutput
-    .split(/\r?\n/)
-    .filter(Boolean)
-    .map((line) => `- \`${line}\``)
-    .join("\n");
-}
-
 async function main() {
   const packageJson = await readPackageJson();
   const scripts = packageJson.scripts ?? {};
-  const branch = (await getGitOutput(["branch", "--show-current"])) || "unknown";
-  const status = await getGitOutput(["status", "--short"]);
   const generatedAt = new Date().toISOString();
 
   const body = `# Codex Handoff
@@ -78,19 +51,17 @@ Generated: \`${generatedAt}\`
 
 ## Repo Snapshot
 
-- Branch: \`${branch}\`
-- App: Next.js app with Prisma-backed structured tag search
-- Storage: Cloudflare R2 for public images
+- App: Next.js 16 and React 19 with Prisma-backed structured tag search
+- Tool frontend: Vue 3 and Vite Plugin Data Reader
+- Data: Supabase Postgres
+- Storage: Cloudflare R2 for images and hosted files
+- Deployment: Vercel with five-minute homepage ISR
 - Search rule: existing DB tags only, no free-text search
-- Important data workspace: \`db image\`
+- Roles: \`ADMIN\`, \`AUDIT\`, and \`MEMBER\`
 
 ## Important Commands
 
 ${formatScriptList(scripts)}
-
-## Current Worktree
-
-${formatWorktree(status)}
 
 ## High-Value Files
 
@@ -98,17 +69,24 @@ ${formatWorktree(status)}
 - \`docs/codex-quick-start.md\`
 - \`lib/content.ts\`
 - \`lib/db.ts\`
-- \`components/tag-links.tsx\`
-- \`scripts/import-tag-review-json.ts\`
-- \`scripts/build-work-tag-json.ts\`
-- \`db image/grab_telegram_images.py\`
+- \`components/home-page-view.tsx\`
+- \`components/tag-autocomplete.tsx\`
+- \`tools/plugin-data-reader-vue/src/App.vue\`
+- \`docs/cut-telegram-semi-auto-workflow.md\`
+- \`docs/mod-library-telegram-sync.md\`
 
 ## Notes For New Sessions
 
-- \`db image/tag/*.json\` is review data used to backfill work/character/style tags.
-- \`db image/tag.json\` is a generated alias map for work tags.
-- Telegram raw media grabbing and clean import are related but separate workflows.
-- If the task is about content visibility, check \`publishStatus\` handling in Prisma and content queries.
+- Run website development, build, Git, commit, and push commands only from \`C:\\Users\\mlcmlc\\Desktop\\KK Diction Website\`.
+- Local \`cut\` and \`up_mod\` data stays outside Git under \`C:\\Users\\mlcmlc\\Desktop\\KK Diction\`; use its \`cut.ps1\` and \`up_mod.ps1\` launchers instead of scanning or moving that workspace.
+- Never include \`db image/\` or \`db mods/\` in website commits. See \`docs/workflow-storage.md\` for path resolution.
+- Locale homepages share five-minute caches for Latest Published and bulletins.
+- Bulletin writes invalidate the bulletin cache; content writes invalidate Latest Published.
+- Admin tag autocomplete has a two-minute browser cache and in-flight request deduplication.
+- Homepage bulletins are database-managed at \`/admin/homepage/bulletins\` and do not require deployment.
+- Mod Library records use Telegram message links and are restricted to signed-in members.
+- Run \`git status --short\` at the start of every task; this handoff intentionally does not snapshot transient worktree state.
+- Follow \`AGENTS.md\` pre-push UI and build verification rules.
 `;
 
   await mkdir(path.dirname(outPath), { recursive: true });

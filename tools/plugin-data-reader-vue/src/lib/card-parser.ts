@@ -10,6 +10,7 @@ export type PluginEntry = {
   version: number | null;
   dataKeys: string[];
   rawData: unknown;
+  resolvedData: unknown;
   embeddedImages: EmbeddedImage[];
 };
 
@@ -191,12 +192,14 @@ function parsePluginEntry(guid: string, value: unknown): PluginEntry {
   }
 
   const dataRecord = toRecord(rawData);
+  const { resolvedData, embeddedImages } = resolvePluginData(rawData);
   return {
     guid,
     version,
     dataKeys: dataRecord ? Object.keys(dataRecord).sort((a, b) => a.localeCompare(b)) : [],
     rawData,
-    embeddedImages: collectEmbeddedImages(rawData)
+    resolvedData,
+    embeddedImages
   };
 }
 
@@ -210,6 +213,9 @@ function detectImageMimeType(bytes: Uint8Array) {
   if (bytes.byteLength >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) {
     return "image/jpeg";
   }
+  if (bytes.byteLength >= 2 && bytes[0] === 0x42 && bytes[1] === 0x4d) {
+    return "image/bmp";
+  }
   if (
     bytes.byteLength >= 6 &&
     bytes[0] === 0x47 &&
@@ -220,6 +226,13 @@ function detectImageMimeType(bytes: Uint8Array) {
     bytes[5] === 0x61
   ) {
     return "image/gif";
+  }
+  if (
+    bytes.byteLength >= 4 &&
+    ((bytes[0] === 0x49 && bytes[1] === 0x49 && bytes[2] === 0x2a && bytes[3] === 0x00) ||
+      (bytes[0] === 0x4d && bytes[1] === 0x4d && bytes[2] === 0x00 && bytes[3] === 0x2a))
+  ) {
+    return "image/tiff";
   }
   if (
     bytes.byteLength >= 12 &&
@@ -237,32 +250,81 @@ function detectImageMimeType(bytes: Uint8Array) {
   return null;
 }
 
-function collectEmbeddedImages(value: unknown) {
-  const images: EmbeddedImage[] = [];
-  const visited = new WeakSet<object>();
+function sameBytes(left: Uint8Array, right: Uint8Array) {
+  if (left.byteLength !== right.byteLength) return false;
+  return left.every((value, index) => value === right[index]);
+}
 
-  function visit(item: unknown, path: string) {
+function tryDecodeNestedMessagePack(bytes: Uint8Array) {
+  if (bytes.byteLength === 0) return null;
+  try {
+    const decoded = decode(bytes, { useBigInt64: false });
+    if (decoded instanceof Uint8Array && sameBytes(decoded, bytes)) return null;
+    return decoded;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Mirrors the Legacy reader's UnknownDataResolver: binary values are repeatedly
+ * treated as MessagePack first, then retained as terminal byte arrays only when
+ * they cannot be decoded any further.
+ */
+export function resolvePluginData(value: unknown) {
+  const images: EmbeddedImage[] = [];
+  const resolving = new WeakSet<object>();
+  const maxDepth = 64;
+
+  function resolve(item: unknown, path: string, depth: number): unknown {
+    if (depth > maxDepth) return normalizeForJson(item);
     if (item instanceof Uint8Array) {
+      const nested = tryDecodeNestedMessagePack(item);
+      if (nested !== null) {
+        return resolve(nested, `${path}::<msgpack>`, depth + 1);
+      }
       const mimeType = detectImageMimeType(item);
       if (mimeType) images.push({ path, mimeType, bytes: item });
-      return;
+      return `byte[${item.byteLength}]`;
     }
-    if (item === null || typeof item !== "object" || visited.has(item)) return;
-    visited.add(item);
+    if (typeof item === "string") {
+      return item.length > 500 ? `string[${item.length}] (Too big to display)` : item;
+    }
+    if (item === null || typeof item !== "object") return item;
+    if (resolving.has(item)) return "[Circular]";
+    resolving.add(item);
 
+    let resolved: unknown;
     if (item instanceof Map) {
-      for (const [key, child] of item.entries()) visit(child, `${path}.${String(key)}`);
-      return;
+      resolved = Object.fromEntries(
+        Array.from(item.entries(), ([key, child]) => [
+          String(key),
+          resolve(child, `${path}.${String(key)}`, depth + 1)
+        ])
+      );
+    } else if (Array.isArray(item)) {
+      resolved = item.map((child, index) => resolve(child, `${path}[${index}]`, depth + 1));
+    } else {
+      const ext = item as Partial<ExtData>;
+      if (typeof ext.type === "number" && ext.data instanceof Uint8Array) {
+        resolved = {
+          extensionType: ext.type,
+          data: resolve(ext.data, `${path}.data`, depth + 1)
+        };
+      } else {
+        resolved = Object.fromEntries(
+          Object.entries(item).map(([key, child]) => [key, resolve(child, `${path}.${key}`, depth + 1)])
+        );
+      }
     }
-    if (Array.isArray(item)) {
-      item.forEach((child, index) => visit(child, `${path}[${index}]`));
-      return;
-    }
-    for (const [key, child] of Object.entries(item)) visit(child, `${path}.${key}`);
+    resolving.delete(item);
+    return resolved;
   }
 
-  visit(value, "$data");
-  return images;
+  return {
+    resolvedData: resolve(value, "$data", 0),
+    embeddedImages: images
+  };
 }
 
 function getPayloadBlock(payload: Uint8Array, entry: { name: string; position: number; size: number }) {

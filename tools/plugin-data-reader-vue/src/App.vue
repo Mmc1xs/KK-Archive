@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import {
   normalizeForJson,
   parseCharacterCard,
@@ -36,7 +36,7 @@ function formatBytes(bytes: number) {
 }
 
 function pluginJson(plugin: PluginEntry) {
-  return JSON.stringify(normalizeForJson(plugin.rawData), null, 2);
+  return JSON.stringify(normalizeForJson(plugin.resolvedData), null, 2);
 }
 
 function clearPreviewUrl() {
@@ -103,7 +103,7 @@ function exportJson() {
     plugins: result.value.plugins.map((plugin) => ({
       guid: plugin.guid,
       version: plugin.version,
-      data: normalizeForJson(plugin.rawData)
+      data: normalizeForJson(plugin.resolvedData)
     }))
   };
   const blob = new Blob([JSON.stringify(exportValue, null, 2)], { type: "application/json" });
@@ -114,6 +114,26 @@ function exportJson() {
   link.click();
   URL.revokeObjectURL(url);
 }
+
+onMounted(() => {
+  if (!import.meta.env.DEV) return;
+
+  const testCardUrl = new URLSearchParams(window.location.search).get("testCard");
+  if (!testCardUrl?.startsWith("/")) return;
+
+  void fetch(testCardUrl)
+    .then((response) => {
+      if (!response.ok) throw new Error(`Test card request failed (${response.status}).`);
+      return response.blob();
+    })
+    .then((blob) => {
+      const fileName = testCardUrl.split("/").pop() || "test-card.png";
+      return readFile(new File([blob], fileName, { type: blob.type || "image/png" }));
+    })
+    .catch((error) => {
+      errorMessage.value = error instanceof Error ? error.message : "The test card could not be loaded.";
+    });
+});
 
 onBeforeUnmount(() => {
   clearPreviewUrl();

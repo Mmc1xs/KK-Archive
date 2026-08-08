@@ -5,7 +5,15 @@ dist
 generated
 prisma/dev.db
 tsconfig.tsbuildinfo
-db image/output
-db image/clean
-db image/.env
+
+# Local workflow data lives in the sibling `KK Diction` workspace.
+/db image/
+/db mods/
+
+# Local/generated workflow artifacts.
+__pycache__/
+*.py[cod]
+/temp/stage-vue-package.cjs
+/temp/upstream-plugin-data-reader-*/
+/temp/*.log
 *.session

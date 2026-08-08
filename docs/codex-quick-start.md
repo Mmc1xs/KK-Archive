@@ -25,14 +25,19 @@ This file is for fresh Codex sessions that need to understand the project quickl
 - `lib`: database, content queries, storage helpers, validation
 - `prisma`: schema and seed files
 - `scripts`: import, sync, migration, reporting, and utility scripts
-- `db image`: local data workspace for Telegram grabs, clean folders, later folders, and tag review JSON
 - `docs`: operational and deployment notes
+
+Local data is intentionally outside this Git repository:
+
+- Website/Git root: `C:\Users\mlcmlc\Desktop\KK Diction Website`
+- `cut` / `up_mod` data root: `C:\Users\mlcmlc\Desktop\KK Diction`
+- Run `cut.ps1` and `up_mod.ps1` from the data root; never commit from that directory.
 
 ## Important Workflows
 
-### Site content import pipeline
+### Legacy site content import pipeline
 
-- Telegram/media data eventually lands in `db image/clean/<id>`
+- Telegram/media data lives under the external workflow root, for example `db image/clean/<id>`
 - Full pipeline:
   - `npm run clean:manifest`
   - `npm run clean:pixiv`
@@ -44,14 +49,12 @@ This file is for fresh Codex sessions that need to understand the project quickl
 
 ### Telegram raw image grab
 
-- Raw Telegram grab script: `db image/grab_telegram_images.py`
-- It downloads from channel `Koikatunews` into `db image/output/<message_id>`
+- Raw Telegram data is stored under the external workflow root.
 - It is separate from the normal clean import pipeline
 
 ### Tag review workflow
 
-- Review source data lives in `db image/tag/*.json`
-- Work alias export lives in `db image/tag.json`
+- Review source data and generated tag files live under the external workflow root.
 - Tag review scripts:
   - `npm run tag:export-review`
   - `npm run tag:import-review`
@@ -83,6 +86,12 @@ This file is for fresh Codex sessions that need to understand the project quickl
 - Export review JSON: `npm run tag:export-review`
 - Import review JSON: `npm run tag:import-review`
 - Generate Codex handoff: `npm run codex:handoff`
+
+## Git Boundary
+
+- Run status, build, commit, and push only from `KK Diction Website`.
+- `db image` and `db mods` are ignored here and must remain in the sibling local workflow workspace.
+- See `docs/workflow-storage.md` for the path-resolution rules.
 
 ## Session Reset Prompt
 

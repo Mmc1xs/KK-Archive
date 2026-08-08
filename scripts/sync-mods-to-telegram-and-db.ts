@@ -1,8 +1,10 @@
 import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { Prisma } from "@prisma/client";
 import { db } from "../lib/db";
+import { dbImageRoot, dbModsRoot, siteRoot } from "./workflow-paths";
 
 type ModTableRow = {
   Name: string;
@@ -63,10 +65,11 @@ type UploadResult = {
   error?: string;
 };
 
-const DEFAULT_MODS_TABLE = path.join(process.cwd(), "db mods", "mods_table.json");
-const DEFAULT_STATE_FILE = path.join(process.cwd(), "db mods", "tg_upload_state.json");
-const DEFAULT_COMPENSATION_FILE = path.join(process.cwd(), "db mods", "tg_upload_compensation.json");
-const PY_UPLOADER = path.join(process.cwd(), "scripts", "telegram-upload-mod-one.py");
+const DEFAULT_MODS_TABLE = path.join(dbModsRoot, "mods_table.json");
+const DEFAULT_STATE_FILE = path.join(dbModsRoot, "tg_upload_state.json");
+const DEFAULT_COMPENSATION_FILE = path.join(dbModsRoot, "tg_upload_compensation.json");
+const DEFAULT_SESSION_FILE = path.join(dbImageRoot, "koikatu_session.session");
+const PY_UPLOADER = path.join(siteRoot, "scripts", "telegram-upload-mod-one.py");
 
 function parseArg(name: string) {
   const direct = process.argv.find((arg) => arg.startsWith(`--${name}=`));
@@ -255,7 +258,7 @@ async function uploadOneWithProgress(params: {
     }
 
     const child = spawn("python", args, {
-      cwd: process.cwd(),
+      cwd: siteRoot,
       env: process.env,
       stdio: ["ignore", "pipe", "pipe"]
     });
@@ -398,7 +401,8 @@ async function main() {
   const tablePath = parseArg("table") || DEFAULT_MODS_TABLE;
   const statePath = parseArg("state") || DEFAULT_STATE_FILE;
   const compensationPath = parseArg("compensation") || DEFAULT_COMPENSATION_FILE;
-  const sessionFile = parseArg("session-file");
+  const explicitSessionFile = parseArg("session-file");
+  const sessionFile = explicitSessionFile || (existsSync(DEFAULT_SESSION_FILE) ? DEFAULT_SESSION_FILE : undefined);
   const rawLimitArg = parseArg("limit");
   const hasLimitArg = typeof rawLimitArg === "string";
   const parsedLimit = hasLimitArg ? Number(rawLimitArg) : NaN;

@@ -7,6 +7,7 @@ import { PublishStatus, ReviewStatus, TagType, UserRole, type Tag } from "@prism
 import { db } from "../lib/db";
 import { uploadR2Object, buildR2PublicUrl } from "../lib/storage/r2";
 import { buildContentFileDownloadPath } from "../lib/downloads/content-file-token";
+import { cutRoot, resolveWorkflowPath, siteRoot, workflowRoot } from "./workflow-paths";
 
 type QueueFile = {
   version: 1;
@@ -20,7 +21,13 @@ type QueueFile = {
 
 type QueueItem = {
   folder: string;
-  sourceLink: string;
+  imageFolder?: string;
+  downloadFolder?: string;
+  downloadFileNames?: string[];
+  downloadFileLabels?: Record<string, string>;
+  sourceLink?: string | null;
+  allowDuplicateSource?: boolean;
+  skipPixivMetadataFetch?: boolean;
   tgLink?: string;
   titleOverride?: string;
   authorOverride?: string;
@@ -31,6 +38,10 @@ type QueueItem = {
   styleNames?: string[];
   usageNames?: string[];
   description?: string;
+};
+
+type RawQueueItem = QueueItem & {
+  Title?: string | null;
 };
 
 type PixivIllustResponse = {
@@ -52,9 +63,14 @@ type WorkAliasesFile = {
   }>;
 };
 
-const CUT_ROOT = path.resolve(process.cwd(), "db image", "cut");
+const CUT_ROOT = cutRoot;
 const DEFAULT_QUEUE = path.join(CUT_ROOT, "queue.json");
-const WORK_ALIAS_PATH = path.resolve(process.cwd(), "scripts", "pixiv-work-aliases.json");
+const LARGE_DOWNLOAD_LIMIT_BYTES = 200 * 1024 * 1024;
+const WORK_ALIAS_PATH = path.resolve(siteRoot, "scripts", "pixiv-work-aliases.json");
+
+function resolveProjectPath(relativePath: string) {
+  return resolveWorkflowPath(relativePath);
+}
 
 function slugify(input: string) {
   const base = input
@@ -106,6 +122,21 @@ function parsePixivArtworkId(sourceLink: string) {
   return matched?.[1] ?? null;
 }
 
+function repairQueueJson(raw: string) {
+  return raw.replace(/(:\s*|\[\s*|,\s*)NULL(\s*[,}\]])/g, "$1null$2");
+}
+
+function normalizeQueueItem(item: RawQueueItem): QueueItem {
+  const titleOverride = item.titleOverride?.trim() || item.Title?.trim() || undefined;
+  const sourceLink = typeof item.sourceLink === "string" ? item.sourceLink.trim() || null : null;
+
+  return {
+    ...item,
+    sourceLink,
+    titleOverride
+  };
+}
+
 function normalizeKey(input: string) {
   return input
     .normalize("NFKD")
@@ -116,10 +147,12 @@ function normalizeKey(input: string) {
 }
 
 async function fetchPixivIllust(artworkId: string) {
+  const cookie = process.env.PIXIV_COOKIE?.trim();
   const response = await fetch(`https://www.pixiv.net/ajax/illust/${artworkId}`, {
     headers: {
       Referer: "https://www.pixiv.net/",
-      "User-Agent": "Mozilla/5.0"
+      "User-Agent": "Mozilla/5.0",
+      ...(cookie ? { Cookie: cookie } : {})
     }
   });
 
@@ -215,9 +248,10 @@ async function loadWorkAliasMap() {
 
 async function inferWorkTag(item: QueueItem, pixivTags: string[], aliasMap: Map<string, string>) {
   if (item.workName) {
-    const direct = await db.tag.findFirst({ where: { type: TagType.WORK, name: item.workName } });
+    const workName = item.workName.trim();
+    const direct = await db.tag.findFirst({ where: { type: TagType.WORK, name: workName } });
     if (!direct) {
-      throw new Error(`workName not found in DB: ${item.workName}`);
+      return ensureTagByTypeAndName(TagType.WORK, workName);
     }
     return direct;
   }
@@ -229,6 +263,7 @@ async function inferWorkTag(item: QueueItem, pixivTags: string[], aliasMap: Map<
     if (work) {
       return work;
     }
+    return ensureTagByTypeAndName(TagType.WORK, canonical);
   }
 
   return null;
@@ -269,10 +304,10 @@ async function resolveBaseTags(item: QueueItem, inferredWorkTag: Tag | null) {
 }
 
 async function importOne(item: QueueItem, defaults: QueueFile["defaults"], aliasMap: Map<string, string>) {
-  const sourceLink = item.sourceLink.trim();
+  const sourceLink = item.sourceLink?.trim() || "";
   const artworkId = parsePixivArtworkId(sourceLink);
 
-  if (artworkId) {
+  if (artworkId && !item.allowDuplicateSource) {
     const existingBySource = await db.content.findFirst({
       where: { sourceLink },
       select: { id: true, slug: true, title: true }
@@ -283,8 +318,12 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
     }
   }
 
-  const folderPath = path.join(CUT_ROOT, item.folder);
-  const downloadFolderPath = path.join(folderPath, "d");
+  const folderPath = item.imageFolder?.trim()
+    ? resolveProjectPath(item.imageFolder.trim())
+    : path.join(CUT_ROOT, item.folder);
+  const downloadFolderPath = item.downloadFolder?.trim()
+    ? resolveProjectPath(item.downloadFolder.trim())
+    : path.join(folderPath, "d");
 
   const folderItems = await fs.readdir(folderPath, { withFileTypes: true });
   const imageFiles = folderItems
@@ -297,14 +336,28 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
     throw new Error(`No images found in ${folderPath}`);
   }
 
-  const downloadFiles = existsSync(downloadFolderPath)
+  const availableDownloadFiles = existsSync(downloadFolderPath)
     ? (await fs.readdir(downloadFolderPath, { withFileTypes: true }))
         .filter((x) => x.isFile())
         .map((x) => x.name)
         .sort((a, b) => a.localeCompare(b, "en"))
     : [];
 
-  const pixiv = artworkId ? await fetchPixivIllust(artworkId) : { title: null, author: null, tags: [] as string[] };
+  const requestedDownloadFiles = item.downloadFileNames
+    ?.map((name) => name.trim())
+    .filter(Boolean);
+  const downloadFiles = requestedDownloadFiles?.length
+    ? requestedDownloadFiles.map((name) => {
+        if (!availableDownloadFiles.includes(name)) {
+          throw new Error(`Requested download file not found in ${downloadFolderPath}: ${name}`);
+        }
+        return name;
+      })
+    : availableDownloadFiles;
+
+  const pixiv = artworkId && !item.skipPixivMetadataFetch
+    ? await fetchPixivIllust(artworkId)
+    : { title: null, author: null, tags: [] as string[] };
 
   const title = item.titleOverride?.trim() || pixiv.title || item.characterName?.trim() || item.folder.trim();
   const authorName = item.authorOverride?.trim() || pixiv.author || "Unknown";
@@ -370,12 +423,15 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
         item.description?.trim() ||
         (artworkId
           ? `Imported from db image/cut/${item.folder}. Auto-enriched from Pixiv artwork ${artworkId}.`
-          : `Imported from db image/cut/${item.folder}. Source: ${sourceLink}`),
+          : sourceLink
+            ? `Imported from db image/cut/${item.folder}. Source: ${sourceLink}`
+            : `Imported from db image/cut/${item.folder}.`),
       coverImageUrl: imageUrls[0],
       sourceLink,
       storageFolder: slug,
-      reviewStatus: item.copyTagsFromSlug ? defaults?.reviewStatus ?? ReviewStatus.UNVERIFIED : defaults?.reviewStatus ?? ReviewStatus.UNVERIFIED,
+      reviewStatus: defaults?.reviewStatus ?? ReviewStatus.PASSED,
       publishStatus: defaults?.publishStatus ?? PublishStatus.PUBLISHED,
+      isVerified: (defaults?.reviewStatus ?? ReviewStatus.PASSED) === ReviewStatus.PASSED,
       contentTags: { create: tagIds.map((tagId) => ({ tagId })) },
       images: {
         create: imageUrls.map((imageUrl, sortOrder) => ({ imageUrl, sortOrder }))
@@ -397,8 +453,15 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
   const downloadResults: Array<{ sortOrder: number; url: string; fileName: string }> = [];
 
   for (let i = 0; i < downloadFiles.length; i += 1) {
-    const fileName = downloadFiles[i];
-    const filePath = path.join(downloadFolderPath, fileName);
+    const sourceFileName = downloadFiles[i];
+    const fileName = item.downloadFileLabels?.[sourceFileName]?.trim() || sourceFileName;
+    const filePath = path.join(downloadFolderPath, sourceFileName);
+    const fileInfo = await fs.stat(filePath);
+    if (fileInfo.size > LARGE_DOWNLOAD_LIMIT_BYTES) {
+      throw new Error(
+        `Download file exceeds 200MB and must not be uploaded as a website download. Report it and use the owner-provided KK Archive mod link instead: ${path.relative(workflowRoot, filePath)} (${fileInfo.size} bytes)`
+      );
+    }
     const buf = await fs.readFile(filePath);
     const safe = sanitizeFileName(fileName);
     const ext = path.extname(safe).toLowerCase() || ".bin";
@@ -461,13 +524,25 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
 }
 
 async function main() {
-  const queuePath = process.argv[2] ? path.resolve(process.cwd(), process.argv[2]) : DEFAULT_QUEUE;
+  const queuePath = process.argv[2] ? resolveWorkflowPath(process.argv[2]) : DEFAULT_QUEUE;
   if (!existsSync(queuePath)) {
     throw new Error(`Queue file not found: ${queuePath}`);
   }
 
   const raw = await fs.readFile(queuePath, "utf8");
-  const queue = JSON.parse(raw.replace(/^\uFEFF/, "")) as QueueFile;
+  const strippedRaw = raw.replace(/^\uFEFF/, "");
+  let queue: QueueFile;
+  try {
+    queue = JSON.parse(strippedRaw) as QueueFile;
+  } catch {
+    const repairedRaw = repairQueueJson(strippedRaw);
+    if (repairedRaw === strippedRaw) {
+      throw new Error(`Queue file is invalid JSON: ${queuePath}`);
+    }
+
+    queue = JSON.parse(repairedRaw) as QueueFile;
+    console.warn(`[CUT] Repaired illegal JSON tokens in ${queuePath}`);
+  }
 
   if (!Array.isArray(queue.items) || queue.items.length === 0) {
     console.log(JSON.stringify({ queuePath, count: 0, results: [], note: "queue has no items" }, null, 2));
@@ -478,19 +553,21 @@ async function main() {
   const results = [] as unknown[];
 
   for (const item of queue.items) {
-    if (!item.folder || !item.sourceLink) {
-      results.push({ skipped: true, reason: "missing_folder_or_source", item });
+    const normalizedItem = normalizeQueueItem(item as RawQueueItem);
+
+    if (!normalizedItem.folder) {
+      results.push({ skipped: true, reason: "missing_folder", item: normalizedItem });
       continue;
     }
 
     try {
-      const result = await importOne(item, queue.defaults, aliasMap);
+      const result = await importOne(normalizedItem, queue.defaults, aliasMap);
       results.push(result);
-      console.log(`[CUT] ${item.folder} -> ${"skipped" in result && result.skipped ? "SKIPPED" : "IMPORTED"}`);
+      console.log(`[CUT] ${normalizedItem.folder} -> ${"skipped" in result && result.skipped ? "SKIPPED" : "IMPORTED"}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      results.push({ folder: item.folder, failed: true, error: message });
-      console.error(`[CUT] ${item.folder} -> FAILED: ${message}`);
+      results.push({ folder: normalizedItem.folder, failed: true, error: message });
+      console.error(`[CUT] ${normalizedItem.folder} -> FAILED: ${message}`);
     }
   }
 
