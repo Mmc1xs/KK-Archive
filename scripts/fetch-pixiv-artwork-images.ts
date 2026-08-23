@@ -2,7 +2,6 @@ import "./load-env";
 import "./load-env";
 import path from "path";
 import { promises as fs } from "fs";
-import { cutRoot } from "./workflow-paths";
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -25,6 +24,7 @@ function parseArgs() {
 }
 
 function assertSafeFolder(folder: string) {
+  const cutRoot = path.resolve(process.cwd(), "db image", "cut");
   const target = path.resolve(cutRoot, folder);
   const relative = path.relative(cutRoot, target);
   if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
@@ -68,6 +68,11 @@ async function main() {
     description: metadataJson.body.description || null,
     tags: (metadataJson.body.tags?.tags ?? []).map((item) => item.tag).filter(Boolean)
   };
+  await fs.writeFile(
+    path.join(outputFolder, "_pixiv-metadata.json"),
+    JSON.stringify({ artworkId, sourceLink: `https://www.pixiv.net/artworks/${artworkId}`, metadata }, null, 2),
+    "utf8"
+  );
 
   const pagesResponse = await fetch(`https://www.pixiv.net/ajax/illust/${artworkId}/pages`, { headers });
   if (!pagesResponse.ok) throw new Error(`Pixiv pages request failed: ${pagesResponse.status}`);

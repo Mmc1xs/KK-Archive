@@ -55,6 +55,18 @@ type HomePageCopy = {
   }>;
   reservedEyebrow: string;
   reservedLabel: string;
+  downloadPanelEyebrow: string;
+  downloadPanelTitle: string;
+  downloadPanelDescription: string;
+  downloadCards: Array<{
+    code: string;
+    title: string;
+    description: string;
+    href?: string;
+    iconUrl: string;
+    actionLabel: string;
+    disabledLabel: string;
+  }>;
   hotTopicEyebrow: string;
   hotTopicTitle: string;
   latestPublishedEyebrow: string;
@@ -178,10 +190,43 @@ export function HomePageView({
               ) : null}
             </article>
 
-            <article className="hero-intel-card">
-              <div className="eyebrow">{copy.reservedEyebrow}</div>
-              <span className="hero-intel-mini">{copy.reservedLabel}</span>
-              <div className="hero-placeholder hero-placeholder-compact" aria-hidden="true" />
+            <article className="hero-download-panel">
+              <div className="hero-download-head">
+                <div>
+                  <div className="eyebrow">{copy.downloadPanelEyebrow}</div>
+                  <strong>{copy.downloadPanelTitle}</strong>
+                </div>
+                <span className="hero-intel-mini">{copy.reservedLabel}</span>
+              </div>
+              <p>{copy.downloadPanelDescription}</p>
+              <div className="hero-download-grid">
+                {copy.downloadCards.map((card) => {
+                  const content = (
+                    <>
+                      <span className="hero-download-avatar" aria-hidden="true">
+                        <Image src={card.iconUrl} alt="" width={128} height={128} />
+                      </span>
+                      <span className="hero-download-code">{card.code}</span>
+                      <strong>{card.title}</strong>
+                      <small>{card.description}</small>
+                      <span className="hero-download-action">
+                        {card.href ? card.actionLabel : card.disabledLabel}
+                        <span aria-hidden="true">{card.href ? "↗" : ""}</span>
+                      </span>
+                    </>
+                  );
+
+                  return card.href ? (
+                    <a key={card.code} className="hero-download-card" href={card.href} target="_blank" rel="noreferrer">
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={card.code} className="hero-download-card is-disabled" aria-disabled="true">
+                      {content}
+                    </div>
+                  );
+                })}
+              </div>
             </article>
           </div>
         </div>

@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { dbModsRoot, resolveWorkflowPath } from "./workflow-paths";
 
 const MOD_EXTENSIONS = [".zipmod", ".zip", ".7z", ".rar"];
 const CLOUD_DOWNLOAD_HOSTS = ["mega.nz", "mega.co.nz"];
@@ -493,10 +492,7 @@ async function main() {
   const deepOffset = Math.max(0, Number(args.get("deep-offset") ?? 0) || 0);
   const deepLimit = Math.max(1, Number(args.get("deep-limit") ?? 50) || 50);
   const authorSlug = slugify(String(args.get("author") ?? new URL(sourceUrl).pathname.split("/").filter(Boolean)[0] ?? "patreon-author"));
-  const requestedOutPath = args.get("out");
-  const outPath = requestedOutPath
-    ? resolveWorkflowPath(String(requestedOutPath))
-    : path.join(dbModsRoot, "source", authorSlug, "index.patreon.json");
+  const outPath = String(args.get("out") ?? path.join("db mods", "source", authorSlug, "index.patreon.json"));
   const { cookie, variable } = getPatreonCookie();
   const warnings: string[] = [];
   if (!cookie) warnings.push("No Patreon cookie/session env variable found. Public posts may still index, but locked/free-account-visible attachments may be missing.");

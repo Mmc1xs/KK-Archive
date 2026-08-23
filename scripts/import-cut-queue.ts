@@ -7,7 +7,6 @@ import { PublishStatus, ReviewStatus, TagType, UserRole, type Tag } from "@prism
 import { db } from "../lib/db";
 import { uploadR2Object, buildR2PublicUrl } from "../lib/storage/r2";
 import { buildContentFileDownloadPath } from "../lib/downloads/content-file-token";
-import { cutRoot, resolveWorkflowPath, siteRoot, workflowRoot } from "./workflow-paths";
 
 type QueueFile = {
   version: 1;
@@ -22,6 +21,7 @@ type QueueFile = {
 type QueueItem = {
   folder: string;
   imageFolder?: string;
+  imageFileNames?: string[];
   downloadFolder?: string;
   downloadFileNames?: string[];
   downloadFileLabels?: Record<string, string>;
@@ -63,13 +63,19 @@ type WorkAliasesFile = {
   }>;
 };
 
-const CUT_ROOT = cutRoot;
+const CUT_ROOT = path.resolve(process.cwd(), "db image", "cut");
 const DEFAULT_QUEUE = path.join(CUT_ROOT, "queue.json");
 const LARGE_DOWNLOAD_LIMIT_BYTES = 200 * 1024 * 1024;
-const WORK_ALIAS_PATH = path.resolve(siteRoot, "scripts", "pixiv-work-aliases.json");
+const WORK_ALIAS_PATH = path.resolve(process.cwd(), "scripts", "pixiv-work-aliases.json");
+const PROJECT_ROOT = path.resolve(process.cwd());
 
 function resolveProjectPath(relativePath: string) {
-  return resolveWorkflowPath(relativePath);
+  const resolved = path.resolve(PROJECT_ROOT, relativePath);
+  const relative = path.relative(PROJECT_ROOT, resolved);
+  if (relative.startsWith("..") || path.isAbsolute(relative)) {
+    throw new Error(`Asset path must stay inside the project root: ${relativePath}`);
+  }
+  return resolved;
 }
 
 function slugify(input: string) {
@@ -326,11 +332,23 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
     : path.join(folderPath, "d");
 
   const folderItems = await fs.readdir(folderPath, { withFileTypes: true });
-  const imageFiles = folderItems
+  const availableImageFiles = folderItems
     .filter((x) => x.isFile())
     .map((x) => x.name)
     .filter((name) => /\.(jpg|jpeg|png|webp)$/i.test(name))
     .sort((a, b) => a.localeCompare(b, "en"));
+
+  const requestedImageFiles = item.imageFileNames
+    ?.map((name) => name.trim())
+    .filter(Boolean);
+  const imageFiles = requestedImageFiles?.length
+    ? requestedImageFiles.map((name) => {
+        if (!availableImageFiles.includes(name)) {
+          throw new Error(`Requested image file not found in ${folderPath}: ${name}`);
+        }
+        return name;
+      })
+    : availableImageFiles;
 
   if (imageFiles.length === 0) {
     throw new Error(`No images found in ${folderPath}`);
@@ -343,10 +361,8 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
         .sort((a, b) => a.localeCompare(b, "en"))
     : [];
 
-  const requestedDownloadFiles = item.downloadFileNames
-    ?.map((name) => name.trim())
-    .filter(Boolean);
-  const downloadFiles = requestedDownloadFiles?.length
+  const requestedDownloadFiles = item.downloadFileNames?.map((name) => name.trim()).filter(Boolean);
+  const downloadFiles = requestedDownloadFiles
     ? requestedDownloadFiles.map((name) => {
         if (!availableDownloadFiles.includes(name)) {
           throw new Error(`Requested download file not found in ${downloadFolderPath}: ${name}`);
@@ -373,8 +389,10 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
     );
   }
 
-  const typeName = item.typeName?.trim() || defaults?.typeName || baseTags.baseTypeTag?.name || "Character card";
-  const typeTag = await db.tag.findFirst({ where: { type: TagType.TYPE, name: typeName } });
+  const typeName = item.typeName?.trim() || defaults?.typeName?.trim() || baseTags.baseTypeTag?.name || "KK";
+  const typeTag =
+    (await db.tag.findFirst({ where: { type: TagType.TYPE, name: typeName } })) ??
+    (typeName === "KK" ? await ensureTagByTypeAndName(TagType.TYPE, typeName) : null);
   if (!typeTag) {
     throw new Error(`Type tag not found: ${typeName}`);
   }
@@ -382,9 +400,16 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
   const authorTag = await ensureTagByTypeAndName(TagType.AUTHOR, authorName);
   const characterTag = await ensureTagByTypeAndName(TagType.CHARACTER, characterName, workTag.id);
 
-  const styleTags = item.styleNames?.length
-    ? await Promise.all(item.styleNames.map((name) => ensureTagByTypeAndName(TagType.STYLE, name)))
+  const explicitStyleNames = item.styleNames?.map((name) => name.trim()).filter(Boolean) ?? [];
+  const styleTags = explicitStyleNames.length
+    ? await Promise.all(explicitStyleNames.map((name) => ensureTagByTypeAndName(TagType.STYLE, name)))
     : baseTags.extraStyleTags;
+
+  if (styleTags.length === 0) {
+    throw new Error(
+      `Style is required for folder '${item.folder}'. Add at least one styleNames value or use copyTagsFromSlug with an existing Style tag; ask the owner if the Style is uncertain.`
+    );
+  }
 
   const usageTags = item.usageNames?.length
     ? await Promise.all(item.usageNames.map((name) => ensureTagByTypeAndName(TagType.USAGE, name)))
@@ -459,7 +484,7 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
     const fileInfo = await fs.stat(filePath);
     if (fileInfo.size > LARGE_DOWNLOAD_LIMIT_BYTES) {
       throw new Error(
-        `Download file exceeds 200MB and must not be uploaded as a website download. Report it and use the owner-provided KK Archive mod link instead: ${path.relative(workflowRoot, filePath)} (${fileInfo.size} bytes)`
+        `Download file exceeds 200MB and must not be uploaded as a website download. Report it and use the owner-provided KK Archive mod link instead: ${path.relative(PROJECT_ROOT, filePath)} (${fileInfo.size} bytes)`
       );
     }
     const buf = await fs.readFile(filePath);
@@ -524,7 +549,7 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
 }
 
 async function main() {
-  const queuePath = process.argv[2] ? resolveWorkflowPath(process.argv[2]) : DEFAULT_QUEUE;
+  const queuePath = process.argv[2] ? path.resolve(process.cwd(), process.argv[2]) : DEFAULT_QUEUE;
   if (!existsSync(queuePath)) {
     throw new Error(`Queue file not found: ${queuePath}`);
   }

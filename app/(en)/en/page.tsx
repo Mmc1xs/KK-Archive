@@ -6,6 +6,7 @@ import {
   getHomepageLatestPublishedContents,
   getHomepageOverviewStats
 } from "@/lib/content";
+import { getLocaleInstallVersionHref } from "@/lib/ui-locale";
 
 export const revalidate = 300;
 export const preferredRegion = "hkg1";
@@ -45,6 +46,29 @@ const copy = {
   ],
   reservedEyebrow: "Reserved Panel",
   reservedLabel: "Future Slot",
+  downloadPanelEyebrow: "Clean Source",
+  downloadPanelTitle: "Base Game Downloads",
+  downloadPanelDescription: "Pick the matching base package first, then pair it with cards, scenes, and mod resources from the archive.",
+  downloadCards: [
+    {
+      code: "KK",
+      title: "Koikatsu Party",
+      description: "School-setting base source for most KK cards and legacy resources.",
+      href: getLocaleInstallVersionHref("en", "kk"),
+      iconUrl: "https://cdn2.steamgriddb.com/grid/eacac8618eb5b3240debd191db819910.jpg",
+      actionLabel: "View Setup",
+      disabledLabel: "Pending"
+    },
+    {
+      code: "KKS",
+      title: "Koikatsu Sunshine",
+      description: "Sunshine edition source slot reserved for the matching cloud folder.",
+      href: getLocaleInstallVersionHref("en", "kks"),
+      iconUrl: "https://cdn2.steamgriddb.com/grid/fdbfb9f7a6e4aa57039a56775046451b.png",
+      actionLabel: "View Setup",
+      disabledLabel: "Pending"
+    }
+  ],
   hotTopicEyebrow: "Hot Topic",
   hotTopicTitle: "Hot Topic",
   latestPublishedEyebrow: "Latest Published",

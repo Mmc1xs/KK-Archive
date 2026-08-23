@@ -77,9 +77,6 @@ ${formatScriptList(scripts)}
 
 ## Notes For New Sessions
 
-- Run website development, build, Git, commit, and push commands only from \`C:\\Users\\mlcmlc\\Desktop\\KK Diction Website\`.
-- Local \`cut\` and \`up_mod\` data stays outside Git under \`C:\\Users\\mlcmlc\\Desktop\\KK Diction\`; use its \`cut.ps1\` and \`up_mod.ps1\` launchers instead of scanning or moving that workspace.
-- Never include \`db image/\` or \`db mods/\` in website commits. See \`docs/workflow-storage.md\` for path resolution.
 - Locale homepages share five-minute caches for Latest Published and bulletins.
 - Bulletin writes invalidate the bulletin cache; content writes invalidate Latest Published.
 - Admin tag autocomplete has a two-minute browser cache and in-flight request deduplication.

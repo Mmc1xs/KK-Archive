@@ -114,6 +114,40 @@ async def run_upload(args: argparse.Namespace) -> int:
         flood_sleep_threshold=60
     ) as client:
         entity = await client.get_entity(args.channel)
+
+        if args.reuse_recent or args.check_only:
+            async for recent_message in client.iter_messages(entity, limit=args.recent_limit):
+                recent_file = getattr(recent_message, "file", None)
+                if recent_file is None:
+                    continue
+                if getattr(recent_file, "name", None) != file_path.name:
+                    continue
+                if int(getattr(recent_file, "size", -1)) != file_size:
+                    continue
+                message_id = int(recent_message.id)
+                emit(
+                    {
+                        "type": "result",
+                        "ok": True,
+                        "reused": True,
+                        "messageId": message_id,
+                        "link": build_link(entity, message_id),
+                        "file": str(file_path)
+                    }
+                )
+                return 0
+
+        if args.check_only:
+            emit(
+                {
+                    "type": "result",
+                    "ok": False,
+                    "found": False,
+                    "file": str(file_path)
+                }
+            )
+            return 3
+
         uploaded = await client.upload_file(
             file=str(file_path),
             part_size_kb=part_size_kb,
@@ -148,6 +182,22 @@ def main() -> int:
         "--session-file",
         default="",
         help="Optional explicit .session path. Defaults to db image/koikatu_session.session if present."
+    )
+    parser.add_argument(
+        "--reuse-recent",
+        action="store_true",
+        help="Reuse a recent message with the same filename and byte size instead of uploading a duplicate."
+    )
+    parser.add_argument(
+        "--check-only",
+        action="store_true",
+        help="Only search recent messages; do not upload when no match is found."
+    )
+    parser.add_argument(
+        "--recent-limit",
+        type=int,
+        default=100,
+        help="Number of recent channel messages to inspect when --reuse-recent is enabled."
     )
     parser.add_argument(
         "--part-size-kb",

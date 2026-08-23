@@ -1,15 +1,8 @@
 $ErrorActionPreference = "Stop"
 
-$siteRoot = Split-Path -Parent $PSScriptRoot
-$workflowRoot = if ($env:KK_WORKFLOW_ROOT) {
-    [System.IO.Path]::GetFullPath($env:KK_WORKFLOW_ROOT)
-}
-else {
-    $siblingRoot = Join-Path (Split-Path $siteRoot -Parent) "KK Diction"
-    if (Test-Path -LiteralPath $siblingRoot) { $siblingRoot } else { $siteRoot }
-}
-$indexPath = Join-Path $workflowRoot "db mods\source\pandaman\index.drive.json"
-$reviewDir = Join-Path $workflowRoot "db mods\source\pandaman\review"
+$projectRoot = Split-Path -Parent $PSScriptRoot
+$indexPath = Join-Path $projectRoot "db mods\source\pandaman\index.drive.json"
+$reviewDir = Join-Path $projectRoot "db mods\source\pandaman\review"
 
 $alreadyUploaded = [System.Collections.Generic.HashSet[string]]::new(
     [string[]]@(

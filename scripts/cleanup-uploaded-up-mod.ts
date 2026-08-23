@@ -3,7 +3,6 @@ import "./load-env";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { db } from "../lib/db";
-import { dbModsRoot } from "./workflow-paths";
 
 type ModTableRow = {
   Guid?: string;
@@ -22,9 +21,10 @@ type IntakeState = {
 };
 
 const apply = process.argv.includes("--apply");
-const upModDir = path.join(dbModsRoot, "up_mod");
-const tablePath = path.join(dbModsRoot, "mods_table.json");
-const intakeStatePath = path.join(dbModsRoot, "up_mod_intake_state.json");
+const root = process.cwd();
+const upModDir = path.join(root, "db mods", "up_mod");
+const tablePath = path.join(root, "db mods", "mods_table.json");
+const intakeStatePath = path.join(root, "db mods", "up_mod_intake_state.json");
 
 function normalizeFilePath(value: string) {
   return path.resolve(value).replaceAll("/", "\\").toLowerCase();

@@ -473,6 +473,154 @@ img {
   line-height: 1.55;
 }
 
+.hero-download-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(117, 173, 222, 0.34);
+  border-radius: 22px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(226, 244, 255, 0.72)),
+    radial-gradient(circle at 18% 22%, rgba(108, 196, 255, 0.16), transparent 30%);
+}
+
+.hero-download-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.hero-download-head strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.hero-download-panel p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.hero-download-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.hero-download-card {
+  position: relative;
+  display: grid;
+  min-height: 168px;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 7px;
+  padding: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(91, 166, 226, 0.34);
+  border-radius: 18px;
+  color: inherit;
+  text-decoration: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(238, 249, 255, 0.76)),
+    repeating-linear-gradient(
+      -45deg,
+      rgba(117, 173, 222, 0.05),
+      rgba(117, 173, 222, 0.05) 8px,
+      transparent 8px,
+      transparent 18px
+    );
+  box-shadow: 0 10px 22px rgba(70, 135, 190, 0.1);
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.hero-download-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(44, 145, 220, 0.58);
+  box-shadow: 0 14px 28px rgba(59, 139, 210, 0.16);
+  text-decoration: none;
+}
+
+.hero-download-card.is-disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.hero-download-card.is-disabled:hover {
+  transform: none;
+  border-color: rgba(91, 166, 226, 0.34);
+  box-shadow: 0 10px 22px rgba(70, 135, 190, 0.1);
+}
+
+.hero-download-avatar {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(91, 166, 226, 0.32);
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 8px 18px rgba(52, 126, 196, 0.16);
+}
+
+.hero-download-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-download-code {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: rgba(230, 247, 255, 0.92);
+  border: 1px solid rgba(91, 166, 226, 0.34);
+  color: #1268b0;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.hero-download-card strong {
+  min-width: 0;
+  color: #134772;
+  font-size: 0.96rem;
+  line-height: 1.25;
+}
+
+.hero-download-card small {
+  color: #3b719d;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+.hero-download-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(91, 166, 226, 0.32);
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .hero-spotlight-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 132px;
@@ -581,6 +729,297 @@ img {
 .hero-feature-pills-compact .hero-feature-pill {
   font-size: 0.82rem;
   padding: 7px 11px;
+}
+
+.install-guide-page {
+  display: grid;
+  gap: 22px;
+}
+
+.install-guide-hero,
+.install-version-panel {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 18px 44px var(--shadow);
+}
+
+.install-guide-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(102, 196, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95), rgba(229, 246, 255, 0.88));
+}
+
+.install-guide-hero h1 {
+  margin: 4px 0 10px;
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  line-height: 1.16;
+}
+
+.install-guide-hero p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.install-guide-actions {
+  flex: 0 0 auto;
+}
+
+.install-guide-jump {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.install-guide-jump a {
+  display: grid;
+  grid-template-columns: 56px auto;
+  grid-template-rows: auto auto;
+  gap: 2px 12px;
+  align-items: center;
+  min-height: 82px;
+  padding: 12px;
+  border: 1px solid rgba(117, 173, 222, 0.36);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.82);
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 12px 26px rgba(70, 135, 190, 0.08);
+}
+
+.install-guide-jump a:hover {
+  border-color: rgba(44, 145, 220, 0.58);
+  text-decoration: none;
+}
+
+.install-guide-jump img {
+  grid-row: 1 / span 2;
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(91, 166, 226, 0.32);
+}
+
+.install-guide-jump span {
+  align-self: end;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.install-guide-jump strong {
+  align-self: start;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.install-guide-stack {
+  display: grid;
+  gap: 22px;
+}
+
+.install-version-panel {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  scroll-margin-top: 96px;
+}
+
+.install-version-header {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.install-version-header img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: 22px;
+  border: 1px solid rgba(91, 166, 226, 0.34);
+  box-shadow: 0 12px 26px rgba(70, 135, 190, 0.14);
+}
+
+.install-version-header h2 {
+  margin: 4px 0 8px;
+  font-size: 1.55rem;
+  line-height: 1.18;
+}
+
+.install-version-header p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.install-version-grid,
+.install-plugin-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  gap: 14px;
+}
+
+.install-plugin-grid {
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+}
+
+.install-source-card,
+.install-steps-card,
+.install-plugin-panel,
+.install-check-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid rgba(117, 173, 222, 0.34);
+  border-radius: 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(238, 249, 255, 0.74));
+}
+
+.install-source-card {
+  align-content: start;
+}
+
+.install-source-list {
+  display: grid;
+  gap: 12px;
+}
+
+.install-source-option {
+  display: grid;
+  gap: 7px;
+}
+
+.install-source-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.install-source-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  align-self: start;
+  justify-self: stretch;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(91, 166, 226, 0.38);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--accent-strong);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.install-source-button:hover {
+  border-color: rgba(44, 145, 220, 0.58);
+  text-decoration: none;
+}
+
+.install-source-button.is-disabled {
+  opacity: 0.68;
+  cursor: not-allowed;
+}
+
+.install-inline-link {
+  color: var(--accent-strong);
+  font-weight: 800;
+  text-decoration: underline;
+  text-decoration-color: rgba(46, 127, 203, 0.34);
+  text-underline-offset: 3px;
+}
+
+.install-inline-link:hover {
+  text-decoration-color: currentColor;
+}
+
+.install-step-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: install-step;
+}
+
+.install-step-list li {
+  position: relative;
+  min-height: 34px;
+  margin: 0;
+  padding: 4px 0 4px 46px;
+  color: #235a8a;
+  line-height: 1.55;
+  counter-increment: install-step;
+}
+
+.install-step-list li::before {
+  content: counter(install-step);
+  position: absolute;
+  left: 0;
+  top: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: rgba(222, 244, 255, 0.92);
+  border: 1px solid rgba(91, 166, 226, 0.34);
+  color: var(--accent-strong);
+  font-weight: 800;
+}
+
+.install-plugin-group {
+  display: grid;
+  gap: 8px;
+}
+
+.install-plugin-group h3 {
+  margin: 0;
+  color: #134772;
+  font-size: 1rem;
+}
+
+.install-plugin-group ul,
+.install-check-panel ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.install-plugin-group li,
+.install-check-panel li {
+  position: relative;
+  margin: 0;
+  padding-left: 20px;
+  color: #3b719d;
+  line-height: 1.5;
+}
+
+.install-plugin-group li::before,
+.install-check-panel li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.68em;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #66c4ff, #2a93df);
+  box-shadow: 0 0 0 4px rgba(102, 196, 255, 0.12);
 }
 
 .panel {
@@ -2360,6 +2799,20 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .install-guide-hero,
+  .install-version-header {
+    grid-template-columns: 1fr;
+  }
+
+  .install-guide-hero {
+    flex-direction: column;
+  }
+
+  .install-version-grid,
+  .install-plugin-grid {
+    grid-template-columns: 1fr;
+  }
+
   .admin-dashboard-columns {
     grid-template-columns: 1fr;
   }
@@ -2435,4 +2888,29 @@ button {
     min-height: 72vh;
   }
 
+}
+
+@media (max-width: 560px) {
+  .install-guide-jump {
+    grid-template-columns: 1fr;
+  }
+
+  .install-version-panel,
+  .install-guide-hero {
+    padding: 18px;
+    border-radius: 24px;
+  }
+
+  .hero-download-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .hero-download-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-download-card {
+    min-height: 150px;
+  }
 }

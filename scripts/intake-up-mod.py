@@ -9,11 +9,11 @@ import sys
 import xml.etree.ElementTree as ET
 import zipfile
 from io import BytesIO
-from workflow_paths import DB_MODS_ROOT
 
-UP_MOD = DB_MODS_ROOT / "up_mod"
-TABLE = DB_MODS_ROOT / "mods_table.json"
-STATE = DB_MODS_ROOT / "up_mod_intake_state.json"
+ROOT = Path.cwd()
+UP_MOD = ROOT / "db mods" / "up_mod"
+TABLE = ROOT / "db mods" / "mods_table.json"
+STATE = ROOT / "db mods" / "up_mod_intake_state.json"
 SEVEN_ZIP = Path(r"C:\Program Files\7-Zip\7z.exe")
 APPLY = "--apply" in sys.argv
 
@@ -49,7 +49,7 @@ def manifest_from_zip_bytes(data: bytes):
             )
             if not manifest_name:
                 return None
-            xml_root = ET.fromstring(archive.read(manifest_name).decode("utf-8-sig", errors="replace"))
+            xml_root = ET.fromstring(archive.read(manifest_name))
         manifest = {
             "Name": find_text(xml_root, "name"),
             "Version": find_text(xml_root, "version"),

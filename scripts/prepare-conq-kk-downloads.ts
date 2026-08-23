@@ -1,9 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
-import { dbModsRoot, workflowRoot } from "./workflow-paths";
 
-const INDEX_PATH = path.join(dbModsRoot, "source", "conq", "index.patreon.deep-merged.json");
-const OUT_ROOT = path.join(dbModsRoot, "source", "conq");
+const ROOT = process.cwd();
+const INDEX_PATH = path.join(ROOT, "db mods", "source", "conq", "index.patreon.deep-merged.json");
+const OUT_ROOT = path.join(ROOT, "db mods", "source", "conq");
 const PLAN_PATH = path.join(OUT_ROOT, "conq-kk-download-plan.json");
 const REVIEW_PATH = path.join(OUT_ROOT, "conq-kk-download-review.md");
 
@@ -94,8 +94,8 @@ for (const post of index.posts || []) {
       publishedAt: post.publishedAt,
       folderName,
       targetFolders: {
-        patreon: path.relative(workflowRoot, path.join(OUT_ROOT, "raw", "patreon", folderName)),
-        mega: path.relative(workflowRoot, path.join(OUT_ROOT, "raw", "mega", folderName)),
+        patreon: path.join("db mods", "source", "conq", "raw", "patreon", folderName),
+        mega: path.join("db mods", "source", "conq", "raw", "mega", folderName),
       },
       downloads: { patreonNative, mega, other },
     });
@@ -144,12 +144,8 @@ for (const post of selectedPosts) {
 lines.push("## Excluded posts with downloads");
 lines.push("");
 for (const post of excludedPosts) {
-  lines.push(`- ${post.title} (${post.downloadCount}) - ${post.url}`);
+  lines.push(`- ${post.title} (${post.downloadCount}) — ${post.url}`);
 }
 fs.writeFileSync(REVIEW_PATH, lines.join("\n"), "utf8");
 
-console.log(JSON.stringify({
-  planPath: path.relative(workflowRoot, PLAN_PATH),
-  reviewPath: path.relative(workflowRoot, REVIEW_PATH),
-  summary
-}, null, 2));
+console.log(JSON.stringify({ planPath: path.relative(ROOT, PLAN_PATH), reviewPath: path.relative(ROOT, REVIEW_PATH), summary }, null, 2));

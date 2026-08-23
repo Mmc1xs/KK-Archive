@@ -9,6 +9,7 @@ Build a maintainable image browsing website with structured tag-based search.
 - Do not implement free-text search.
 - Search must only use existing database tags.
 - Each content item must have exactly one author tag.
+- Every card must have exactly one `TYPE` tag and at least one `STYLE` tag. Default an unspecified Type to `KK`; if Style is uncertain, stop and ask the owner instead of guessing or importing without Style.
 - Keep author/style/usage tags separated in UI and logic.
 
 ## Technical preferences

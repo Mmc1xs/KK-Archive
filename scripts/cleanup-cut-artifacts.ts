@@ -1,6 +1,5 @@
 import path from "path";
 import { existsSync, promises as fs } from "fs";
-import { workflowRoot } from "./workflow-paths";
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -38,7 +37,7 @@ function parseArgs() {
 }
 
 function resolveAllowedPath(input: string, allowCutFolder: boolean, allowVioletFolder: boolean) {
-  const root = workflowRoot;
+  const root = process.cwd();
   const target = path.resolve(root, input);
   const allowedRoots = [
     path.resolve(root, "db image", "output"),

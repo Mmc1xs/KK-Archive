@@ -6,6 +6,7 @@ import {
   getHomepageLatestPublishedContents,
   getHomepageOverviewStats
 } from "@/lib/content";
+import { getLocaleInstallVersionHref } from "@/lib/ui-locale";
 
 export const revalidate = 300;
 export const preferredRegion = "hkg1";
@@ -44,6 +45,29 @@ const copy = {
   ],
   reservedEyebrow: "予約パネル",
   reservedLabel: "今後の枠",
+  downloadPanelEyebrow: "クリーンソース",
+  downloadPanelTitle: "本体ダウンロード",
+  downloadPanelDescription: "対応する本体パッケージを先に取得し、アーカイブ内のカード、シーン、Mod と組み合わせて使えます。",
+  downloadCards: [
+    {
+      code: "KK",
+      title: "Koikatsu Party",
+      description: "多くの KK カードと旧来リソース向けの学園系本体ソースです。",
+      href: getLocaleInstallVersionHref("ja", "kk"),
+      iconUrl: "https://cdn2.steamgriddb.com/grid/eacac8618eb5b3240debd191db819910.jpg",
+      actionLabel: "手順を見る",
+      disabledLabel: "接続待ち"
+    },
+    {
+      code: "KKS",
+      title: "Koikatsu Sunshine",
+      description: "KKS 用クラウドフォルダに接続するためのサンシャイン版ソース枠です。",
+      href: getLocaleInstallVersionHref("ja", "kks"),
+      iconUrl: "https://cdn2.steamgriddb.com/grid/fdbfb9f7a6e4aa57039a56775046451b.png",
+      actionLabel: "手順を見る",
+      disabledLabel: "接続待ち"
+    }
+  ],
   hotTopicEyebrow: "注目トピック",
   hotTopicTitle: "注目トピック",
   latestPublishedEyebrow: "最新公開",

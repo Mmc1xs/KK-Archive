@@ -3,7 +3,6 @@ import json
 import os
 from pathlib import Path
 from zipfile import ZipFile
-from workflow_paths import CUT_ROOT, DB_IMAGE_ROOT, WORKFLOW_ROOT
 
 
 def within(base: Path, target: Path) -> bool:
@@ -22,12 +21,12 @@ def main() -> None:
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
-    root = WORKFLOW_ROOT
+    root = Path.cwd().resolve()
     archive_roots = [
-        (CUT_ROOT / "_source-downloads").resolve(),
-        (DB_IMAGE_ROOT / "output").resolve(),
+        (root / "db image" / "cut" / "_source-downloads").resolve(),
+        (root / "db image" / "output").resolve(),
     ]
-    cut_root = CUT_ROOT.resolve()
+    cut_root = (root / "db image" / "cut").resolve()
     archive_path = (root / args.archive).resolve()
     output_path = (root / args.output).resolve()
 

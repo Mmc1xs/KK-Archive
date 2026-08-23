@@ -1,7 +1,6 @@
 import path from "node:path";
 import { constants } from "node:fs";
 import { copyFile, mkdir, stat } from "node:fs/promises";
-import { cutRoot, dbImageRoot, workflowRoot } from "./workflow-paths";
 
 const LARGE_FILE_LIMIT_BYTES = 200 * 1024 * 1024;
 
@@ -9,20 +8,27 @@ function parseArgs() {
   const args = process.argv.slice(2);
   let source = "";
   let folder = "";
+  let preview = false;
+  let upMod = false;
 
   for (let index = 0; index < args.length; index += 1) {
     if (args[index] === "--source") {
       source = args[++index] ?? "";
     } else if (args[index] === "--folder") {
       folder = args[++index] ?? "";
+    } else if (args[index] === "--preview") {
+      preview = true;
+    } else if (args[index] === "--up-mod") {
+      upMod = true;
     } else {
       throw new Error(`Unsupported argument: ${args[index]}`);
     }
   }
 
   if (!source.trim()) throw new Error("--source is required");
-  if (!folder.trim()) throw new Error("--folder is required");
-  return { source: source.trim(), folder: folder.trim() };
+  if (preview && upMod) throw new Error("--preview and --up-mod cannot be combined");
+  if (!upMod && !folder.trim()) throw new Error("--folder is required unless --up-mod is used");
+  return { source: source.trim(), folder: folder.trim(), preview, upMod };
 }
 
 function resolveWithin(base: string, candidate: string, label: string) {
@@ -35,11 +41,13 @@ function resolveWithin(base: string, candidate: string, label: string) {
 }
 
 async function main() {
-  const { source, folder } = parseArgs();
-  const root = workflowRoot;
-  const outputRoot = path.resolve(dbImageRoot, "output");
+  const { source, folder, preview, upMod } = parseArgs();
+  const root = process.cwd();
+  const outputRoot = path.resolve(root, "db image", "output");
+  const cutRoot = path.resolve(root, "db image", "cut");
+  const upModRoot = path.resolve(root, "db mods", "up_mod");
   const sourcePath = resolveWithin(outputRoot, source, "source");
-  const contentFolder = resolveWithin(cutRoot, folder, "folder");
+  const contentFolder = upMod ? null : resolveWithin(cutRoot, folder, "folder");
   const sourceInfo = await stat(sourcePath);
 
   if (!sourceInfo.isFile()) throw new Error(`Source is not a file: ${source}`);
@@ -49,7 +57,7 @@ async function main() {
     );
   }
 
-  const destinationFolder = path.join(contentFolder, "d");
+  const destinationFolder = upMod ? upModRoot : preview ? contentFolder! : path.join(contentFolder!, "d");
   const destinationPath = path.join(destinationFolder, path.basename(sourcePath));
   await mkdir(destinationFolder, { recursive: true });
   await copyFile(sourcePath, destinationPath, constants.COPYFILE_EXCL);
@@ -57,7 +65,8 @@ async function main() {
   console.log(JSON.stringify({
     source: path.relative(root, sourcePath),
     destination: path.relative(root, destinationPath),
-    bytes: sourceInfo.size
+    bytes: sourceInfo.size,
+    kind: upMod ? "up_mod" : preview ? "preview" : "download"
   }, null, 2));
 }
 

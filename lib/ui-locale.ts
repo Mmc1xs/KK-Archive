@@ -70,6 +70,18 @@ export function getLocaleSupportHref(locale: UiLocale) {
   return buildLocalizedHref(locale, "/support");
 }
 
+export function getLocaleInstallHref(locale: UiLocale) {
+  if (locale === "en") {
+    return "/en/install";
+  }
+
+  return buildLocalizedHref(locale, "/install");
+}
+
+export function getLocaleInstallVersionHref(locale: UiLocale, version: "kk" | "kks") {
+  return `${getLocaleInstallHref(locale)}/${version}`;
+}
+
 export function getLocalePrivacyHref(locale: UiLocale) {
   return buildLocalizedHref(locale, "/privacy");
 }

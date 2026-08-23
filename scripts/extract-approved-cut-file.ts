@@ -2,7 +2,6 @@ import path from "path";
 import { existsSync, promises as fs } from "fs";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { cutRoot, workflowRoot } from "./workflow-paths";
 
 const execFileAsync = promisify(execFile);
 
@@ -34,8 +33,9 @@ function assertWithin(base: string, target: string, label: string) {
 
 async function main() {
   const args = parseArgs();
-  const root = workflowRoot;
-  const archiveRoot = path.resolve(cutRoot, "_source-downloads");
+  const root = process.cwd();
+  const archiveRoot = path.resolve(root, "db image", "cut", "_source-downloads");
+  const cutRoot = path.resolve(root, "db image", "cut");
   const archivePath = path.resolve(root, args.archive);
   const outputPath = path.resolve(root, args.output);
 

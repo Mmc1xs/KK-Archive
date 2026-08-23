@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { tagSchema, updateTagSchema } from "@/lib/validation";
 
 const FIXED_TYPE_TAGS = [
+  { name: "KK", slug: "type-kk" },
   { name: "Character card", slug: "type-character-card" },
   { name: "Cloth card", slug: "type-cloth-card" },
   { name: "Scene Card", slug: "type-scene-card" },
