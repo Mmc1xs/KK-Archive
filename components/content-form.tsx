@@ -8,6 +8,7 @@ import { HostedFileUploader } from "@/components/admin/hosted-file-uploader";
 import { TagAutocomplete } from "@/components/tag-autocomplete";
 import { WorkCharacterFields } from "@/components/work-character-fields";
 import { buildContentHref } from "@/lib/content-href";
+import { isApexDriveUrl, isTelegramUrl } from "@/lib/download-providers";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 import { resolveContentStorageFolderValue } from "@/lib/uploads";
@@ -79,15 +80,6 @@ function getReviewStatusMeta(reviewStatus: "UNVERIFIED" | "EDITED" | "PASSED") {
   }
 }
 
-function isTelegramUrl(url: string) {
-  try {
-    const parsed = new URL(url);
-    return parsed.hostname === "t.me" || parsed.hostname === "telegram.me" || parsed.hostname.endsWith(".t.me");
-  } catch {
-    return false;
-  }
-}
-
 export function ContentForm({ mode, role = "ADMIN", error, success, tagOptions, content }: ContentFormProps) {
   const action =
     mode === "create"
@@ -110,7 +102,9 @@ export function ContentForm({ mode, role = "ADMIN", error, success, tagOptions, 
       .filter(
         (url) => !hostedLegacyDownloadLinks.has(url) && !hostedLegacyIdDownloadLinks.has(url) && !hostedDownloadLinkSet.has(url)
       ) ?? [];
-  const telegramDownloadLink = manualDownloadLinks.find(isTelegramUrl) ?? manualDownloadLinks[0] ?? "";
+  const telegramDownloadLink = manualDownloadLinks.find(isTelegramUrl) ?? "";
+  const apexDriveDownloadLinks = manualDownloadLinks.filter(isApexDriveUrl);
+  const otherDownloadLinks = manualDownloadLinks.filter((url) => !isTelegramUrl(url) && !isApexDriveUrl(url));
   const imageUrls = content?.images.length ? content.images.map((image) => image.imageUrl) : ["", "", ""];
   const storageFolder = content ? resolveContentStorageFolderValue(content) : "";
 
@@ -238,6 +232,8 @@ export function ContentForm({ mode, role = "ADMIN", error, success, tagOptions, 
         <DownloadLinksEditor
           initialTelegramLink={telegramDownloadLink}
           initialHostedLinks={hostedDownloadLinks}
+          initialApexDriveLinks={apexDriveDownloadLinks}
+          initialOtherLinks={otherDownloadLinks}
         />
         {mode === "edit" && content ? (
           <div className="field hosted-files-panel">

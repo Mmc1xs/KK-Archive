@@ -7,6 +7,7 @@
 - `folder`: cut folder name under `db image/cut`
 - `sourceLink`: Pixiv artwork URL when verified, or `null`/empty only with owner-approved no-source handling
 - `tgLink`: Telegram post/archive URL (optional, but keep it when available)
+- `apexDriveLink` / `apexDriveLinks`: ApexDrive download URL(s) when the downloadable file is hosted there
 - Style: provide at least one non-empty `styleNames` value, or use `copyTagsFromSlug` only when the referenced card already has a Style tag
 
 Every imported card must have exactly one Type and at least one Style. Type defaults to `KK` only when neither the item, queue defaults, nor `copyTagsFromSlug` supplies one. If Style is uncertain, stop and ask the owner; do not guess or import the card without Style.
@@ -38,6 +39,7 @@ When `sourceLink` is empty, set `skipPixivMetadataFetch: true` and provide expli
 - Skips item when a non-empty `sourceLink` already exists in DB, unless `allowDuplicateSource` is set.
 - Uploads all root-level images in the folder to `contents/<content-slug>/...`.
 - Uploads selected `downloadFileNames`, or all files in `d/`, to `uploadfiles/<content-slug>/...` and auto-creates website download links.
+- Adds ApexDrive link(s) as download links when `apexDriveLink`, `apexDriveLinks`, `apexDriveUrl`, or `apexDriveUrls` is provided.
 - Rejects local download files over 200 MiB; use owner-approved external/archive links for large files.
 - Adds TG link as the last download link when `tgLink` is provided.
 - Creates/imports tags from explicit overrides, so source-less imports must be reviewed carefully before upload.

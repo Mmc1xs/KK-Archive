@@ -72,7 +72,7 @@ export default async function ContentDetailPage({
     });
   }
 
-  const { tgDownloadLink, siteDownloadEntries } = normalizeContentDownloadEntries(content);
+  const { tgDownloadLink, siteDownloadEntries, apexDriveEntries } = normalizeContentDownloadEntries(content);
 
   return (
     <ContentDetailView
@@ -80,6 +80,7 @@ export default async function ContentDetailPage({
       user={user}
       tgDownloadLink={tgDownloadLink}
       siteDownloadEntries={siteDownloadEntries}
+      apexDriveEntries={apexDriveEntries}
       locale="en"
       flashMessage={
         success
@@ -98,6 +99,8 @@ export default async function ContentDetailPage({
         telegramDownload: "TG Download",
         websiteDownload: "Website Download",
         websiteDownloads: (count) => `Website Download (${count})`,
+        apexDriveDownload: "ApexDrive Download",
+        apexDriveDownloads: (count) => `ApexDrive Download (${count})`,
         websiteDownloadLoginRequired: "Website Download is available for logged-in members only.",
         login: "Login",
         adBlockNotice: {

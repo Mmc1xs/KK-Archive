@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 type DownloadLinksEditorProps = {
   initialTelegramLink?: string;
   initialHostedLinks?: string[];
+  initialApexDriveLinks?: string[];
+  initialOtherLinks?: string[];
 };
 
 function isValidUrl(value: string) {
@@ -18,10 +20,13 @@ function isValidUrl(value: string) {
 
 export function DownloadLinksEditor({
   initialTelegramLink = "",
-  initialHostedLinks = []
+  initialHostedLinks = [],
+  initialApexDriveLinks = [],
+  initialOtherLinks = []
 }: DownloadLinksEditorProps) {
   const [telegramLink, setTelegramLink] = useState(initialTelegramLink);
   const [hostedLinks, setHostedLinks] = useState<string[]>([...new Set(initialHostedLinks)]);
+  const [apexDriveLinksText, setApexDriveLinksText] = useState([...new Set(initialApexDriveLinks)].join("\n"));
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -31,6 +36,10 @@ export function DownloadLinksEditor({
   useEffect(() => {
     setHostedLinks([...new Set(initialHostedLinks)]);
   }, [initialHostedLinks]);
+
+  useEffect(() => {
+    setApexDriveLinksText([...new Set(initialApexDriveLinks)].join("\n"));
+  }, [initialApexDriveLinks]);
 
   useEffect(() => {
     function handleExternalLink(event: Event) {
@@ -62,6 +71,15 @@ export function DownloadLinksEditor({
 
   const trimmedTelegram = telegramLink.trim();
   const telegramIsValid = !trimmedTelegram || isValidUrl(trimmedTelegram);
+  const apexDriveLinks = [
+    ...new Set(
+      apexDriveLinksText
+        .split(/\r?\n/)
+        .map((url) => url.trim())
+        .filter(Boolean)
+    )
+  ];
+  const apexDriveLinksAreValid = apexDriveLinks.every(isValidUrl);
 
   return (
     <div className="field download-links-editor">
@@ -88,6 +106,34 @@ export function DownloadLinksEditor({
       </div>
 
       <div className="download-link-row">
+        <label htmlFor="apexDriveDownloadLinks">ApexDrive</label>
+        <textarea
+          id="apexDriveDownloadLinks"
+          rows={Math.max(2, apexDriveLinks.length)}
+          placeholder="https://newapexcloud.com/s/..."
+          value={apexDriveLinksText}
+          onChange={(event) => {
+            const next = event.target.value;
+            setApexDriveLinksText(next);
+            const links = next
+              .split(/\r?\n/)
+              .map((url) => url.trim())
+              .filter(Boolean);
+            if (links.every(isValidUrl)) {
+              setError("");
+            } else {
+              setError("Please enter valid ApexDrive links, one URL per line");
+            }
+          }}
+        />
+        {apexDriveLinksAreValid
+          ? apexDriveLinks.map((url, index) => (
+              <input key={`apex-drive-download-link-${index}`} type="hidden" name="downloadLinks" value={url} />
+            ))
+          : null}
+      </div>
+
+      <div className="download-link-row">
         <label>Website (R2)</label>
         <div className="download-link-readonly">
           {hostedLinks.length
@@ -98,6 +144,18 @@ export function DownloadLinksEditor({
           <input key={`hosted-download-link-${index}`} type="hidden" name="downloadLinks" value={url} />
         ))}
       </div>
+
+      {initialOtherLinks.length ? (
+        <div className="download-link-row">
+          <label>Other</label>
+          <div className="download-link-readonly">
+            Preserved external link(s): {initialOtherLinks.length}
+          </div>
+          {[...new Set(initialOtherLinks)].map((url, index) => (
+            <input key={`other-download-link-${index}`} type="hidden" name="downloadLinks" value={url} />
+          ))}
+        </div>
+      ) : null}
 
       {error ? <div className="notice">{error}</div> : null}
     </div>

@@ -1,4 +1,5 @@
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
+import { isApexDriveUrl, isTelegramUrl } from "@/lib/download-providers";
 import { buildR2PublicUrl } from "@/lib/storage/r2";
 
 export function getPrimaryTagName(
@@ -32,15 +33,6 @@ export function normalizeTypeLabel(raw?: string) {
     .join(" ");
 }
 
-export function isTelegramUrl(url: string) {
-  try {
-    const parsed = new URL(url);
-    return parsed.hostname === "t.me" || parsed.hostname === "telegram.me" || parsed.hostname.endsWith(".t.me");
-  } catch {
-    return false;
-  }
-}
-
 export function normalizeContentDownloadEntries(content: {
   downloadLinks: Array<{ url: string }>;
   hostedFiles: Array<{ id: number; objectKey: string; fileName: string }>;
@@ -66,7 +58,7 @@ export function normalizeContentDownloadEntries(content: {
     }
 
     return {
-      kind: isTelegramUrl(link.url) ? ("telegram" as const) : ("other" as const),
+      kind: isTelegramUrl(link.url) ? ("telegram" as const) : isApexDriveUrl(link.url) ? ("apexDrive" as const) : ("other" as const),
       url: link.url,
       label: link.url
     };
@@ -77,6 +69,13 @@ export function normalizeContentDownloadEntries(content: {
     ...new Map(
       normalizedDownloadEntries
         .filter((entry) => entry.kind === "website")
+        .map((entry) => [entry.url, entry] as const)
+    ).values()
+  ];
+  const apexDriveEntries = [
+    ...new Map(
+      normalizedDownloadEntries
+        .filter((entry) => entry.kind === "apexDrive")
         .map((entry) => [entry.url, entry] as const)
     ).values()
   ];
@@ -93,6 +92,7 @@ export function normalizeContentDownloadEntries(content: {
 
   return {
     tgDownloadLink,
-    siteDownloadEntries
+    siteDownloadEntries,
+    apexDriveEntries
   };
 }

@@ -5,6 +5,7 @@ import { promises as fs } from "fs";
 import { pathToFileURL } from "url";
 import { PublishStatus, ReviewStatus, TagType, UserRole, type Tag } from "@prisma/client";
 import { db } from "../lib/db";
+import { isApexDriveUrl } from "../lib/download-providers";
 import { uploadR2Object, buildR2PublicUrl } from "../lib/storage/r2";
 import { buildContentFileDownloadPath } from "../lib/downloads/content-file-token";
 
@@ -29,6 +30,10 @@ type QueueItem = {
   allowDuplicateSource?: boolean;
   skipPixivMetadataFetch?: boolean;
   tgLink?: string;
+  apexDriveLink?: string;
+  apexDriveLinks?: string[];
+  apexDriveUrl?: string;
+  apexDriveUrls?: string[];
   titleOverride?: string;
   authorOverride?: string;
   characterName?: string;
@@ -135,11 +140,20 @@ function repairQueueJson(raw: string) {
 function normalizeQueueItem(item: RawQueueItem): QueueItem {
   const titleOverride = item.titleOverride?.trim() || item.Title?.trim() || undefined;
   const sourceLink = typeof item.sourceLink === "string" ? item.sourceLink.trim() || null : null;
+  const apexDriveLinks = [
+    ...(Array.isArray(item.apexDriveLinks) ? item.apexDriveLinks : []),
+    ...(Array.isArray(item.apexDriveUrls) ? item.apexDriveUrls : [])
+  ]
+    .map((url) => url.trim())
+    .filter(Boolean);
+  const apexDriveLink = item.apexDriveLink?.trim() || item.apexDriveUrl?.trim() || undefined;
 
   return {
     ...item,
     sourceLink,
-    titleOverride
+    titleOverride,
+    apexDriveLink,
+    apexDriveLinks
   };
 }
 
@@ -150,6 +164,21 @@ function normalizeKey(input: string) {
     .toLowerCase()
     .replace(/[^a-z0-9\u4e00-\u9fff\u3040-\u30ff\uac00-\ud7af]+/g, "")
     .trim();
+}
+
+function getApexDriveLinks(item: QueueItem) {
+  const links = [
+    item.apexDriveLink?.trim(),
+    item.apexDriveUrl?.trim(),
+    ...(item.apexDriveLinks ?? []).map((url) => url.trim()),
+    ...(item.apexDriveUrls ?? []).map((url) => url.trim())
+  ].filter((url): url is string => Boolean(url));
+  const uniqueLinks = [...new Set(links)];
+  const invalidLinks = uniqueLinks.filter((url) => !isApexDriveUrl(url));
+  if (invalidLinks.length) {
+    throw new Error(`Invalid ApexDrive link(s): ${invalidLinks.join(", ")}`);
+  }
+  return uniqueLinks;
 }
 
 async function fetchPixivIllust(artworkId: string) {
@@ -510,6 +539,18 @@ async function importOne(item: QueueItem, defaults: QueueFile["defaults"], alias
     const url = buildContentFileDownloadPath(file.id);
     await db.contentDownloadLink.create({ data: { contentId: content.id, url, sortOrder: i } });
     downloadResults.push({ sortOrder: i, url, fileName });
+  }
+
+  for (const apexDriveLink of getApexDriveLinks(item)) {
+    const sortOrder = downloadResults.length;
+    await db.contentDownloadLink.create({
+      data: {
+        contentId: content.id,
+        url: apexDriveLink,
+        sortOrder
+      }
+    });
+    downloadResults.push({ sortOrder, url: apexDriveLink, fileName: "ApexDrive" });
   }
 
   if (item.tgLink?.trim()) {

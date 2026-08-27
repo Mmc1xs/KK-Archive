@@ -42,7 +42,7 @@ type SessionUser = {
 };
 
 type NormalizedDownloadEntry = {
-  kind: "website" | "telegram" | "other";
+  kind: "website" | "telegram" | "apexDrive" | "other";
   url: string;
   label: string;
 };
@@ -52,6 +52,7 @@ type ContentDetailViewProps = {
   user: SessionUser | null;
   tgDownloadLink?: string;
   siteDownloadEntries: NormalizedDownloadEntry[];
+  apexDriveEntries: NormalizedDownloadEntry[];
   locale: UiLocale;
   flashMessage?: {
     type: "success" | "error";
@@ -67,6 +68,8 @@ type ContentDetailViewProps = {
     telegramDownload: string;
     websiteDownload: string;
     websiteDownloads: (count: number) => string;
+    apexDriveDownload: string;
+    apexDriveDownloads: (count: number) => string;
     websiteDownloadLoginRequired: string;
     login: string;
     adBlockNotice: {
@@ -136,6 +139,7 @@ export function ContentDetailView({
   user,
   tgDownloadLink,
   siteDownloadEntries,
+  apexDriveEntries,
   locale,
   flashMessage,
   copy
@@ -156,6 +160,7 @@ export function ContentDetailView({
   const detailPath = buildContentDetailPath(locale, content.slug);
   const reportCopy = getReportCopy(locale);
   const canUseWebsiteDownload = siteDownloadEntries.length > 0;
+  const canUseApexDriveDownload = apexDriveEntries.length > 0;
 
   return (
     <div className="page-section grid">
@@ -230,7 +235,7 @@ export function ContentDetailView({
               </div>
             </section>
           ) : null}
-          {tgDownloadLink || siteDownloadEntries.length ? (
+          {tgDownloadLink || siteDownloadEntries.length || apexDriveEntries.length ? (
             <section className="tag-section">
               <strong>{copy.downloadLinks}</strong>
               <div className="tag-group download-link-group">
@@ -269,6 +274,36 @@ export function ContentDetailView({
                     </div>
                   </details>
                 ) : null}
+                {canUseApexDriveDownload && apexDriveEntries.length === 1 ? (
+                  <a
+                    href={apexDriveEntries[0].url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="link-pill exo-download-trigger"
+                  >
+                    {copy.apexDriveDownload}
+                  </a>
+                ) : null}
+                {canUseApexDriveDownload && apexDriveEntries.length > 1 ? (
+                  <details className="download-menu">
+                    <summary className="link-pill download-menu-trigger">
+                      {copy.apexDriveDownloads(apexDriveEntries.length)}
+                    </summary>
+                    <div className="download-menu-panel">
+                      {apexDriveEntries.map((entry, index) => (
+                        <a
+                          key={entry.url}
+                          href={entry.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="download-menu-item exo-download-trigger"
+                        >
+                          {`${copy.apexDriveDownload} ${index + 1}`}
+                        </a>
+                      ))}
+                    </div>
+                  </details>
+                ) : null}
               </div>
             </section>
           ) : null}
@@ -282,7 +317,7 @@ export function ContentDetailView({
           </div>
         </aside>
       </div>
-      {siteDownloadEntries.length > 0 ? <AdBlockNoticeModal copy={copy.adBlockNotice} /> : null}
+      {siteDownloadEntries.length > 0 || apexDriveEntries.length > 0 ? <AdBlockNoticeModal copy={copy.adBlockNotice} /> : null}
       <HomeStickyBanner />
     </div>
   );

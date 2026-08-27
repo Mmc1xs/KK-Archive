@@ -67,7 +67,7 @@ export default async function ContentDetailPageZhCn({
     });
   }
 
-  const { tgDownloadLink, siteDownloadEntries } = normalizeContentDownloadEntries(content);
+  const { tgDownloadLink, siteDownloadEntries, apexDriveEntries } = normalizeContentDownloadEntries(content);
 
   return (
     <ContentDetailView
@@ -75,6 +75,7 @@ export default async function ContentDetailPageZhCn({
       user={user}
       tgDownloadLink={tgDownloadLink}
       siteDownloadEntries={siteDownloadEntries}
+      apexDriveEntries={apexDriveEntries}
       locale="zh-CN"
       flashMessage={
         success
@@ -93,6 +94,8 @@ export default async function ContentDetailPageZhCn({
         telegramDownload: "TG 下载",
         websiteDownload: "网站下载",
         websiteDownloads: (count) => `网站下载 (${count})`,
+        apexDriveDownload: "ApexDrive 下载",
+        apexDriveDownloads: (count) => `ApexDrive 下载 (${count})`,
         websiteDownloadLoginRequired: "网站下载仅对已登录会员开放。",
         login: "登录",
         adBlockNotice: {
