@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
-const EXOCLICK_POPUNDER_ZONE_ID = process.env.NEXT_PUBLIC_EXOCLICK_POPUNDER_ZONE_ID?.trim();
+const EXOCLICK_POPUNDER_ENABLED = (process.env.NEXT_PUBLIC_EXOCLICK_POPUNDER_ENABLED?.trim() || "true") !== "false";
+const EXOCLICK_POPUNDER_ZONE_ID = process.env.NEXT_PUBLIC_EXOCLICK_POPUNDER_ZONE_ID?.trim() || "5913562";
 const EXOCLICK_POPUNDER_TRIGGER_CLASS =
   process.env.NEXT_PUBLIC_EXOCLICK_POPUNDER_TRIGGER_CLASS?.trim() || "exo-download-trigger";
 const EXOCLICK_POPUNDER_FREQUENCY_PERIOD =
@@ -29,15 +30,16 @@ function toBoolString(value: string) {
 export function ExoClickPopunder() {
   const pathname = usePathname();
 
-  if (!EXOCLICK_POPUNDER_ZONE_ID) {
-    return null;
-  }
-
   useEffect(() => {
     const clearScripts = () => {
       document.getElementById(EXOCLICK_POPUNDER_CONFIG_SCRIPT_ID)?.remove();
       document.getElementById(EXOCLICK_POPUNDER_LOADER_SCRIPT_ID)?.remove();
     };
+
+    if (!EXOCLICK_POPUNDER_ENABLED || !EXOCLICK_POPUNDER_ZONE_ID) {
+      clearScripts();
+      return;
+    }
 
     const isContentDetailRoute =
       pathname.includes("/contents/") || pathname.includes("/zh-CN/contents/") || pathname.includes("/ja/contents/");
