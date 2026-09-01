@@ -1865,6 +1865,10 @@ button {
   background: rgba(231, 246, 255, 0.98);
 }
 
+.home-sticky-ad:not(.is-filled):not(.is-local-debug) .home-sticky-ad-close {
+  display: none;
+}
+
 .home-sticky-ad-inner {
   pointer-events: auto;
   width: 728px;
@@ -1878,6 +1882,13 @@ button {
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 24px rgba(20, 45, 68, 0.16);
+}
+
+.home-sticky-ad:not(.is-filled):not(.is-local-debug) .home-sticky-ad-inner {
+  pointer-events: none;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
 }
 
 .home-sticky-ad-inner ins {

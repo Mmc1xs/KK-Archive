@@ -42,25 +42,30 @@ export function HomeStickyBanner() {
       // ignore storage errors
     }
 
-    const timer = window.setTimeout(() => {
+    let timer: number | undefined = window.setTimeout(() => {
       setIsTimeout(true);
     }, 5000);
 
-    const container = containerRef.current;
-    const ins = container?.querySelector("ins");
+    const adInner = containerRef.current?.querySelector(".home-sticky-ad-inner");
 
-    if (!ins) {
+    if (!adInner) {
       return () => {
         window.clearTimeout(timer);
       };
     }
 
     const updateFilledState = () => {
-      const hasRenderedChild = ins.childElementCount > 0;
-      const hasRenderedMarkup = Boolean(ins.innerHTML.trim());
-      if (hasRenderedChild || hasRenderedMarkup) {
-        setIsFilled(true);
+      const hasRenderedAd = Boolean(
+        adInner.querySelector('iframe, img[src], [id^="exo-sticky-container-"], [data-uid] iframe, [data-uid] img')
+      );
+      if (hasRenderedAd && timer) {
+        window.clearTimeout(timer);
+        timer = undefined;
       }
+      if (hasRenderedAd) {
+        setIsTimeout(false);
+      }
+      setIsFilled(hasRenderedAd);
     };
 
     updateFilledState();
@@ -69,11 +74,13 @@ export function HomeStickyBanner() {
       updateFilledState();
     });
 
-    observer.observe(ins, { childList: true, subtree: true, characterData: true });
+    observer.observe(adInner, { childList: true, subtree: true, characterData: true, attributes: true });
 
     return () => {
       observer.disconnect();
-      window.clearTimeout(timer);
+      if (timer) {
+        window.clearTimeout(timer);
+      }
     };
   }, []);
 
