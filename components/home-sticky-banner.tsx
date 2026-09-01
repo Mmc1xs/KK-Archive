@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ExoClickZone } from "@/components/exoclick-zone";
 
 const EXOCLICK_HOME_STICKY_ZONE_ID = process.env.NEXT_PUBLIC_EXOCLICK_HOME_STICKY_ZONE_ID?.trim() || "5915396";
@@ -25,9 +25,11 @@ export function HomeStickyBanner() {
   const [isFilled, setIsFilled] = useState(false);
   const [isTimeout, setIsTimeout] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
-  const shouldShowLocalDebug = useMemo(() => EXOCLICK_HOME_STICKY_LOCAL_DEBUG && isLocalhost(), []);
+  const [shouldShowLocalDebug, setShouldShowLocalDebug] = useState(false);
 
   useEffect(() => {
+    setShouldShowLocalDebug(EXOCLICK_HOME_STICKY_LOCAL_DEBUG && isLocalhost());
+
     try {
       const untilRaw = window.localStorage.getItem(EXOCLICK_HOME_STICKY_DISMISS_KEY);
       const until = untilRaw ? Number.parseInt(untilRaw, 10) : 0;
