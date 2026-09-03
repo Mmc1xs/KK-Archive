@@ -213,8 +213,12 @@ export function SiteNavClient() {
         <Link href={getLocaleHomeHref(locale)} className="brand">
           KK Archive
         </Link>
-        <Link href={getLocaleContentsHref(locale)}>{labels.contents}</Link>
-        <Link href={getLocaleSearchHref(locale)}>{labels.search}</Link>
+        <Link href={getLocaleContentsHref(locale)} prefetch={false}>
+          {labels.contents}
+        </Link>
+        <Link href={getLocaleSearchHref(locale)} prefetch={false}>
+          {labels.search}
+        </Link>
         {canAccessModLibrary ? <Link href={getLocaleModLibraryHref(locale)}>{labels.modLibrary}</Link> : null}
         <div ref={toolMenuRef} style={{ position: "relative", zIndex: 80 }}>
           <button

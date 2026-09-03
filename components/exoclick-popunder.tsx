@@ -7,6 +7,18 @@ const EXOCLICK_POPUNDER_ENABLED = (process.env.NEXT_PUBLIC_EXOCLICK_POPUNDER_ENA
 const EXOCLICK_POPUNDER_ZONE_ID = process.env.NEXT_PUBLIC_EXOCLICK_POPUNDER_ZONE_ID?.trim() || "5913562";
 const EXOCLICK_POPUNDER_TRIGGER_CLASS =
   process.env.NEXT_PUBLIC_EXOCLICK_POPUNDER_TRIGGER_CLASS?.trim() || "exo-download-trigger";
+const EXOCLICK_SEARCH_FILTER_POPUNDER_ZONE_ID =
+  process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_FILTER_POPUNDER_ZONE_ID?.trim() || EXOCLICK_POPUNDER_ZONE_ID;
+const EXOCLICK_SEARCH_FILTER_TRIGGER_CLASS =
+  process.env.NEXT_PUBLIC_EXOCLICK_SEARCH_FILTER_TRIGGER_CLASS?.trim() || "exo-search-filter-trigger";
+const EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_ZONE_ID =
+  process.env.NEXT_PUBLIC_EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_ZONE_ID?.trim() || EXOCLICK_POPUNDER_ZONE_ID;
+const EXOCLICK_MOD_LIBRARY_SEARCH_TRIGGER_CLASS =
+  process.env.NEXT_PUBLIC_EXOCLICK_MOD_LIBRARY_SEARCH_TRIGGER_CLASS?.trim() || "exo-mod-library-search-trigger";
+const EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_FREQUENCY_PERIOD =
+  process.env.NEXT_PUBLIC_EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_FREQUENCY_PERIOD?.trim() || "1";
+const EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_FREQUENCY_COUNT =
+  process.env.NEXT_PUBLIC_EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_FREQUENCY_COUNT?.trim() || "9999";
 const EXOCLICK_POPUNDER_FREQUENCY_PERIOD =
   process.env.NEXT_PUBLIC_EXOCLICK_POPUNDER_FREQUENCY_PERIOD?.trim() || "720";
 const EXOCLICK_POPUNDER_FREQUENCY_COUNT =
@@ -36,16 +48,35 @@ export function ExoClickPopunder() {
       document.getElementById(EXOCLICK_POPUNDER_LOADER_SCRIPT_ID)?.remove();
     };
 
-    if (!EXOCLICK_POPUNDER_ENABLED || !EXOCLICK_POPUNDER_ZONE_ID) {
+    if (!EXOCLICK_POPUNDER_ENABLED) {
       clearScripts();
       return;
     }
 
     const isContentDetailRoute =
       pathname.includes("/contents/") || pathname.includes("/zh-CN/contents/") || pathname.includes("/ja/contents/");
+    const isSearchRoute = pathname === "/search" || pathname === "/zh-CN/search" || pathname === "/ja/search";
+    const isModLibraryRoute =
+      pathname === "/mod_library" || pathname === "/zh-CN/mod_library" || pathname === "/ja/mod_library";
+    const activeZoneId = isSearchRoute
+      ? EXOCLICK_SEARCH_FILTER_POPUNDER_ZONE_ID
+      : isModLibraryRoute
+        ? EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_ZONE_ID
+        : EXOCLICK_POPUNDER_ZONE_ID;
+    const activeTriggerClass = isSearchRoute
+      ? EXOCLICK_SEARCH_FILTER_TRIGGER_CLASS
+      : isModLibraryRoute
+        ? EXOCLICK_MOD_LIBRARY_SEARCH_TRIGGER_CLASS
+        : EXOCLICK_POPUNDER_TRIGGER_CLASS;
+    const activeFrequencyPeriod = isModLibraryRoute
+      ? EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_FREQUENCY_PERIOD
+      : EXOCLICK_POPUNDER_FREQUENCY_PERIOD;
+    const activeFrequencyCount = isModLibraryRoute
+      ? EXOCLICK_MOD_LIBRARY_SEARCH_POPUNDER_FREQUENCY_COUNT
+      : EXOCLICK_POPUNDER_FREQUENCY_COUNT;
 
     clearScripts();
-    if (!isContentDetailRoute) {
+    if ((!isContentDetailRoute && !isSearchRoute && !isModLibraryRoute) || !activeZoneId || !activeTriggerClass) {
       return;
     }
 
@@ -57,15 +88,15 @@ export function ExoClickPopunder() {
       configScript.id = EXOCLICK_POPUNDER_CONFIG_SCRIPT_ID;
       configScript.type = "application/javascript";
       configScript.text = [
-        `var ad_idzone = "${EXOCLICK_POPUNDER_ZONE_ID}";`,
+        `var ad_idzone = ${JSON.stringify(activeZoneId)};`,
         "var ad_popup_fallback = false;",
         `var ad_popup_force = ${toBoolString(EXOCLICK_POPUNDER_POPUP_FORCE)};`,
         `var ad_chrome_enabled = ${toBoolString(EXOCLICK_POPUNDER_CHROME_ENABLED)};`,
         `var ad_new_tab = ${toBoolString(EXOCLICK_POPUNDER_NEW_TAB)};`,
-        `var ad_frequency_period = ${Number.parseInt(EXOCLICK_POPUNDER_FREQUENCY_PERIOD, 10) || 720};`,
-        `var ad_frequency_count = ${Number.parseInt(EXOCLICK_POPUNDER_FREQUENCY_COUNT, 10) || 1};`,
+        `var ad_frequency_period = ${Number.parseInt(activeFrequencyPeriod, 10) || 720};`,
+        `var ad_frequency_count = ${Number.parseInt(activeFrequencyCount, 10) || 1};`,
         "var ad_trigger_method = 2;",
-        `var ad_trigger_class = "${EXOCLICK_POPUNDER_TRIGGER_CLASS}";`,
+        `var ad_trigger_class = ${JSON.stringify(activeTriggerClass)};`,
         "var ad_trigger_delay = 0;",
         `var ad_capping_enabled = ${toBoolString(EXOCLICK_POPUNDER_CAPPING_ENABLED)};`,
         `var ad_tcf_enabled = ${toBoolString(EXOCLICK_POPUNDER_TCF_ENABLED)};`
@@ -81,13 +112,15 @@ export function ExoClickPopunder() {
     };
 
     // Ensure download links already exist before ExoClick binds trigger class clicks.
-    if (document.querySelector(".exo-download-trigger")) {
+    const triggerSelector = `.${activeTriggerClass}`;
+
+    if (document.querySelector(triggerSelector)) {
       const timer = window.setTimeout(injectScript, 0);
       return () => window.clearTimeout(timer);
     }
 
     const observer = new MutationObserver(() => {
-      if (document.querySelector(".exo-download-trigger")) {
+      if (document.querySelector(triggerSelector)) {
         observer.disconnect();
         injectScript();
       }

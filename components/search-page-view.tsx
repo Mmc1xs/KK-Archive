@@ -171,6 +171,7 @@ export function SearchPageView({
                 resultsPage.hasPrevious ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"
               }
               aria-disabled={!resultsPage.hasPrevious}
+              prefetch={false}
             >
               {copy.previous}
             </Link>
@@ -191,6 +192,7 @@ export function SearchPageView({
                   : "link-pill pagination-arrow pagination-disabled"
               }
               aria-disabled={!resultsPage.hasNext}
+              prefetch={false}
             >
               {copy.next}
             </Link>

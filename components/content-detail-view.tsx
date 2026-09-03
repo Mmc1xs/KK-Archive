@@ -1,7 +1,6 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
 import { ReviewStatus } from "@prisma/client";
-import { reportPassedContentIssueAction } from "@/app/actions";
 import { AdBlockNoticeModal } from "@/components/adblock-notice-modal";
 import { HomeStickyBanner } from "@/components/home-sticky-banner";
 import { TagLinks } from "@/components/tag-links";
@@ -108,31 +107,21 @@ function getReportCopy(locale: UiLocale) {
     case "zh-CN":
       return {
         label: "回报问题",
-        hoverHint: "仅回报文件问题（例如图片损坏或下载链接失效）。"
+        hoverHint: "前往 KK Archive Telegram 问题回报讨论串。"
       };
     case "ja":
       return {
         label: "問題を報告",
-        hoverHint: "ファイルの問題（画像の破損やダウンロードリンク切れなど）のみ報告してください。"
+        hoverHint: "KK Archive Telegram の問題報告スレッドを開きます。"
       };
     default:
       return {
         label: "Report Issue",
-        hoverHint: "Only report file issues (for example broken images or broken downloads)."
+        hoverHint: "Open the KK Archive Telegram issue report thread."
       };
   }
 }
-function buildContentDetailPath(locale: UiLocale, slug: string) {
-  if (locale === "zh-CN") {
-    return `/zh-CN/contents/${slug}`;
-  }
-
-  if (locale === "ja") {
-    return `/ja/contents/${slug}`;
-  }
-
-  return `/contents/${slug}`;
-}
+const REPORT_ISSUE_THREAD_HREF = "https://t.me/c/4331026715/7/8";
 
 export function ContentDetailView({
   content,
@@ -157,7 +146,6 @@ export function ContentDetailView({
     content.reviewStatus === ReviewStatus.PASSED;
   const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus, copy.reviewStatus);
   const description = content.description?.trim();
-  const detailPath = buildContentDetailPath(locale, content.slug);
   const reportCopy = getReportCopy(locale);
   const canUseWebsiteDownload = siteDownloadEntries.length > 0;
   const canUseApexDriveDownload = apexDriveEntries.length > 0;
@@ -214,14 +202,15 @@ export function ContentDetailView({
             <div className="status">{content.publishStatus}</div>
             {isStaff ? <div className={reviewStatusMeta.className}>{reviewStatusMeta.label}</div> : null}
             {canReportIssue ? (
-              <form action={reportPassedContentIssueAction} className="report-issue-form">
-                <input type="hidden" name="contentId" value={content.id} />
-                <input type="hidden" name="issueType" value="fileIssue" />
-                <input type="hidden" name="redirectTo" value={detailPath} />
-                <button type="submit" className="link-pill" title={reportCopy.hoverHint}>
-                  {reportCopy.label}
-                </button>
-              </form>
+              <a
+                href={REPORT_ISSUE_THREAD_HREF}
+                target="_blank"
+                rel="noreferrer"
+                className="link-pill"
+                title={reportCopy.hoverHint}
+              >
+                {reportCopy.label}
+              </a>
             ) : null}
           </div>
           {description ? <p className="muted">{description}</p> : null}

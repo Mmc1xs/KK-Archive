@@ -43,8 +43,10 @@ type HomePageCopy = {
   onlineLabel: string;
   totalPostsEyebrow: string;
   totalPostsDescription: string;
-  indexedAuthorsEyebrow: string;
-  indexedAuthorsDescription: string;
+  telegramGroupEyebrow: string;
+  telegramGroupTitle: string;
+  telegramGroupDescription: string;
+  telegramGroupActionLabel: string;
   spotlightEyebrow: string;
   spotlightFallbackTitle: string;
   spotlightFallbackAuthor: string;
@@ -99,6 +101,9 @@ function formatBulletinDate(value: Date | string | null, locale: UiLocale) {
     day: "2-digit"
   }).format(date);
 }
+
+const TELEGRAM_GROUP_HREF = "https://t.me/+gm-dbibcQ6EyMDVl";
+const TELEGRAM_GROUP_LOGO_SRC = "/images/kk-telegram-group-logo.png";
 
 export function HomePageView({
   hotTopicContents,
@@ -164,11 +169,25 @@ export function HomePageView({
                 <strong>{overviewStats.totalPosts}</strong>
                 <small>{copy.totalPostsDescription}</small>
               </article>
-              <article className="hero-intel-card">
-                <span className="eyebrow">{copy.indexedAuthorsEyebrow}</span>
-                <strong>{overviewStats.indexedAuthors}</strong>
-                <small>{copy.indexedAuthorsDescription}</small>
-              </article>
+              <a
+                className="hero-intel-card hero-telegram-card"
+                href={TELEGRAM_GROUP_HREF}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <div className="hero-telegram-head">
+                  <span className="eyebrow">{copy.telegramGroupEyebrow}</span>
+                  <span className="hero-telegram-logo" aria-hidden="true">
+                    <Image src={TELEGRAM_GROUP_LOGO_SRC} alt="" width={96} height={96} />
+                  </span>
+                </div>
+                <strong>{copy.telegramGroupTitle}</strong>
+                <small>{copy.telegramGroupDescription}</small>
+                <span className="hero-telegram-action">
+                  {copy.telegramGroupActionLabel}
+                  <span aria-hidden="true">↗</span>
+                </span>
+              </a>
             </div>
 
             <article className="hero-spotlight-card">
@@ -256,7 +275,7 @@ export function HomePageView({
             <div className="eyebrow">{copy.latestPublishedEyebrow}</div>
             <h2 className="title-lg">{copy.latestPublishedTitle}</h2>
           </div>
-          <Link href={contentsHref} className="link-pill">
+          <Link href={contentsHref} className="link-pill" prefetch={false}>
             {copy.viewMoreLabel}
           </Link>
         </div>

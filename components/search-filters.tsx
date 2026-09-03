@@ -213,6 +213,7 @@ export function SearchFilters({
   const characterRef = useRef<HTMLDivElement>(null);
   const styleRef = useRef<HTMLDivElement>(null);
   const usageRef = useRef<HTMLDivElement>(null);
+  const filterFormRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     setSelectedAuthor(initialAuthor);
@@ -648,12 +649,18 @@ export function SearchFilters({
     }
   }
 
+  function handleApplyFiltersClick() {
+    window.setTimeout(() => {
+      filterFormRef.current?.requestSubmit();
+    }, 150);
+  }
+
   const styleLabel = labels.styleLabelTemplate
     .replace("{count}", String(selectedStyles.length))
     .replace("{max}", String(MAX_SELECTED_STYLES));
 
   return (
-    <form method="get" className="grid">
+    <form ref={filterFormRef} method="get" className="grid">
       <div className="field">
         <label htmlFor="author-search">{labels.author}</label>
         <div className="search-author-picker" ref={authorRef}>
@@ -968,7 +975,9 @@ export function SearchFilters({
       </div>
 
       <div className="inline-actions">
-        <button type="submit">{labels.applyFilters}</button>
+        <button type="button" className="exo-search-filter-trigger" onClick={handleApplyFiltersClick}>
+          {labels.applyFilters}
+        </button>
         <a href={clearHref} className="link-pill">
           {labels.clearFilters}
         </a>

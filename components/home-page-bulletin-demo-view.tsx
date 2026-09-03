@@ -193,7 +193,7 @@ export function HomePageBulletinDemoView({
             <div className="eyebrow">{copy.latestPublishedEyebrow}</div>
             <h2 className="title-lg">{copy.latestPublishedTitle}</h2>
           </div>
-          <Link href={contentsHref} className="link-pill">
+          <Link href={contentsHref} className="link-pill" prefetch={false}>
             {copy.viewMoreLabel}
           </Link>
         </div>

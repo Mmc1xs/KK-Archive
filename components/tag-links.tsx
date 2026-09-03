@@ -39,7 +39,7 @@ export function TagLinks({ title, tags, type, locale = "en" }: TagLinksProps) {
                 : `${searchHref}?${type === "type" ? "types" : `${type}s`}=${tag.slug}`;
 
           return (
-            <Link key={tag.slug} href={href} className="link-pill">
+            <Link key={tag.slug} href={href} className="link-pill" prefetch={false}>
               {tag.name}
             </Link>
           );

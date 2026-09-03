@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { HomeStickyBanner } from "@/components/home-sticky-banner";
+import { ModLibrarySearchForm } from "@/components/mod-library-search-form";
 import type { UiLocale } from "@/lib/ui-locale";
 import { getLocaleModLibraryHref } from "@/lib/ui-locale";
 
@@ -85,19 +87,15 @@ export function ModLibraryPageView({
         <h1 className="title-lg">{copy.title}</h1>
         <p className="muted">{copy.description}</p>
 
-        <form action={basePath} method="get" className="inline-actions mod-library-search-form">
-          <label className="field-label mod-library-search-label">
-            {copy.searchLabel}
-            <input name="q" type="text" defaultValue={query} placeholder={copy.searchPlaceholder} />
-          </label>
-          <input type="hidden" name="pageSize" value={String(pageSize)} />
-          <button type="submit" className="button secondary">
-            {copy.searchButton}
-          </button>
-          <Link href={basePath} className="link-pill">
-            {copy.clearButton}
-          </Link>
-        </form>
+        <ModLibrarySearchForm
+          action={basePath}
+          query={query}
+          pageSize={pageSize}
+          searchLabel={copy.searchLabel}
+          searchPlaceholder={copy.searchPlaceholder}
+          searchButton={copy.searchButton}
+          clearButton={copy.clearButton}
+        />
 
         <div className="split mod-library-toolbar">
           <span className="status">{`Page ${currentPage} / ${totalPages} - ${totalCount} mods`}</span>
@@ -184,6 +182,7 @@ export function ModLibraryPageView({
           </nav>
         ) : null}
       </section>
+      <HomeStickyBanner />
     </div>
   );
 }

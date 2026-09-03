@@ -102,6 +102,7 @@ export function ContentsPageView({
               href={currentPage > 1 ? `${contentsHref}?page=${currentPage - 1}` : `${contentsHref}?page=1`}
               className={currentPage > 1 ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
               aria-disabled={currentPage <= 1}
+              prefetch={false}
             >
               {copy.previous}
             </Link>
@@ -117,6 +118,7 @@ export function ContentsPageView({
                     href={item === 1 ? contentsHref : `${contentsHref}?page=${item}`}
                     className={item === currentPage ? "button secondary pagination-page-current" : "link-pill pagination-page"}
                     aria-current={item === currentPage ? "page" : undefined}
+                    prefetch={false}
                   >
                     {item}
                   </Link>
@@ -128,6 +130,7 @@ export function ContentsPageView({
               href={currentPage < totalPages ? `${contentsHref}?page=${currentPage + 1}` : `${contentsHref}?page=${totalPages}`}
               className={currentPage < totalPages ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
               aria-disabled={currentPage >= totalPages}
+              prefetch={false}
             >
               {copy.next}
             </Link>

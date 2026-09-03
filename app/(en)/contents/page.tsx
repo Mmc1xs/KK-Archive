@@ -77,6 +77,7 @@ export default async function ContentsPage({
               href={currentPage > 1 ? `/contents?page=${currentPage - 1}` : "/contents?page=1"}
               className={currentPage > 1 ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
               aria-disabled={currentPage <= 1}
+              prefetch={false}
             >
               Previous
             </Link>
@@ -92,6 +93,7 @@ export default async function ContentsPage({
                     href={item === 1 ? "/contents" : `/contents?page=${item}`}
                     className={item === currentPage ? "button secondary pagination-page-current" : "link-pill pagination-page"}
                     aria-current={item === currentPage ? "page" : undefined}
+                    prefetch={false}
                   >
                     {item}
                   </Link>
@@ -103,6 +105,7 @@ export default async function ContentsPage({
               href={currentPage < totalPages ? `/contents?page=${currentPage + 1}` : `/contents?page=${totalPages}`}
               className={currentPage < totalPages ? "link-pill pagination-arrow" : "link-pill pagination-arrow pagination-disabled"}
               aria-disabled={currentPage >= totalPages}
+              prefetch={false}
             >
               Next
             </Link>
