@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { UserRole } from "@prisma/client";
 import { touchUserActivity } from "@/lib/auth/activity";
-import { SESSION_COOKIE_NAME } from "@/lib/constants";
+import { SESSION_COOKIE_NAME, SESSION_PRESENCE_COOKIE_NAME } from "@/lib/constants";
 import { db } from "@/lib/db";
 
 type SessionPayload = {
@@ -84,6 +84,19 @@ export function getSessionCookieOptions(expiresAt?: number, domain?: string) {
   };
 }
 
+export function getSessionPresenceCookieOptions(expiresAt?: number, domain?: string) {
+  return {
+    httpOnly: false,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: SESSION_MAX_AGE_SECONDS,
+    priority: "high" as const,
+    ...(normalizeCookieDomain(domain) ? { domain: normalizeCookieDomain(domain) } : {}),
+    ...(expiresAt ? { expires: new Date(expiresAt) } : {})
+  };
+}
+
 function decodeSession(value: string): SessionPayload | null {
   const [raw, signature] = value.split(".");
   if (!raw || !signature) {
@@ -112,11 +125,13 @@ export async function createSession(userId: number, role: UserRole) {
 
   const store = await cookies();
   store.set(SESSION_COOKIE_NAME, encodeSession(payload), getSessionCookieOptions(payload.expiresAt));
+  store.set(SESSION_PRESENCE_COOKIE_NAME, "1", getSessionPresenceCookieOptions(payload.expiresAt));
 }
 
 export async function clearSession() {
   const store = await cookies();
   store.delete(SESSION_COOKIE_NAME);
+  store.delete(SESSION_PRESENCE_COOKIE_NAME);
 }
 
 type SessionAccessOptions = {

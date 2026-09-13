@@ -14,6 +14,7 @@ import {
   getLocaleSearchHref,
   UI_LOCALES
 } from "@/lib/ui-locale";
+import { SESSION_PRESENCE_COOKIE_NAME } from "@/lib/constants";
 
 type SessionUser = {
   id: number;
@@ -124,6 +125,17 @@ export function SiteNavClient() {
       }
     }
 
+    function hasSessionPresenceCookie() {
+      try {
+        return document.cookie
+          .split(";")
+          .map((part) => part.trim().split("=")[0])
+          .includes(SESSION_PRESENCE_COOKIE_NAME);
+      } catch {
+        return true;
+      }
+    }
+
     async function loadSession() {
       try {
         const response = await fetch("/api/session", {
@@ -156,9 +168,27 @@ export function SiteNavClient() {
       }
     }
 
+    const hasSessionCookie = hasSessionPresenceCookie();
     const cached = loadCachedSnapshot();
     if (cached) {
+      if (cached.user && !hasSessionCookie) {
+        setUser(cached.user);
+        setResolved(true);
+        void loadSession();
+        return () => {
+          active = false;
+        };
+      }
+
       setUser(cached.user ?? null);
+      setResolved(true);
+      return () => {
+        active = false;
+      };
+    }
+
+    if (!hasSessionCookie) {
+      setUser(null);
       setResolved(true);
       return () => {
         active = false;

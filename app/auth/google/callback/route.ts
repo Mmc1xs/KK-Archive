@@ -3,11 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { UserRole } from "@prisma/client";
 import { recordUserLogin } from "@/lib/auth/activity";
 import { enforceUserLoginThreshold } from "@/lib/admin/activity";
-import { getSessionCookieOptions, getSessionCookieValue } from "@/lib/auth/session";
+import { getSessionCookieOptions, getSessionCookieValue, getSessionPresenceCookieOptions } from "@/lib/auth/session";
 import { getEmailUsernameSeed, generateUniqueUsername } from "@/lib/auth/username";
 import { db } from "@/lib/db";
 import { exchangeGoogleCode, fetchGoogleUserInfo, getGoogleRedirectUri, sanitizeGoogleEmail } from "@/lib/auth/google";
-import { GOOGLE_STATE_COOKIE_NAME, SESSION_COOKIE_NAME } from "@/lib/constants";
+import { GOOGLE_STATE_COOKIE_NAME, SESSION_COOKIE_NAME, SESSION_PRESENCE_COOKIE_NAME } from "@/lib/constants";
 
 function redirectWithError(request: NextRequest, message: string) {
   return NextResponse.redirect(new URL(`/login?error=${encodeURIComponent(message)}`, request.url));
@@ -111,6 +111,11 @@ export async function GET(request: NextRequest) {
       SESSION_COOKIE_NAME,
       getSessionCookieValue(user.id, user.role),
       getSessionCookieOptions(Date.now() + 1000 * 60 * 60 * 24 * 7, cookieDomain)
+    );
+    response.cookies.set(
+      SESSION_PRESENCE_COOKIE_NAME,
+      "1",
+      getSessionPresenceCookieOptions(Date.now() + 1000 * 60 * 60 * 24 * 7, cookieDomain)
     );
     response.cookies.delete({
       name: GOOGLE_STATE_COOKIE_NAME,
