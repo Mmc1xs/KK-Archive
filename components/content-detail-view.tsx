@@ -1,7 +1,8 @@
 ﻿import Image from "next/image";
-import Link from "next/link";
 import { ReviewStatus } from "@prisma/client";
 import { AdBlockNoticeModal } from "@/components/adblock-notice-modal";
+import { ContentDetailSessionActions } from "@/components/content-detail-session-actions";
+import { ContentViewTracker } from "@/components/content-view-tracker";
 import { HomeStickyBanner } from "@/components/home-sticky-banner";
 import { TagLinks } from "@/components/tag-links";
 import { type UiLocale } from "@/lib/ui-locale";
@@ -36,10 +37,6 @@ type ContentDetailContent = {
   }>;
 };
 
-type SessionUser = {
-  role: "ADMIN" | "AUDIT" | "MEMBER";
-};
-
 type NormalizedDownloadEntry = {
   kind: "website" | "telegram" | "apexDrive" | "other";
   url: string;
@@ -48,15 +45,10 @@ type NormalizedDownloadEntry = {
 
 type ContentDetailViewProps = {
   content: ContentDetailContent;
-  user: SessionUser | null;
   tgDownloadLink?: string;
   siteDownloadEntries: NormalizedDownloadEntry[];
   apexDriveEntries: NormalizedDownloadEntry[];
   locale: UiLocale;
-  flashMessage?: {
-    type: "success" | "error";
-    message: string;
-  };
   copy: {
     unverifiedTitle: string;
     unverifiedBody: string;
@@ -102,35 +94,12 @@ function getReviewStatusMeta(reviewStatus: ReviewStatus, copy: ContentDetailView
   }
 }
 
-function getReportCopy(locale: UiLocale) {
-  switch (locale) {
-    case "zh-CN":
-      return {
-        label: "回报问题",
-        hoverHint: "前往 KK Archive Telegram 问题回报讨论串。"
-      };
-    case "ja":
-      return {
-        label: "問題を報告",
-        hoverHint: "KK Archive Telegram の問題報告スレッドを開きます。"
-      };
-    default:
-      return {
-        label: "Report Issue",
-        hoverHint: "Open the KK Archive Telegram issue report thread."
-      };
-  }
-}
-const REPORT_ISSUE_THREAD_HREF = "https://t.me/c/4331026715/7/8";
-
 export function ContentDetailView({
   content,
-  user,
   tgDownloadLink,
   siteDownloadEntries,
   apexDriveEntries,
   locale,
-  flashMessage,
   copy
 }: ContentDetailViewProps) {
   const authors = content.contentTags.filter((item) => item.tag.type === "AUTHOR").map((item) => item.tag);
@@ -140,19 +109,14 @@ export function ContentDetailView({
   const usages = content.contentTags.filter((item) => item.tag.type === "USAGE").map((item) => item.tag);
   const types = content.contentTags.filter((item) => item.tag.type === "TYPE").map((item) => item.tag);
   const galleryImages = content.images.slice(1);
-  const isStaff = user?.role === "ADMIN" || user?.role === "AUDIT";
-  const canReportIssue =
-    (user?.role === "MEMBER" || user?.role === "AUDIT" || user?.role === "ADMIN") &&
-    content.reviewStatus === ReviewStatus.PASSED;
   const reviewStatusMeta = getReviewStatusMeta(content.reviewStatus, copy.reviewStatus);
   const description = content.description?.trim();
-  const reportCopy = getReportCopy(locale);
   const canUseWebsiteDownload = siteDownloadEntries.length > 0;
   const canUseApexDriveDownload = apexDriveEntries.length > 0;
 
   return (
     <div className="page-section grid">
-      {flashMessage ? <div className={`notice ${flashMessage.type}`}>{flashMessage.message}</div> : null}
+      <ContentViewTracker contentId={content.id} />
       {content.reviewStatus === ReviewStatus.UNVERIFIED ? (
         <section className="verification-warning" aria-label={copy.unverifiedTitle}>
           <strong>{copy.unverifiedTitle}</strong>
@@ -190,28 +154,24 @@ export function ContentDetailView({
         </section>
         <aside className="panel">
           <div className="eyebrow">{copy.visibleContentEyebrow}</div>
-          {isStaff ? (
-            <div className="admin-detail-actions">
-              <Link href={`/admin/contents/${content.id}/edit`} className="link-pill admin-edit-link">
-                {copy.edit}
-              </Link>
-            </div>
-          ) : null}
+          <ContentDetailSessionActions
+            contentId={content.id}
+            reviewStatus={content.reviewStatus}
+            locale={locale}
+            placement="admin"
+            editLabel={copy.edit}
+          />
           <h1 className="title-lg">{content.title}</h1>
           <div className="detail-status-row">
             <div className="status">{content.publishStatus}</div>
-            {isStaff ? <div className={reviewStatusMeta.className}>{reviewStatusMeta.label}</div> : null}
-            {canReportIssue ? (
-              <a
-                href={REPORT_ISSUE_THREAD_HREF}
-                target="_blank"
-                rel="noreferrer"
-                className="link-pill"
-                title={reportCopy.hoverHint}
-              >
-                {reportCopy.label}
-              </a>
-            ) : null}
+            <ContentDetailSessionActions
+              contentId={content.id}
+              reviewStatus={content.reviewStatus}
+              locale={locale}
+              placement="status"
+              reviewStatusLabel={reviewStatusMeta.label}
+              reviewStatusClassName={reviewStatusMeta.className}
+            />
           </div>
           {description ? <p className="muted">{description}</p> : null}
           {content.sourceLink ? (

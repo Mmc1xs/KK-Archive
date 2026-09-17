@@ -87,7 +87,6 @@ export function SiteNavClient() {
   const toolMenuRef = useRef<HTMLDivElement | null>(null);
   const locale = getCurrentUiLocale(pathname);
   const labels = localeLabels[locale];
-  const canAccessModLibrary = resolved && Boolean(user);
 
   useEffect(() => {
     let active = true;
@@ -249,7 +248,9 @@ export function SiteNavClient() {
         <Link href={getLocaleSearchHref(locale)} prefetch={false}>
           {labels.search}
         </Link>
-        {canAccessModLibrary ? <Link href={getLocaleModLibraryHref(locale)}>{labels.modLibrary}</Link> : null}
+        <Link href={getLocaleModLibraryHref(locale)} prefetch={false}>
+          {labels.modLibrary}
+        </Link>
         <div ref={toolMenuRef} style={{ position: "relative", zIndex: 80 }}>
           <button
             type="button"

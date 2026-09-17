@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { ContentDetailView } from "@/components/content-detail-view";
-import { getCurrentSession } from "@/lib/auth/session";
-import { getBrowsableContentBySlug, getBrowsableContentMetadataBySlug, recordContentView } from "@/lib/content";
+import { getBrowsableContentBySlug, getBrowsableContentMetadataBySlug } from "@/lib/content";
 import { getPrimaryTagName, normalizeContentDownloadEntries, normalizeTypeLabel } from "@/lib/content-detail";
 
 export const preferredRegion = "hkg1";
+export const dynamic = "force-static";
+export const revalidate = 900;
 
 export async function generateMetadata({
   params
@@ -45,31 +45,15 @@ export async function generateMetadata({
 }
 
 export default async function ContentDetailPage({
-  params,
-  searchParams
+  params
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
-  const query = await searchParams;
-  const success = typeof query.success === "string" ? query.success : undefined;
-  const error = typeof query.error === "string" ? query.error : undefined;
-  const user = await getCurrentSession({ touchActivity: false });
-  const content = await getBrowsableContentBySlug(slug, Boolean(user), user?.role);
+  const content = await getBrowsableContentBySlug(slug, false);
 
   if (!content) {
     notFound();
-  }
-
-  const requestHeaders = await headers();
-  const userAgent = requestHeaders.get("user-agent")?.toLowerCase() ?? "";
-  const isLikelyBot = /(bot|crawler|spider|headless|preview|facebookexternalhit|slurp|bingpreview)/i.test(userAgent);
-
-  if (!isLikelyBot) {
-    void recordContentView(content.id).catch(() => {
-      // Non-blocking analytics: view tracking failures should not block page rendering.
-    });
   }
 
   const { tgDownloadLink, siteDownloadEntries, apexDriveEntries } = normalizeContentDownloadEntries(content);
@@ -77,18 +61,10 @@ export default async function ContentDetailPage({
   return (
     <ContentDetailView
       content={content}
-      user={user}
       tgDownloadLink={tgDownloadLink}
       siteDownloadEntries={siteDownloadEntries}
       apexDriveEntries={apexDriveEntries}
       locale="en"
-      flashMessage={
-        success
-          ? { type: "success", message: "Thanks. Your report has been submitted." }
-          : error
-            ? { type: "error", message: error }
-            : undefined
-      }
       copy={{
         unverifiedTitle: "Unverified Content",
         unverifiedBody: "This post has not been fully reviewed yet. Tags and metadata may still be incomplete or inaccurate.",
