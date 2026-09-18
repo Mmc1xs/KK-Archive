@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { StaffUploadMethod, StaffUploadStatus } from "@prisma/client";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getCurrentSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { buildR2PublicUrl, completeR2MultipartUpload } from "@/lib/storage/r2";
@@ -146,6 +146,7 @@ export async function POST(
     revalidatePath(`/contents/${content.slug}`);
     revalidatePath(`/zh-CN/contents/${content.slug}`);
     revalidatePath(`/ja/contents/${content.slug}`);
+    revalidateTag("public-content", "max");
   }
 
   return NextResponse.json({

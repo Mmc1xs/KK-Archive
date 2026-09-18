@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { UserRole } from "@prisma/client";
 import { getCurrentSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
@@ -99,6 +99,7 @@ export async function DELETE(
   revalidatePath(`/contents/${hostedFile.content.slug}`);
   revalidatePath(`/zh-CN/contents/${hostedFile.content.slug}`);
   revalidatePath(`/ja/contents/${hostedFile.content.slug}`);
+  revalidateTag("public-content", "max");
 
   return NextResponse.json({
     removedFileId: hostedFile.id,

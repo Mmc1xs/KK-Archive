@@ -1023,7 +1023,7 @@ const getCachedPublicBrowsableContentsPage = unstable_cache(
     };
   },
   ["public-browsable-contents-page"],
-  { revalidate: 600 }
+  { revalidate: 600, tags: ["public-content"] }
 );
 
 export async function getBrowsableContentBySlug(slug: string, isLoggedIn: boolean, viewerRole?: UserRole | null) {
@@ -1097,7 +1097,7 @@ const getCachedPublicBrowsableContentBySlug = unstable_cache(
       }
   }),
   ["public-browsable-content-by-slug"],
-  { revalidate: 900 }
+  { revalidate: 900, tags: ["public-content"] }
 );
 
 const getRequestScopedPublicBrowsableContentBySlug = cache(async (slug: string) =>
@@ -1126,7 +1126,7 @@ const getCachedPublicBrowsableContentMetadataBySlug = unstable_cache(
       }
   }),
   ["public-browsable-content-metadata-by-slug"],
-  { revalidate: 1800 }
+  { revalidate: 1800, tags: ["public-content"] }
 );
 
 const getRequestScopedPublicBrowsableContentMetadataBySlug = cache(async (slug: string) =>
@@ -1411,7 +1411,7 @@ const getCachedPublicSearchResults = unstable_cache(
     };
   },
   ["public-search-results"],
-  { revalidate: 600 }
+  { revalidate: 600, tags: ["public-content"] }
 );
 
 export async function searchPublishedContents(filters: {
@@ -2031,13 +2031,14 @@ export async function saveContent(
     try {
       revalidateTag("tags", "max");
       revalidateTag("homepage-content", "max");
+      revalidateTag("public-content", "max");
     } catch (error) {
       if (!(error instanceof Error && error.message.includes("static generation store missing"))) {
         throw error;
       }
     }
 
-    return { ok: true as const, contentId: content.id };
+    return { ok: true as const, contentId: content.id, contentSlug: content.slug };
   } catch (error) {
     if (error instanceof Error && error.message.includes("Unique constraint")) {
       return { ok: false as const, error: "Slug already exists" };

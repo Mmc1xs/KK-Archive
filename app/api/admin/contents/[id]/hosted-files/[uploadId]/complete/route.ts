@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { StaffUploadMethod, StaffUploadStatus } from "@prisma/client";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { getCurrentSession } from "@/lib/auth/session";
 import { db } from "@/lib/db";
 import { buildContentFileDownloadPath, buildLegacyContentFileDownloadPath } from "@/lib/downloads/content-file-token";
@@ -216,6 +217,19 @@ export async function POST(
       errorMessage: null
     }
   });
+
+  const content = await db.content.findUnique({
+    where: { id: upload.contentId },
+    select: { slug: true }
+  });
+
+  if (content) {
+    revalidatePath(`/admin/contents/${upload.contentId}/edit`);
+    revalidatePath(`/contents/${content.slug}`);
+    revalidatePath(`/zh-CN/contents/${content.slug}`);
+    revalidatePath(`/ja/contents/${content.slug}`);
+    revalidateTag("public-content", "max");
+  }
 
   return NextResponse.json({
     hostedFile,

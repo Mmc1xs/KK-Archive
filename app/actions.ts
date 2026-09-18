@@ -58,6 +58,26 @@ function getBooleanFromFormData(formData: FormData, key: string) {
   return formData.get(key) === "on" || formData.get(key) === "true" || formData.get(key) === "1";
 }
 
+function revalidatePublicContentViews(slugs: Array<string | null | undefined> = []) {
+  const uniqueSlugs = [...new Set(slugs.map((slug) => slug?.trim()).filter((slug): slug is string => Boolean(slug)))];
+
+  revalidatePath("/admin/contents");
+  revalidatePath("/contents");
+  revalidatePath("/zh-CN/contents");
+  revalidatePath("/ja/contents");
+  revalidatePath("/en");
+  revalidatePath("/zh-CN");
+  revalidatePath("/ja");
+  revalidateTag("homepage-content", "max");
+  revalidateTag("public-content", "max");
+
+  uniqueSlugs.forEach((slug) => {
+    revalidatePath(`/contents/${slug}`);
+    revalidatePath(`/zh-CN/contents/${slug}`);
+    revalidatePath(`/ja/contents/${slug}`);
+  });
+}
+
 export async function reportPassedContentIssueAction(formData: FormData) {
   const user = await requireUserWithoutTouch();
   const redirectTo = getSafeRedirectPath(String(formData.get("redirectTo") || "/"), "/");
@@ -193,6 +213,7 @@ export async function createContentAction(formData: FormData) {
     redirectWithMessage("/admin/contents/new", "error", result.error);
   }
 
+  revalidatePublicContentViews([result.contentSlug]);
   redirectWithMessage(`/admin/contents/${result.contentId}/edit`, "success", "Content created");
 }
 
@@ -201,7 +222,7 @@ export async function updateContentAction(contentId: number, formData: FormData)
   const reviewAction = String(formData.get("reviewAction") || "edited");
   const existing = await db.content.findUnique({
     where: { id: contentId },
-    select: { reviewStatus: true }
+    select: { reviewStatus: true, slug: true }
   });
 
   if (!existing) {
@@ -251,6 +272,9 @@ export async function updateContentAction(contentId: number, formData: FormData)
   if (!result.ok) {
     redirectWithMessage(`/admin/contents/${contentId}/edit`, "error", result.error);
   }
+
+  revalidatePath(`/admin/contents/${contentId}/edit`);
+  revalidatePublicContentViews([existing.slug, result.contentSlug]);
 
   if (reviewAction === "saved" || isRepassingAlreadyPassed) {
     redirectWithMessage(`/admin/contents/${contentId}/edit`, "success", "Content saved");
@@ -657,18 +681,8 @@ export async function deleteContentAction(formData: FormData) {
     });
   }
 
-  revalidatePath("/admin/contents");
   revalidatePath("/admin/homepage");
-  revalidatePath("/contents");
-  revalidatePath("/zh-CN/contents");
-  revalidatePath("/ja/contents");
-  revalidatePath("/en");
-  revalidatePath("/zh-CN");
-  revalidatePath("/ja");
-  revalidatePath(`/contents/${content.slug}`);
-  revalidatePath(`/zh-CN/contents/${content.slug}`);
-  revalidatePath(`/ja/contents/${content.slug}`);
-  revalidateTag("homepage-content", "max");
+  revalidatePublicContentViews([content.slug]);
 
   redirectWithMessage(
     "/admin/contents",
@@ -692,6 +706,7 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
   const content = await db.content.findUnique({
     where: { id: contentId },
     select: {
+      slug: true,
       reviewStatus: true,
       firstEditedByUserId: true
     }
@@ -760,6 +775,9 @@ export async function transitionContentReviewStatusAction(formData: FormData) {
       : nextStatus === ReviewStatus.PASSED
         ? "Content passed final review"
         : "Content reset to Unverified";
+
+  revalidatePath(`/admin/contents/${contentId}/edit`);
+  revalidatePublicContentViews([content.slug]);
 
   redirectWithMessage(redirectTo, "success", statusMessage);
 }
