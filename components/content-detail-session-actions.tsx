@@ -9,6 +9,11 @@ type SessionUser = {
   role: "ADMIN" | "AUDIT" | "MEMBER";
 };
 
+type SessionSnapshot = {
+  user: SessionUser | null;
+  updatedAt: number;
+};
+
 type ContentDetailSessionActionsProps = {
   contentId: number;
   reviewStatus: string;
@@ -20,6 +25,8 @@ type ContentDetailSessionActionsProps = {
 };
 
 const REPORT_ISSUE_THREAD_HREF = "https://t.me/c/4331026715/7/8";
+const SESSION_CACHE_KEY = "kk_site_nav_session_v1";
+const SESSION_CACHE_USER_MAX_AGE_MS = 15 * 60 * 1000;
 let sessionPromise: Promise<SessionUser | null> | null = null;
 
 function getReportCopy(locale: UiLocale) {
@@ -50,6 +57,28 @@ function hasSessionPresenceCookie() {
       .includes(SESSION_PRESENCE_COOKIE_NAME);
   } catch {
     return false;
+  }
+}
+
+function loadCachedSessionUser() {
+  try {
+    const raw = window.localStorage.getItem(SESSION_CACHE_KEY);
+    if (!raw) {
+      return null;
+    }
+
+    const snapshot = JSON.parse(raw) as SessionSnapshot;
+    if (!snapshot?.user || typeof snapshot.updatedAt !== "number") {
+      return null;
+    }
+
+    if (Date.now() - snapshot.updatedAt > SESSION_CACHE_USER_MAX_AGE_MS) {
+      return null;
+    }
+
+    return snapshot.user;
+  } catch {
+    return null;
   }
 }
 
@@ -89,7 +118,14 @@ export function ContentDetailSessionActions({
   const canReportIssue = Boolean(user) && reviewStatus === "PASSED";
 
   useEffect(() => {
-    if (!hasSessionPresenceCookie()) {
+    const cachedUser = loadCachedSessionUser();
+    const shouldVerifySession = hasSessionPresenceCookie() || Boolean(cachedUser);
+
+    if (cachedUser) {
+      setUser(cachedUser);
+    }
+
+    if (!shouldVerifySession) {
       return;
     }
 

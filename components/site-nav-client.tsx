@@ -35,6 +35,19 @@ type SessionSnapshot = {
   updatedAt: number;
 };
 
+function shouldVerifySessionForPath(pathname: string) {
+  return (
+    pathname === "/admin" ||
+    pathname.startsWith("/admin/") ||
+    pathname === "/profile" ||
+    pathname.startsWith("/profile/") ||
+    pathname === "/zh-CN/profile" ||
+    pathname.startsWith("/zh-CN/profile/") ||
+    pathname === "/ja/profile" ||
+    pathname.startsWith("/ja/profile/")
+  );
+}
+
 const localeLabels = {
   en: {
     short: "EN",
@@ -168,6 +181,7 @@ export function SiteNavClient() {
     }
 
     const hasSessionCookie = hasSessionPresenceCookie();
+    const shouldVerifySession = hasSessionCookie || shouldVerifySessionForPath(pathname);
     const cached = loadCachedSnapshot();
     if (cached) {
       if (cached.user && !hasSessionCookie) {
@@ -179,14 +193,16 @@ export function SiteNavClient() {
         };
       }
 
-      setUser(cached.user ?? null);
-      setResolved(true);
-      return () => {
-        active = false;
-      };
+      if (cached.user || !shouldVerifySession) {
+        setUser(cached.user ?? null);
+        setResolved(true);
+        return () => {
+          active = false;
+        };
+      }
     }
 
-    if (!hasSessionCookie) {
+    if (!shouldVerifySession) {
       setUser(null);
       setResolved(true);
       return () => {
@@ -199,7 +215,7 @@ export function SiteNavClient() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [pathname]);
 
   function persistLocalePreference(localeOption: (typeof UI_LOCALES)[number]) {
     try {
